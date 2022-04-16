@@ -20,7 +20,7 @@ export class WsJwtAuthGuard implements CanActivate {
         try {
             const decoded: TokenPayload = this.jwtService.verify(access_token)
             return async (resolve, reject) => {
-                const user = await this.usersService.getUserByName(decoded.username)
+                const user = await this.usersService.getUserByUsername(decoded.username)
                 if (user) {
                     resolve(user)
                 } else {

@@ -1,10 +1,13 @@
-import { Body, Controller, Post, Res } from '@nestjs/common'
-import { Response } from './types/request-response'
+import { Body, Controller, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
+import { RequestResponseUser, Response } from './types/request-response'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { AuthService } from './auth.service'
 import { ValidateUserDto } from './dto/validate-user.dto'
-import { Token } from './types/token'
 import { UsersService } from 'src/users/users.service'
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
+import { Tokens } from './types/tokens'
+import { CurrentUser } from 'src/utils/current-user.decorator'
+import { User } from 'src/users/models/users.model'
 
 
 @Controller('/auth')
@@ -15,13 +18,13 @@ export class AuthController {
         private usersService: UsersService
     ) {}
 
-    @Post('/reg')
+    @Post('/registration')
     async registration(
         @Body() dto: CreateUserDto,
         @Res() res: Response
     ): Promise<Response> {
-        const token: Token = await this.authService.registration(dto)
-        return res.send(token.accessToken).status(200)
+        const tokens: Tokens = await this.authService.registration(dto)
+        return res.send(tokens).status(200)
     }
 
     @Post('/login')
@@ -29,8 +32,24 @@ export class AuthController {
         @Body() dto: ValidateUserDto,
         @Res() res: Response
     ): Promise<Response> {
-        const token: Token = await this.authService.login(dto)
-        return res.send(token.accessToken).status(200)
+        const tokens: Tokens = await this.authService.login(dto)
+        return res.send(tokens).status(200)
+    }
+
+    @Post('/refresh')
+    @UseGuards(JwtRefreshGuard)
+    async refresh(
+        @Body('refresh_token') refreshToken: string,
+        @CurrentUser() { id }: RequestResponseUser
+    ): Promise<Tokens> {
+        const user: User = await this.usersService.getUserById(id)
+        const isRefreshTokenMatches: boolean = await this.authService.isRefreshTokenMatches(refreshToken, id)
+        if (!isRefreshTokenMatches)
+            throw new UnauthorizedException({ message: 'Wrong refresh token' })
+        const tokens: Tokens = await this.authService.generateTokens(user)
+        if (!tokens)
+            throw new UnauthorizedException({ message: 'Refresh server error' })
+        return tokens
     }
 
     // @Post('/logout')

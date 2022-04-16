@@ -4,11 +4,11 @@ import { PassportModule } from '@nestjs/passport'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { UsersModule } from 'src/users/users.module'
 import { User } from 'src/users/models/users.model'
-import { JwtAuthStrategy } from 'src/utils/jwt.strategy'
+import { JwtAuthStrategy } from 'src/auth/strategies/jwt-auth.strategy'
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import 'dotenv/config'
-import { JwtRefreshStrategy } from 'src/utils/jwt-refresh-strategy'
+import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy'
 import * as redisStore from 'cache-manager-redis-store'
 
 

@@ -39,16 +39,10 @@ export class AuthService {
         throw new InternalServerErrorException({ message: 'Internal login server error' })
     }
 
-    // async getUserFromToken(token: Token): Promise<User> {
-    //     const { id }: TokenPayload = this.jwtService.verify(token.access_token)
-    //     const user: User = await this.usersService.getUserById(id)
-    //     return user
-    // }
-
     async generateToken(user: User): Promise<Token> {
         const payload: TokenPayload = user
         const token: Token = {
-            access_token: this.jwtService.sign(payload),
+            accessToken: this.jwtService.sign(payload),
         }
         if (token)
             return token

@@ -6,7 +6,7 @@ import {
     WebSocketServer,
 } from '@nestjs/websockets'
 import { Server } from 'socket.io'
-import { WsJwtGuard } from 'src/auth/guards/ws.guard'
+import { WsJwtAuthGuard } from 'src/auth/guards/ws.guard'
 
 
 @WebSocketGateway()
@@ -15,7 +15,7 @@ export class ChatGateway {
     @WebSocketServer()
         server: Server
 
-    @UseGuards(WsJwtGuard)
+    @UseGuards(WsJwtAuthGuard)
     @SubscribeMessage('send_message')
     messageHandler(@MessageBody() data: string) {
         this.server.sockets.emit('receive_message', data)

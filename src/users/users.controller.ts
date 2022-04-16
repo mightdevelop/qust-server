@@ -17,6 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto'
 import { CurrentUser } from 'src/utils/current-user.decorator'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 
 
 @Controller('/users')
@@ -27,6 +28,7 @@ export class UsersController {
     ) {}
 
     @Get('/')
+    @UseGuards(JwtAuthGuard)
     async getAllUsers(): Promise<User[]> {
         const users: User[] = await this.usersService.getAllUsers()
         return users
@@ -44,7 +46,7 @@ export class UsersController {
 
     @Post('/')
     @isAdmin()
-    @UseGuards(AuthGuard, AdminGuard)
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async createUser(
         @Body() dto: CreateUserDto,
     ): Promise<User> {
@@ -53,7 +55,7 @@ export class UsersController {
     }
 
     @Put('/:id')
-    @UseGuards(AuthGuard)
+    @UseGuards(JwtAuthGuard)
     async updateUser(
         @Param('id') userId: number,
         @Body() dto: UpdateUserDto,
@@ -74,7 +76,7 @@ export class UsersController {
 
     @Delete('/:id')
     @isAdmin()
-    @UseGuards(AuthGuard, AdminGuard)
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async deleteUser(
         @Param('id') authorId: number,
     ): Promise<User> {

@@ -1,6 +1,6 @@
 export type CreateUserDto = {
     email: string
-    name: string
+    username: string
     password: string
     info?: string
 }

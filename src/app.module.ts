@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common'
-import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { ChatModule } from './chat/chat.module'
 import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/models/users.model'
 import 'dotenv/config'
+import { AuthModule } from './auth/auth.module'
 
 
 @Module({
@@ -25,9 +25,9 @@ import 'dotenv/config'
             ],
             autoLoadModels: true,
         }),
+        AuthModule,
         ChatModule,
     ],
-    controllers: [ AppController ],
     providers: [ AppService ],
 })
 export class AppModule {}

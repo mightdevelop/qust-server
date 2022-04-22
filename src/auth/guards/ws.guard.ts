@@ -1,4 +1,4 @@
-import { CanActivate, Injectable, UnauthorizedException } from '@nestjs/common'
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Observable } from 'rxjs'
 import { UsersService } from 'src/users/users.service'
@@ -14,20 +14,20 @@ export class WsJwtAuthGuard implements CanActivate {
     ) {}
 
     canActivate(
-        context: any,
+        context: ExecutionContext,
     ): boolean | any | Promise<boolean | any> | Observable<boolean | any> {
-        const access_token = context.args[0].handshake.headers.authorization.split(' ')[1]
+        const accessToken: string = context.switchToHttp().getRequest().headers.authorization.split(' ')[1]
         try {
-            const decoded: TokenPayload = this.jwtService.verify(access_token)
+            const payload: TokenPayload = this.jwtService.verify(accessToken)
             return async (resolve, reject) => {
-                const user = await this.usersService.getUserByUsername(decoded.username)
+                const user = await this.usersService.getUserByUsername(payload.username)
                 if (user) {
                     resolve(user)
                 } else {
                     reject(false)
                 }
             }
-        } catch (error) {
+        } catch {
             throw new UnauthorizedException({ message: 'Unauthorized' })
         }
     }

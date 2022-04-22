@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common'
 import { AppService } from './app.service'
-import { ChatModule } from './chat/chat.module'
 import { ConfigModule } from '@nestjs/config'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/models/users.model'
 import 'dotenv/config'
 import { AuthModule } from './auth/auth.module'
+import { Friend } from './friends/models/friends.model'
+import { Notification } from './notifications/models/notifications.model'
 
 
 @Module({
@@ -22,11 +23,13 @@ import { AuthModule } from './auth/auth.module'
             database: process.env.POSTGRES_DB,
             models: [
                 User,
+                Friend,
+                Notification,
             ],
             autoLoadModels: true,
         }),
         AuthModule,
-        ChatModule,
+        // ChatModule,
     ],
     providers: [ AppService ],
 })

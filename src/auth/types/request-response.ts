@@ -8,7 +8,7 @@ export interface Response extends ExpressResponse {
     user: RequestResponseUser
 }
 
-export interface RequestResponseUser {
+export type RequestResponseUser = {
     id: number
     email: string
     username: string

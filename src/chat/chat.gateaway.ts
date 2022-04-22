@@ -1,24 +1,38 @@
-import { UseGuards } from '@nestjs/common'
-import {
-    MessageBody,
-    SubscribeMessage,
-    WebSocketGateway,
-    WebSocketServer,
-} from '@nestjs/websockets'
-import { Server } from 'socket.io'
-import { WsJwtAuthGuard } from 'src/auth/guards/ws.guard'
+// import {
+//     ConnectedSocket,
+//     MessageBody, OnGatewayConnection,
+//     SubscribeMessage,
+//     WebSocketGateway,
+//     WebSocketServer,
+// } from '@nestjs/websockets'
+// import { Server, Socket } from 'socket.io'
+// import { ChatService } from './chat.service'
 
+// @WebSocketGateway()
+// export class ChatGateway implements OnGatewayConnection {
 
-@WebSocketGateway()
-export class ChatGateway {
+//     constructor(
+//       private readonly chatService: ChatService
+//     ) {}
 
-    @WebSocketServer()
-        server: Server
+//     @WebSocketServer()
+//         server: Server
 
-    @UseGuards(WsJwtAuthGuard)
-    @SubscribeMessage('send_message')
-    messageHandler(@MessageBody() data: string) {
-        this.server.sockets.emit('receive_message', data)
-    }
+//     async handleConnection(socket: Socket) {
+//         await this.chatService.getUserFromSocket(socket)
+//     }
 
-}
+//     @SubscribeMessage('send_message')
+//     async listenForMessages(
+//       @MessageBody() content: string,
+//       @ConnectedSocket() socket: Socket,
+//     ) {
+//         const author = await this.chatService.getUserFromSocket(socket)
+
+//         this.server.sockets.emit('receive_message', {
+//             content,
+//             author
+//         })
+//     }
+
+// }

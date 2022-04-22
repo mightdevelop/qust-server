@@ -10,14 +10,15 @@ import {
     Put,
     UseGuards,
 } from '@nestjs/common'
-import { isAdmin } from 'src/utils/isAdmin.decorator'
+import { isAdmin } from 'src/auth/decorators/isAdmin.decorator'
 import { UsersService } from './users.service'
 import { User } from './models/users.model'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { CurrentUser } from 'src/utils/current-user.decorator'
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
+import { FriendsService } from 'src/friends/friends.service'
 
 
 @Controller('/users')
@@ -25,10 +26,10 @@ export class UsersController {
 
     constructor(
         private usersService: UsersService,
+        private friendsService: FriendsService,
     ) {}
 
     @Get('/')
-    @UseGuards(JwtAuthGuard)
     async getAllUsers(): Promise<User[]> {
         const users: User[] = await this.usersService.getAllUsers()
         return users
@@ -36,12 +37,23 @@ export class UsersController {
 
     @Get('/:id')
     async getUserById(
-        @Param('id') authorId: number,
+        @Param('id') userId: number,
     ): Promise<User> {
-        const user: User = await this.usersService.getUserById(authorId)
-        if (user)
-            return user
-        throw new NotFoundException({ message: 'User not found' })
+        const user: User = await this.usersService.getUserById(userId)
+        if (!user)
+            throw new NotFoundException({ message: 'User not found' })
+        return user
+    }
+
+    @Get('/:id/friends')
+    async getFriendsByUserId(
+        @Param('id') userId: number,
+    ): Promise<User[]> {
+        const user = await this.usersService.getUserById(userId)
+        if (!user)
+            throw new NotFoundException({ message: 'User not found' })
+        const friends: User[] = await this.friendsService.getFriendsByUserId(userId)
+        return friends
     }
 
     @Post('/')

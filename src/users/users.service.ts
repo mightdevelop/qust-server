@@ -38,41 +38,6 @@ export class UsersService {
         return user
     }
 
-    // async getUsersByBookId(
-    //     bookId: number
-    // ): Promise<Author[]> {
-    //     const bookAuthorColumns = await this.bookAuthorRepository.findAll({ where: { bookId } })
-    //     const users: Author[] = []
-    //     for (const column of bookAuthorColumns) {
-    //         const user = await this.authorRepository.findByPk(column.authorId)
-    //         users.push(user)
-    //     }
-    //     return users
-    // }
-
-    // async getUsersByGenreId(
-    //     genreId: number
-    // ): Promise<Author[]> {
-    //     const bookAuthorColumns = await this.genreAuthorRepository.findAll({ where: { genreId } })
-    //     const users: Author[] = []
-    //     for (const column of bookAuthorColumns) {
-    //         const user = await this.userRepository.findByPk(column.authorId)
-    //         users.push(user)
-    //     }
-    //     return users
-    // }
-
-    // async belongsToUser(
-    //     bookId: number,
-    //     authorId: number
-    // ): Promise<boolean> {
-    //     const bookAuthorColumn = await this.bookAuthorRepository.findOne({ where: { bookId, authorId } })
-    //     if (bookAuthorColumn) {
-    //         return true
-    //     }
-    //     return false
-    // }
-
     async createUser(
         dto: CreateUserDto
     ): Promise<User> {
@@ -96,4 +61,5 @@ export class UsersService {
         await this.userRepository.destroy({ where: { id: authorId } })
         return user
     }
+
 }

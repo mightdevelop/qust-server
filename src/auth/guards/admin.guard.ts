@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { IS_ADMIN_KEY } from 'src/utils/isAdmin.decorator'
+import { IS_ADMIN_KEY } from 'src/auth/decorators/isAdmin.decorator'
 
 
 @Injectable()

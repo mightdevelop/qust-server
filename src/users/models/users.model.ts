@@ -1,7 +1,6 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript'
 
-
-@Table
+@Table({ tableName: 'users' })
 export class User extends Model {
 
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
@@ -28,11 +27,8 @@ export class User extends Model {
     @Column({ type: DataType.STRING, allowNull: false, defaultValue: '' })
         info: string
 
-    // @BelongsToMany(() => Guild, () => GuildUser)
-    //     guilds: Guild[]
-
-    // @BelongsToMany(() => Role, () => RoleUser)
-    //     roles: Role[]
+    // @BelongsToMany(() => Group, () => UserGroup)
+    //     groups: Group[]
 
 }
 

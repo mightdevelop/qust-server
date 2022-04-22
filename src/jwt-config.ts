@@ -1,7 +1,7 @@
 export const accessConfig = {
     secret: 'secret',
     signOptions: {
-        expiresIn: 60,
+        expiresIn: 600,
     }
 }
 export const refreshConfig = {

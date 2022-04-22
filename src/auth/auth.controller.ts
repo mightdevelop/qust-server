@@ -6,7 +6,7 @@ import { ValidateUserDto } from './dto/validate-user.dto'
 import { UsersService } from 'src/users/users.service'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { Tokens } from './types/tokens'
-import { CurrentUser } from 'src/utils/current-user.decorator'
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { User } from 'src/users/models/users.model'
 
 

@@ -21,7 +21,7 @@ export class FriendsService {
         )
         const friends: User[] = []
         for (const column of userFriendColumns) {
-            const friend = await this.userRepository.findByPk(column.friendId)
+            const friend: User = await this.userRepository.findByPk(column.friendId)
             friends.push(friend)
         }
         return friends

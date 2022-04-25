@@ -2,7 +2,7 @@
 
 <h3>&lt;Backend&gt;<h3>
 
-<h4>CLI messager client, written on Rust -> https://github.com/requiemDevelop/qust-cli<h4>
+<h4>CLI messager client, written on Rust (soon) -> https://github.com/requiemDevelop/qust-cli<h4>
 
 <br><hr><br>
 

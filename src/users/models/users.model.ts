@@ -27,8 +27,5 @@ export class User extends Model {
     @Column({ type: DataType.STRING, allowNull: false, defaultValue: '' })
         info: string
 
-    // @BelongsToMany(() => Group, () => UserGroup)
-    //     groups: Group[]
-
 }
 

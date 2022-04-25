@@ -9,12 +9,12 @@ export class Notification extends Model {
         id: number
 
     @ForeignKey(() => User)
-        userId: number
+        resipientId: number
 
     @Column({ type: DataType.STRING, allowNull: false })
         body: string
 
-    @Column({ type: DataType.DATE })
+    @Column({ type: DataType.DATE, allowNull: false })
         timestamp: number
 
 }

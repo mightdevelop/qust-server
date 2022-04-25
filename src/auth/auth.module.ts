@@ -1,4 +1,4 @@
-import { CacheModule, Module } from '@nestjs/common'
+import { CacheModule, forwardRef, Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { SequelizeModule } from '@nestjs/sequelize'
@@ -30,8 +30,8 @@ import * as redisStore from 'cache-manager-redis-store'
         }),
         SequelizeModule.forFeature([ User ]),
         JwtModule.register({}),
-        PassportModule,
-        UsersModule,
+        forwardRef(() => PassportModule),
+        forwardRef(() => UsersModule),
     ],
     exports: [ AuthService ],
 })

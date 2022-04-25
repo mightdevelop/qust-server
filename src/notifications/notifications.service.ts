@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import { NotificationMailingDto } from './dto/notification-mailing.dto'
+import { SendCreateChatNotificationDto } from './dto/send-create-chat-notif.dto'
 import { SendFriendshipRequestNotificationDto } from './dto/send-friendship-request-notif.dto'
 import { Notification } from './models/notifications.model'
-import { friendshipNotificationBody } from './notification-bodies/notification-body'
+import { friendshipRequestNotificationBody, createChatNotificationBody } from './types/notification-body'
 import { NotificationType } from './types/notification-type'
 
 
@@ -20,13 +20,13 @@ export class NotificationsService {
     async notificationMailing({
         notificationType, resipientsIds, dto
     }: NotificationMailingDto): Promise<string> {
-        for (const resipientId of resipientsIds) {
+        for (const userId of resipientsIds) {
             switch (notificationType) {
             case NotificationType.FRIENDSHIP_REQUEST:
-                await this.sendFriendshipRequestNotification(resipientId, dto)
+                await this.sendFriendshipRequestNotification(userId, dto)
                 return
             case NotificationType.CREATE_CHAT:
-                await this.sendCreateChatNotification(resipientId)
+                await this.sendCreateChatNotification(userId, dto)
                 return
             }
         }
@@ -34,24 +34,24 @@ export class NotificationsService {
     }
 
     async sendFriendshipRequestNotification(
-        resipientId: number,
-        { requesterId }: SendFriendshipRequestNotificationDto
+        userId: number,
+        { requesterUsername }: SendFriendshipRequestNotificationDto
     ): Promise<Notification> {
-        const requester: User = await this.usersService.getUserById(requesterId)
         const notification: Notification = await this.notificationRepository.create({
-            resipientId,
-            body: friendshipNotificationBody(requester.username),
+            userId,
+            body: friendshipRequestNotificationBody(requesterUsername),
             timestamp: Date.now()
         })
         return notification
     }
 
     async sendCreateChatNotification(
-        resipientId: number
+        userId: number,
+        { requesterUsername }: SendCreateChatNotificationDto
     ): Promise<Notification> {
         const notification: Notification = await this.notificationRepository.create({
-            resipientId,
-            body: friendshipNotificationBody('requester.username'),
+            userId,
+            body: createChatNotificationBody(requesterUsername),
             timestamp: Date.now()
         })
         return notification

@@ -65,7 +65,7 @@ export class FriendsController {
         }
         await this.friendsService.friendshipRequest(friendId, user.id)
         await this.notificationsService.sendFriendshipRequestNotification(
-            friendId, { requesterId: user.id }
+            friendId, { requesterUsername: user.username }
         )
         return 'Friendship requested'
     }

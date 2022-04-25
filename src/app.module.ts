@@ -39,6 +39,7 @@ import { ChatUser } from './chat/models/chat-user.model'
                 MessageContent,
             ],
             autoLoadModels: true,
+            retryAttempts: 0
         }),
         forwardRef(() => AuthModule),
         forwardRef(() => UsersModule),

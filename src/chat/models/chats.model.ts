@@ -10,9 +10,6 @@ export class Chat extends Model {
     @Column({ type: DataType.STRING, allowNull: false })
         name: string
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
-        usersCount: number
-
     @Column({ type: DataType.STRING, allowNull: false })
         chatType: ChatType
 

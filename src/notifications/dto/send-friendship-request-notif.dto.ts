@@ -1,3 +1,3 @@
 export interface SendFriendshipRequestNotificationDto {
-    requesterId: number
+    requesterUsername: string
 }

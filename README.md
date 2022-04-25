@@ -1,4 +1,4 @@
-<h2>Qust - CLI messenger<h2>
+<h2>Qust - будущий CLI мессенджер<h2>
 
 <h3>&lt;Backend&gt;<h3>
 

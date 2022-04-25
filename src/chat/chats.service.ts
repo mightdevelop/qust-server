@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { AuthService } from '../auth/auth.service'
 import { CreateChatDto } from './dto/create-chat.dto'
 import { CreateDialogueDto } from './dto/create-dialogue.dto'
+import { UpdateChatDto } from './dto/update-chat.dto'
 import { ChatUser } from './models/chat-user.model'
 import { Chat } from './models/chats.model'
 import { ChatType } from './types/chat-type'
@@ -28,6 +29,25 @@ export class ChatsService {
                 chatId: chat.id,
                 userId: chatterId
             })
+        }
+        return chat
+    }
+
+    async updateChat(dto: UpdateChatDto): Promise<Chat> {
+        const chat: Chat = await this.chatRepository.findByPk(dto.id)
+        if (!chat)
+            throw new NotFoundException({ message: 'Chat not found' })
+        await chat.update(dto)
+        return chat
+    }
+
+    async deleteChat(chatId: number): Promise<Chat> {
+        const chat: Chat = await this.chatRepository.findByPk(chatId)
+        if (!chat)
+            throw new NotFoundException({ message: 'Chat not found' })
+        const chatUserColumns: ChatUser[] = await this.chatUserRepository.findAll({ where: { chatId } })
+        for (const column of chatUserColumns) {
+            await this.chatUserRepository.destroy({ where: { chatId: column.chatId } })
         }
         return chat
     }

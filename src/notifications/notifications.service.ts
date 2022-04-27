@@ -5,7 +5,7 @@ import { NotificationMailingDto } from './dto/notification-mailing.dto'
 import { SendCreateChatNotificationDto } from './dto/send-create-chat-notif.dto'
 import { SendFriendshipRequestNotificationDto } from './dto/send-friendship-request-notif.dto'
 import { Notification } from './models/notifications.model'
-import { friendshipRequestNotificationBody, createChatNotificationBody } from './types/notification-body'
+import { friendshipRequestNotificationBody, createChatNotificationBody } from './utils/notification-body'
 import { NotificationType } from './types/notification-type'
 
 

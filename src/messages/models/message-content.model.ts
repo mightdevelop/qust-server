@@ -1,5 +1,4 @@
-import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
-import { Message } from './messages.model'
+import { Column, DataType, Model, Table } from 'sequelize-typescript'
 
 @Table({ tableName: 'message-content' })
 export class MessageContent extends Model {
@@ -7,12 +6,8 @@ export class MessageContent extends Model {
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
         id: number
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.STRING, allowNull: true })
         text: string
-
-    @Column({ type: DataType.INTEGER, unique: true, allowNull: false })
-    @ForeignKey(() => Message)
-        messageId: string
 
 }
 

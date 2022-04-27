@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { User } from 'src/users/models/users.model'
+import { UsersService } from 'src/users/users.service'
 import { Friend } from './models/friends.model'
 import { FriendRequestStatus } from './types/friend-request-status'
 
@@ -9,7 +10,7 @@ import { FriendRequestStatus } from './types/friend-request-status'
 export class FriendsService {
 
     constructor(
-        @InjectModel(User) private userRepository: typeof User,
+        private usersService: UsersService,
         @InjectModel(Friend) private userFriendsRepository: typeof Friend,
     ) {}
 
@@ -21,7 +22,7 @@ export class FriendsService {
         )
         const friends: User[] = []
         for (const column of userFriendColumns) {
-            const friend: User = await this.userRepository.findByPk(column.friendId)
+            const friend: User = await this.usersService.getUserById(column.friendId)
             friends.push(friend)
         }
         return friends
@@ -31,7 +32,7 @@ export class FriendsService {
         friendId: number,
         userId: number
     ): Promise<Friend> {
-        const friend: User = await this.userRepository.findByPk(friendId)
+        const friend: User = await this.usersService.getUserById(friendId)
         if (!friend)
             throw new NotFoundException({ message: 'Friend not found' })
         const userFriendColumn: Friend = await this.userFriendsRepository.findOne(
@@ -46,7 +47,7 @@ export class FriendsService {
     ): Promise<void> {
         if (friendId === userId)
             throw new BadRequestException({ message: 'You can`t request friendship from yourself' })
-        const requestRecipient: User = await this.userRepository.findByPk(friendId)
+        const requestRecipient: User = await this.usersService.getUserById(friendId)
         if (!requestRecipient)
             throw new BadRequestException({ message: 'User doesn`t exists' })
         const friendColumn: Friend = await this.userFriendsRepository.findOne(

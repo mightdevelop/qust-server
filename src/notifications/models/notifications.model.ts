@@ -3,7 +3,7 @@ import { User } from 'src/users/models/users.model'
 
 
 @Table({ tableName: 'notifications' })
-export class Notification extends Model {
+export class Notification extends Model<Notification> {
 
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
         id: number

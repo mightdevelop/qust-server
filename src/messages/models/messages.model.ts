@@ -1,6 +1,7 @@
-import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
 import { Chat } from 'src/chat/models/chats.model'
 import { User } from 'src/users/models/users.model'
+import { MessageContent } from './message-content.model'
 
 @Table({ tableName: 'messages' })
 export class Message extends Model {
@@ -22,8 +23,12 @@ export class Message extends Model {
     @Column({ type: DataType.DATE, allowNull: false })
         timestamp: number
 
-    // @BelongsTo(() => MessageContent)
-    //     content: string
+    @BelongsTo(() => MessageContent)
+        content: string
+
+    @Column({ type: DataType.INTEGER, unique: true, allowNull: false })
+    @ForeignKey(() => MessageContent)
+        contentId: string
 
 }
 

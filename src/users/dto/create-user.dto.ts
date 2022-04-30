@@ -1,5 +1,4 @@
-import { IsEmail, IsString, Min } from 'class-validator'
-import { Max } from 'sequelize-typescript'
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from 'class-validator'
 
 export class CreateUserDto {
 
@@ -8,16 +7,17 @@ export class CreateUserDto {
         email: string
 
     @IsString()
-    @Min(4)
-    @Max(25)
+    @MinLength(4)
+    @MaxLength(25)
         username: string
 
     @IsString()
-    @Min(6)
-    @Max(25)
+    @MinLength(6)
+    @MaxLength(25)
         password: string
 
     @IsString()
+    @IsOptional()
         info?: string
 
 }

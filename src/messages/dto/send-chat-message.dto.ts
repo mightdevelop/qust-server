@@ -1,23 +1,21 @@
 import { Type } from 'class-transformer'
-import { IsNumber, IsString, Max, Min } from 'class-validator'
+import { IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
 
-export class SendMessageDto {
+export class SendChatMessageDto {
 
     @IsNumber()
         userId: number
 
     @IsString()
-    @Min(4)
-    @Max(25)
+    @MinLength(4)
+    @MaxLength(25)
         username: string
 
     @IsNumber()
         chatId: number
 
     @Type(() => Content)
-        content: {
-            text: string
-        }
+        content: Content
 
 }
 

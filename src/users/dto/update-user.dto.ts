@@ -1,11 +1,12 @@
-import { IsString, Max, Min } from 'class-validator'
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class UpdateUserDto {
     @IsString()
-    @Min(4)
-    @Max(25)
+    @MinLength(4)
+    @MaxLength(25)
         username?: string
 
     @IsString()
+    @IsOptional()
         info?: string
 }

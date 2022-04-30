@@ -1,7 +1,7 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript'
 
 @Table({ tableName: 'message-content' })
-export class MessageContent extends Model {
+export class MessageContent extends Model<MessageContent> {
 
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
         id: number

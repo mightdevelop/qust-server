@@ -10,11 +10,12 @@ import { UsersModule } from './users/users.module'
 import { FriendsModule } from './friends/friends.module'
 import { NotificationsModule } from './notifications/notifications.module'
 import { MessagesModule } from './messages/messages.module'
-import { ChatsModule } from './chat/chats.module'
-import { Chat } from './chat/models/chats.model'
+import { ChatsModule } from './chats/chats.module'
+import { Chat } from './chats/models/chats.model'
 import { Message } from './messages/models/messages.model'
 import { MessageContent } from './messages/models/message-content.model'
-import { ChatUser } from './chat/models/chat-user.model'
+import { ChatUser } from './chats/models/chat-user.model'
+import { ChatMessage } from './messages/models/chat-message'
 
 
 @Module({
@@ -37,6 +38,7 @@ import { ChatUser } from './chat/models/chat-user.model'
                 ChatUser,
                 Message,
                 MessageContent,
+                ChatMessage
             ],
             autoLoadModels: true,
             retryAttempts: 0

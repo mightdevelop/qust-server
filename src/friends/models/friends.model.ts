@@ -3,7 +3,7 @@ import { User } from 'src/users/models/users.model'
 import { FriendRequestStatus } from '../types/friend-request-status'
 
 @Table({ tableName: 'friends' })
-export class Friend extends Model {
+export class Friend extends Model<Friend> {
 
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
         id: number

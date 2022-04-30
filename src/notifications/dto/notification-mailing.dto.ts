@@ -1,7 +1,7 @@
 import { NotificationType } from '../types/notification-type'
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-import { SendNotificationDto } from './send-notification.dto'
+import { SendFriendshipRequestNotificationDto } from './send-friendship-request-notif.dto'
 
 export class NotificationMailingDto {
 
@@ -15,7 +15,7 @@ export class NotificationMailingDto {
     @Type(() => Number)
         resipientsIds: number[]
 
-    @Type(() => SendNotificationDto)
-        dto?: SendNotificationDto
+    // @Type(() => SendFriendshipRequestNotificationDto)
+    dto?: SendFriendshipRequestNotificationDto
 
 }

@@ -3,7 +3,7 @@ import { User } from 'src/users/models/users.model'
 import { Chat } from './chats.model'
 
 @Table({ tableName: 'chat-user' })
-export class ChatUser extends Model {
+export class ChatUser extends Model<ChatUser> {
 
     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
         id: number

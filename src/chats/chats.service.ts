@@ -28,7 +28,6 @@ export class ChatsService {
         const chat: Chat = await this.chatRepository.create({
             name: dto.name, chatType: ChatType.chat
         })
-        console.log(dto)
         for (const chatterId of dto.chattersIds) {
             await this.chatUserRepository.create({
                 chatId: chat.id,
@@ -40,7 +39,7 @@ export class ChatsService {
 
     async updateChat(dto: UpdateChatDto): Promise<Chat> {
         const chat: Chat = await this.chatRepository.findOne({
-            where: { chatId: dto.chatId, chatType: ChatType.chat }
+            where: { id: dto.chatId, chatType: ChatType.chat }
         })
         if (!chat)
             throw new NotFoundException({ message: 'Chat not found' })

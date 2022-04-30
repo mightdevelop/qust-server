@@ -1,4 +1,3 @@
 export enum NotificationType {
     FRIENDSHIP_REQUEST = 'FRIENDSHIP_REQUEST',
-    CREATE_CHAT = 'CREATE_CHAT'
 }

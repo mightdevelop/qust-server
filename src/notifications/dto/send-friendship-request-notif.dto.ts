@@ -1,9 +1,8 @@
-import { IsString, Max, Min } from 'class-validator'
-import { SendNotificationDto } from './send-notification.dto'
+import { IsString, MaxLength, MinLength } from 'class-validator'
 
-export class SendFriendshipRequestNotificationDto extends SendNotificationDto {
+export class SendFriendshipRequestNotificationDto {
     @IsString()
-    @Min(4)
-    @Max(25)
+    @MinLength(4)
+    @MaxLength(25)
         requesterUsername: string
 }

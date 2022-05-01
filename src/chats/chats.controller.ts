@@ -1,14 +1,12 @@
-import { Body, Controller, ForbiddenException, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
-import { InjectModel } from '@nestjs/sequelize'
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { RequestResponseUser } from 'src/auth/types/request-response'
-import { ChatMessagesService } from 'src/messages/chat-messages.service'
+import { ChatMessageService } from 'src/messages/chat-message.service'
 import { ChatsService } from './chats.service'
 import { CreateChatDto } from './dto/create-chat.dto'
 import { AddUsersToChatDto } from './dto/add-users-to-chat.dto'
 import { UpdateChatDto } from './dto/update-chat.dto'
-import { ChatUser } from './models/chat-user.model'
 import { Chat } from './models/chats.model'
 import { addUsersMessageContent } from 'src/messages/utils/messages-text-content'
 import { SendChatMessageDto } from 'src/messages/dto/send-chat-message.dto'
@@ -26,8 +24,7 @@ export class ChatsController {
     constructor(
         private chatsService: ChatsService,
         private usersService: UsersService,
-        private chatMessagesService: ChatMessagesService,
-        @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
+        private chatMessageService: ChatMessageService,
     ) {}
 
     @Post('/')
@@ -48,7 +45,7 @@ export class ChatsController {
                 text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
             }
         }
-        await this.chatMessagesService.sendMessageToChat(sendChatMessageDto)
+        await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
         return chat
     }
 
@@ -71,12 +68,7 @@ export class ChatsController {
         @CurrentUser() user: RequestResponseUser,
     ): Promise<Chat> {
         const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
-        const isChatParticipant = !!await this.chatUserRepository.findOne({ where: {
-            userId: user.id,
-            chatId
-        } })
-        if (!isChatParticipant)
-            throw new ForbiddenException({ message: 'You are not a chat participant' })
+        isUserChatParticipantValidate(user.id, chatId)
         const chat: Chat = await this.chatsService.addUsersToChat(addUsersDto)
         const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
         const sendChatMessageDto: SendChatMessageDto = {
@@ -87,7 +79,7 @@ export class ChatsController {
                 text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
             }
         }
-        await this.chatMessagesService.sendMessageToChat(sendChatMessageDto)
+        await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
         return chat
     }
 
@@ -99,7 +91,7 @@ export class ChatsController {
         @Body() dto: CreateMessageContentDto
     ): Promise<Message> {
         isUserChatParticipantValidate(user.id, chatId)
-        const message: Message = await this.chatMessagesService.sendMessageToChat({
+        const message: Message = await this.chatMessageService.sendMessageToChat({
             userId: user.id,
             username: user.username,
             chatId,
@@ -115,7 +107,7 @@ export class ChatsController {
         @CurrentUser() user: RequestResponseUser
     ): Promise<Message[]> {
         isUserChatParticipantValidate(user.id, chatId)
-        const messages: Message[] = await this.chatMessagesService.getMessagesFromChat(chatId)
+        const messages: Message[] = await this.chatMessageService.getMessagesFromChat(chatId)
         return messages
     }
 

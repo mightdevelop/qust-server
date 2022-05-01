@@ -1,6 +1,5 @@
 import { NotificationType } from '../types/notification-type'
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, ValidateNested } from 'class-validator'
-import { Type } from 'class-transformer'
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNumber, ValidateNested } from 'class-validator'
 import { SendFriendshipRequestNotificationDto } from './send-friendship-request-notif.dto'
 
 export class NotificationMailingDto {
@@ -12,7 +11,7 @@ export class NotificationMailingDto {
     @ValidateNested({ each: true })
     @ArrayMinSize(1)
     @ArrayMaxSize(100)
-    @Type(() => Number)
+    @IsNumber()
         resipientsIds: number[]
 
     // @Type(() => SendFriendshipRequestNotificationDto)

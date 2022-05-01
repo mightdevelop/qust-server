@@ -12,15 +12,18 @@ export class Message extends Model<Message> {
     @ForeignKey(() => User)
         userId: number
 
+    @Column({ type: DataType.INTEGER, unique: true, allowNull: false })
+    @ForeignKey(() => MessageContent)
+        contentId: number
+
     @Column({ type: DataType.STRING, allowNull: false })
         username: string
 
     @Column({ type: DataType.DATE, allowNull: false })
         timestamp: number
 
-    @Column({ type: DataType.INTEGER, unique: true, allowNull: false })
-    @ForeignKey(() => MessageContent)
-        contentId: number
+    @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
+        edited: boolean
 
 }
 

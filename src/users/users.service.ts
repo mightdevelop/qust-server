@@ -50,7 +50,7 @@ export class UsersService {
             return { id: column.userId }
         })
         const chatters: User[] = await this.userRepository.findAll({
-            where: { [Op.and]: chattersIds }
+            where: { [Op.or]: chattersIds }
         })
         return chatters
     }
@@ -65,7 +65,7 @@ export class UsersService {
             return { id: column.userId }
         })
         const friends: User[] = await this.userRepository.findAll({
-            where: { [Op.and]: friendsIds }
+            where: { [Op.or]: friendsIds }
         })
         return friends
     }

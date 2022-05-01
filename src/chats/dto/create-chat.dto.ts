@@ -1,4 +1,3 @@
-import { Type } from 'class-transformer'
 import { IsArray, IsString } from 'class-validator'
 
 export class CreateChatDto {
@@ -7,7 +6,6 @@ export class CreateChatDto {
         name: string
 
     @IsArray()
-    @Type(() => Number)
         chattersIds: number[]
 
 }

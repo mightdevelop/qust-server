@@ -2,7 +2,6 @@ import { forwardRef, Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { AuthModule } from 'src/auth/auth.module'
 import { MessagesModule } from 'src/messages/messages.module'
-import { NotificationsModule } from 'src/notifications/notifications.module'
 import { UsersModule } from 'src/users/users.module'
 import { ChatsController } from './chats.controller'
 import { ChatsService } from './chats.service'
@@ -15,7 +14,6 @@ import { Chat } from './models/chats.model'
     imports: [
         SequelizeModule.forFeature([ Chat, ChatUser ]),
         forwardRef(() => AuthModule),
-        NotificationsModule,
         MessagesModule,
         UsersModule
     ],

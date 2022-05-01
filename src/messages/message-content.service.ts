@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { CreateMessageContentDto } from './dto/send-chat-message.dto copy'
+import { CreateMessageContentDto } from './dto/create-message-content.dto'
 import { MessageContent } from './models/message-content.model'
 
 

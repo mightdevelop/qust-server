@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { UsersService } from 'src/users/users.service'
 import { NotificationMailingDto } from './dto/notification-mailing.dto'
 import { SendFriendshipRequestNotificationDto } from './dto/send-friendship-request-notif.dto'
 import { Notification } from './models/notifications.model'
@@ -12,7 +11,6 @@ import { NotificationType } from './types/notification-type'
 export class NotificationsService {
 
     constructor(
-        private usersService: UsersService,
         @InjectModel(Notification) private notificationRepository: typeof Notification
     ) {}
 

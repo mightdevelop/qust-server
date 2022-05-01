@@ -18,7 +18,6 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { FriendsService } from 'src/friends/friends.service'
 
 
 @Controller('/users')
@@ -26,7 +25,6 @@ export class UsersController {
 
     constructor(
         private usersService: UsersService,
-        private friendsService: FriendsService,
     ) {}
 
     @Get('/')
@@ -52,7 +50,7 @@ export class UsersController {
         const user = await this.usersService.getUserById(userId)
         if (!user)
             throw new NotFoundException({ message: 'User not found' })
-        const friends: User[] = await this.friendsService.getFriendsByUserId(userId)
+        const friends: User[] = await this.usersService.getFriendsByUserId(userId)
         return friends
     }
 

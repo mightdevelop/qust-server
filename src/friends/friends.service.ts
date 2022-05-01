@@ -14,20 +14,6 @@ export class FriendsService {
         @InjectModel(Friend) private userFriendsRepository: typeof Friend,
     ) {}
 
-    async getFriendsByUserId(
-        userId: number
-    ): Promise<User[]> {
-        const userFriendColumns: Friend[] = await this.userFriendsRepository.findAll(
-            { where: { userId, status: FriendRequestStatus.CONFIRM } }
-        )
-        const friends: User[] = []
-        for (const column of userFriendColumns) {
-            const friend: User = await this.usersService.getUserById(column.friendId)
-            friends.push(friend)
-        }
-        return friends
-    }
-
     async getUserFriendColumn(
         friendId: number,
         userId: number

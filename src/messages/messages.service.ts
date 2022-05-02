@@ -56,8 +56,7 @@ export class MessagesService {
         const message: Message = await this.messageRepository.create({
             userId: dto.userId,
             username: dto.username,
-            contentId: content.id,
-            timestamp: Math.ceil(Date.now() / 1000),
+            contentId: content.id
         })
         message.setDataValue('content', content)
         return message

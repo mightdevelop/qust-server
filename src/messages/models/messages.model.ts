@@ -22,9 +22,6 @@ export class Message extends Model<Message> {
     @Column({ type: DataType.STRING, allowNull: false })
         username: string
 
-    @Column({ type: DataType.DATE, allowNull: false })
-        timestamp: number
-
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
         edited: boolean
 

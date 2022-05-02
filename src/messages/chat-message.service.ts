@@ -25,6 +25,17 @@ export class ChatMessageService {
         return messages
     }
 
+    async getMessagesWithContentFromChat(chatId: number): Promise<Message[]> {
+        const chatMessageColumns: ChatMessage[] = await this.chatMessageRepository.findAll({
+            where: { chatId }
+        })
+        const messagesIds: { id: number }[] = chatMessageColumns.map(column => {
+            return { id: column.messageId }
+        })
+        const messages: Message[] = await this.messageService.getMessagesWithContentByIds(messagesIds)
+        return messages
+    }
+
     async getChatMessageColumn(messageId: number): Promise<ChatMessage> {
         const column: ChatMessage = await this.chatMessageRepository.findOne({ where: { messageId } })
         return column

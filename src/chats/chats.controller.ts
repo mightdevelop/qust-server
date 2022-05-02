@@ -102,12 +102,12 @@ export class ChatsController {
 
     @Get('/:id/messages')
     @UseGuards(JwtAuthGuard)
-    async getMessagesFromChat(
+    async getMessagesWithContentFromChat(
         @Param('id') chatId: number,
         @CurrentUser() user: RequestResponseUser
     ): Promise<Message[]> {
         isUserChatParticipantValidate(user.id, chatId)
-        const messages: Message[] = await this.chatMessageService.getMessagesFromChat(chatId)
+        const messages: Message[] = await this.chatMessageService.getMessagesWithContentFromChat(chatId)
         return messages
     }
 

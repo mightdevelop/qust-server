@@ -29,6 +29,28 @@ export class MessagesService {
         return messages
     }
 
+    async getMessageWithContentById(messageId: number): Promise<Message> {
+        const message: Message = await this.messageRepository.findByPk(messageId)
+        const content: MessageContent = await this.messageContentService.getContentById(message.contentId)
+        message.setDataValue('content', content)
+        return message
+    }
+
+    async getMessagesWithContentByIds(messagesIds: { id: number }[]): Promise<Message[]> {
+        const messages: Message[] = await this.messageRepository.findAll({
+            where: { [Op.or]: messagesIds }
+        })
+        const contentsIds: { id: number }[] = messages.map(message => {
+            return { id: message.contentId }
+        })
+        const contents: MessageContent[] = await this.messageContentService.getContentsByIds(contentsIds)
+        const messagesWithContent: Message[] = messages.map(message => {
+            message.setDataValue('content', contents.find(content => content.id === message.contentId))
+            return message
+        })
+        return messagesWithContent
+    }
+
     async createMessage(dto: CreateMessageDto): Promise<Message> {
         const content: MessageContent = await this.messageContentService.createMessageContent(dto.content)
         const message: Message = await this.messageRepository.create({
@@ -37,6 +59,7 @@ export class MessagesService {
             contentId: content.id,
             timestamp: Math.ceil(Date.now() / 1000),
         })
+        message.setDataValue('content', content)
         return message
     }
 
@@ -46,11 +69,16 @@ export class MessagesService {
             messageContentId: message.contentId,
             text: text
         })
+        const content: MessageContent = await this.messageContentService.getContentById(message.contentId)
+        message.setDataValue('content', content)
         return message
     }
 
     async deleteMessage({ message }: DeleteMessageDto): Promise<Message> {
-        await this.messageContentService.deleteMessageContent({ messageContentId: message.contentId })
+        const content: MessageContent =await this.messageContentService.deleteMessageContent(
+            { messageContentId: message.contentId }
+        )
+        message.setDataValue('content', content)
         await message.destroy()
         return message
     }

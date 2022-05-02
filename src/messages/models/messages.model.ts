@@ -1,4 +1,4 @@
-import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
 import { User } from 'src/users/models/users.model'
 import { MessageContent } from './message-content.model'
 
@@ -11,6 +11,9 @@ export class Message extends Model<Message> {
     @Column({ type: DataType.INTEGER, allowNull: false })
     @ForeignKey(() => User)
         userId: number
+
+    @BelongsTo(() => MessageContent)
+        content: MessageContent
 
     @Column({ type: DataType.INTEGER, unique: true, allowNull: false })
     @ForeignKey(() => MessageContent)

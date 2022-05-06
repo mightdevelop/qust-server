@@ -18,8 +18,8 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
         })
     }
     async validate(payload: TokenPayload): Promise<RequestResponseUser> {
-        const { id, username, email, isAdmin }: RequestResponseUser =
+        const user: RequestResponseUser =
             await this.usersService.getUserById(payload.id)
-        return { id, username, email, isAdmin }
+        return user
     }
 }

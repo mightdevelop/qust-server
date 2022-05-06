@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { StandardCategoryLayouts } from 'src/categories/types/standard-category-layouts'
+import { StandardGroupLayouts } from 'src/layouts/types/standard-category-layouts'
 import { CreateGroupDto } from './dto/create-group.dto'
-import { LayoutsService } from './layouts.service'
+import { LayoutsService } from '../layouts/layouts.service'
 import { Group } from './models/groups.model'
 
 
@@ -18,34 +18,10 @@ export class GroupsService {
         const group: Group = await this.groupRepository.create(dto)
         await this.layoutsService.createCategoriesAndTextChannelsByLayout({
             groupId: group.id,
-            categoryLayouts: StandardCategoryLayouts[dto.layout ? dto.layout : 'DEFAULT']
+            groupLayout: StandardGroupLayouts[dto.layout ? dto.layout : 'DEFAULT']
         })
         return group
     }
-
-    // async createByDefaultLayout(group: Group): Promise<void> {
-    //     const categories: Category[] = await this.categoriesService.createCategoriesByDefaultLayout(group.id)
-    //     const channels: TextChannel[] = await this.textChannelsService.createTextChannelsByDefaultLayout(group.id)
-    //     await group.update({ categories })
-    //     return
-    // }
-
-    // async createGroup(dto: CreateGroupDto): Promise<Group> {
-    //     const group: Group = await this.groupRepository.create({
-    //         name: dto.name
-    //     })
-    //     const arrayToCreateChatUserColumns: {
-    //         chatId: number,
-    //         userId: number
-    //     }[] = dto.chattersIds.map(chatterId => {
-    //         return {
-    //             chatId: chat.id,
-    //             userId: chatterId
-    //         }
-    //     })
-    //     await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns)
-    //     return chat
-    // }
 
     // async updateChat(dto: UpdateChatDto): Promise<Chat> {
     //     const chat: Chat = await this.chatRepository.findOne({

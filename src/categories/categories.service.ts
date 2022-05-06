@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { TextChannel } from 'src/text-channels/models/text-channels.model'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
 import { Category } from './models/categories.model'
@@ -11,7 +10,6 @@ export class CategoriesService {
 
     constructor(
         @InjectModel(Category) private categoryRepository: typeof Category,
-        @InjectModel(TextChannel) private textChannelRepository: typeof TextChannel,
     ) {}
 
     async createCategory(dto: CreateCategoryDto): Promise<Category> {

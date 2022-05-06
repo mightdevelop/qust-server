@@ -1,5 +1,5 @@
-import { ForcedPermissionLevel } from '../permission-level'
+import { PermissionLevel } from '../permission-level'
 
 export class RoleCategoryPermissionsList {
-    manageCategory: ForcedPermissionLevel
+    manageCategory: PermissionLevel
 }

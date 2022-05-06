@@ -1,9 +1,9 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
 import { Role } from 'src/roles/models/roles.model'
-import { ForcedPermissionLevel } from 'src/roles/types/permission-level'
+import { PermissionLevel } from 'src/roles/types/permission-level'
 import { TextChannel } from './text-channels.model'
 
-@Table({ tableName: 'channel-role-permissions' })
+@Table({ tableName: 'text-channel-role-permissions' })
 export class TextChannelRolePermissions extends Model<TextChannelRolePermissions> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
@@ -25,38 +25,38 @@ export class TextChannelRolePermissions extends Model<TextChannelRolePermissions
 
 
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        viewTextChannels: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        viewTextChannels: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        readMessages: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        readMessages: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        writeMessages: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        writeMessages: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.NOT_ALOWED })
-        deleteMessages: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.NOT_ALOWED })
+        deleteMessages: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        embedLinks: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        embedLinks: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        embedFiles: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        embedFiles: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        addReactions: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        addReactions: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        useEmojis: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        useEmojis: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        useExternalEmojis: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        useExternalEmojis: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        mentionDefaultRoles: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        mentionDefaultRoles: PermissionLevel
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.ALOWED })
-        mentionCustomRoles: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.ALOWED })
+        mentionCustomRoles: PermissionLevel
 
 }
 

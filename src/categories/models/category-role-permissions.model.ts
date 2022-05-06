@@ -1,6 +1,6 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
 import { Role } from 'src/roles/models/roles.model'
-import { ForcedPermissionLevel } from 'src/roles/types/permission-level'
+import { PermissionLevel } from 'src/roles/types/permission-level'
 import { Category } from './categories.model'
 
 @Table({ tableName: 'category-role-permissions' })
@@ -25,8 +25,8 @@ export class CategoryRolePermissions extends Model<CategoryRolePermissions> {
 
 
 
-    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: ForcedPermissionLevel.NOT_ALOWED })
-        manageCategory: ForcedPermissionLevel
+    @Column({ type: DataType.SMALLINT, allowNull: false, defaultValue: PermissionLevel.NOT_ALOWED })
+        manageCategory: PermissionLevel
 
 }
 

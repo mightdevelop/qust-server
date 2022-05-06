@@ -1,9 +1,13 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript'
+import { BelongsToMany, Column, DataType, Model, Table } from 'sequelize-typescript'
+import { GroupUser } from 'src/groups/models/group-user.model'
+import { Group } from 'src/groups/models/groups.model'
+import { RoleUser } from 'src/roles/models/role-user.model'
+import { Role } from 'src/roles/models/roles.model'
 
 @Table({ tableName: 'users' })
 export class User extends Model<User> {
 
-    @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+    @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
         id: number
 
     @Column({ type: DataType.STRING, allowNull: false })
@@ -26,6 +30,12 @@ export class User extends Model<User> {
 
     @Column({ type: DataType.STRING, allowNull: false, defaultValue: '' })
         info: string
+
+    @BelongsToMany(() => Group, () => GroupUser)
+        groups: Group[]
+
+    @BelongsToMany(() => Role, () => RoleUser)
+        roles: Role[]
 
 }
 

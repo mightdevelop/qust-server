@@ -7,6 +7,7 @@ import { UpdateChatDto } from './dto/update-chat.dto'
 import { ChatUser } from './models/chat-user.model'
 import { Chat } from './models/chats.model'
 import { ChatType } from './types/chat-type'
+import { Message } from 'src/messages/models/messages.model'
 
 
 @Injectable()
@@ -16,6 +17,16 @@ export class ChatsService {
         @InjectModel(Chat) private chatRepository: typeof Chat,
         @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
     ) {}
+
+    async getChatById(chatId: number): Promise<Chat> {
+        const chat: Chat = await this.chatRepository.findByPk(chatId)
+        return chat
+    }
+
+    async getMessagesFromChat(chatId: number): Promise<Message[]> {
+        const chat: Chat = await this.chatRepository.findByPk(chatId, { include: Message })
+        return chat.messages
+    }
 
     async createChat(dto: CreateChatDto): Promise<Chat> {
         const chat: Chat = await this.chatRepository.create({
@@ -30,7 +41,7 @@ export class ChatsService {
                 userId: chatterId
             }
         })
-        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns)
+        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns, { validate: true })
         return chat
     }
 
@@ -78,7 +89,7 @@ export class ChatsService {
                 userId: chatterId
             }
         })
-        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns)
+        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns, { validate: true })
         return chat
     }
 

@@ -1,17 +1,21 @@
-import { Column, DataType, HasOne, Model, Table } from 'sequelize-typescript'
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
 import { Message } from './messages.model'
 
 @Table({ tableName: 'message-content' })
 export class MessageContent extends Model<MessageContent> {
 
-    @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+    @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
         id: number
 
     @Column({ type: DataType.STRING, allowNull: true })
         text: string
 
-    @HasOne(() => Message)
+    @BelongsTo(() => Message, { onDelete: 'cascade' })
         message: Message
+
+    @Column({ type: DataType.UUID, unique: true, allowNull: false })
+    @ForeignKey(() => Message)
+        messageId: number
 
 }
 

@@ -5,7 +5,7 @@ import { FriendRequestStatus } from '../types/friend-request-status'
 @Table({ tableName: 'friends' })
 export class Friend extends Model<Friend> {
 
-    @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+    @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
         id: number
 
     @Column({ type: DataType.ENUM(
@@ -14,11 +14,11 @@ export class Friend extends Model<Friend> {
     ), defaultValue: FriendRequestStatus.REQUEST })
         status: FriendRequestStatus
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
         userId: number
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
         friendId: number
 

@@ -1,11 +1,11 @@
 // import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
-// import { Channel } from 'src/channels/models/channels.model'
+// import { TextChannel } from 'src/channels/models/channels.model'
 // import { Message } from './messages.model'
 
 // @Table({ tableName: 'messages' })
-// export class ChannelMessage extends Model<ChannelMessage> {
+// export class TextChannelMessage extends Model<TextChannelMessage> {
 
-//     @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+//     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
 //         id: number
 
 //     @Column({ type: DataType.INTEGER, allowNull: false })
@@ -13,7 +13,7 @@
 //         messageId: number
 
 //     @Column({ type: DataType.INTEGER, allowNull: false })
-//     @ForeignKey(() => Channel)
+//     @ForeignKey(() => TextChannel)
 //         channelId: number
 
 // }

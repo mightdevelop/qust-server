@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer'
-import { IsNotEmptyObject, IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class SendChatMessageDto {
 
@@ -14,12 +13,7 @@ export class SendChatMessageDto {
     @IsNumber()
         chatId: number
 
-    @Type(() => Content)
-    @IsNotEmptyObject()
-        content: Content
+    @IsString()
+        text: string
 
-}
-
-class Content {
-    text?: string
 }

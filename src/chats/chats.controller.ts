@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { RequestResponseUser } from 'src/auth/types/request-response'
@@ -14,8 +14,7 @@ import StandartBots from 'src/utils/standart-bots-const'
 import { User } from 'src/users/models/users.model'
 import { Message } from 'src/messages/models/messages.model'
 import { UsersService } from 'src/users/users.service'
-import { isUserChatParticipantValidate } from './utils/is-user-chat-participant-validate'
-import { CreateMessageContentDto } from 'src/messages/dto/create-message-content.dto'
+import { isUserChatParticipant } from './utils/is-user-chat-participant'
 
 
 @Controller('/chats')
@@ -41,9 +40,7 @@ export class ChatsController {
             userId: StandartBots.CHAT_BOT.id,
             username: StandartBots.CHAT_BOT.username,
             chatId: chat.id,
-            content: {
-                text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-            }
+            text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         }
         await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
         return chat
@@ -55,7 +52,8 @@ export class ChatsController {
         @Body() dto: UpdateChatDto,
         @CurrentUser() user: RequestResponseUser
     ): Promise<Chat> {
-        isUserChatParticipantValidate(user.id, dto.chatId)
+        if (!isUserChatParticipant(user.id, dto.chatId))
+            throw new ForbiddenException({ message: 'You are not a chat participant' })
         const chat: Chat = await this.chatsService.updateChat(dto)
         return chat
     }
@@ -68,16 +66,15 @@ export class ChatsController {
         @CurrentUser() user: RequestResponseUser,
     ): Promise<Chat> {
         const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
-        isUserChatParticipantValidate(user.id, chatId)
+        if (!isUserChatParticipant(user.id, chatId))
+            throw new ForbiddenException({ message: 'You are not a chat participant' })
         const chat: Chat = await this.chatsService.addUsersToChat(addUsersDto)
         const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
         const sendChatMessageDto: SendChatMessageDto = {
             userId: StandartBots.CHAT_BOT.id,
             username: StandartBots.CHAT_BOT.username,
             chatId,
-            content: {
-                text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-            }
+            text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         }
         await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
         return chat
@@ -88,26 +85,30 @@ export class ChatsController {
     async sendMessageToChat(
         @Param('id') chatId: number,
         @CurrentUser() user: RequestResponseUser,
-        @Body() dto: CreateMessageContentDto
+        @Body() { text }: {text: string}
     ): Promise<Message> {
-        isUserChatParticipantValidate(user.id, chatId)
+        if (!await this.chatsService.getChatById(chatId))
+            throw new NotFoundException({ message: 'Chat not found' })
+        if (!isUserChatParticipant(user.id, chatId))
+            throw new ForbiddenException({ message: 'You are not a chat participant' })
         const message: Message = await this.chatMessageService.sendMessageToChat({
             userId: user.id,
             username: user.username,
             chatId,
-            content: dto
+            text
         })
         return message
     }
 
     @Get('/:id/messages')
     @UseGuards(JwtAuthGuard)
-    async getMessagesWithContentFromChat(
+    async getMessagesFromChat(
         @Param('id') chatId: number,
         @CurrentUser() user: RequestResponseUser
     ): Promise<Message[]> {
-        isUserChatParticipantValidate(user.id, chatId)
-        const messages: Message[] = await this.chatMessageService.getMessagesWithContentFromChat(chatId)
+        if (!isUserChatParticipant(user.id, chatId))
+            throw new ForbiddenException({ message: 'You are not a chat participant' })
+        const messages: Message[] = await this.chatsService.getMessagesFromChat(chatId)
         return messages
     }
 

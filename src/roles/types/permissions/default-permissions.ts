@@ -1,0 +1,31 @@
+import { RolePermissionsList } from './permissions'
+import { PermissionLevel } from '../permission-level'
+
+export const DefaultRolePermissions: RolePermissionsList = {
+    manageGroup: PermissionLevel.NOT_ALOWED,
+    manageTextChannels: PermissionLevel.NOT_ALOWED,
+    manageCategories: PermissionLevel.NOT_ALOWED,
+    manageRoles: PermissionLevel.NOT_ALOWED,
+    manageEvents: PermissionLevel.NOT_ALOWED,
+    manageEmojis: PermissionLevel.NOT_ALOWED,
+    readAuditLog: PermissionLevel.NOT_ALOWED,
+    banUsers: PermissionLevel.NOT_ALOWED,
+    inviteUsers: PermissionLevel.ALOWED,
+    viewTextChannels: PermissionLevel.NONE,
+    readMessages: PermissionLevel.NONE,
+    writeMessages: PermissionLevel.NONE,
+    deleteMessages: PermissionLevel.NOT_ALOWED,
+    embedLinks: PermissionLevel.NONE,
+    embedFiles: PermissionLevel.NONE,
+    addReactions: PermissionLevel.NONE,
+    useEmojis: PermissionLevel.NONE,
+    useExternalEmojis: PermissionLevel.NONE,
+    mentionDefaultRoles: PermissionLevel.NONE,
+    mentionCustomRoles: PermissionLevel.NONE,
+    voiceConnect: PermissionLevel.NONE,
+    voiceSpeak: PermissionLevel.NONE,
+    streamVideo: PermissionLevel.NONE,
+    muteMembers: PermissionLevel.NOT_ALOWED,
+    deafenMembers: PermissionLevel.NOT_ALOWED,
+    moveMembers: PermissionLevel.NOT_ALOWED,
+}

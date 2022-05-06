@@ -1,23 +1,19 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
+import { Column, DataType, ForeignKey, HasOne, Model, Table } from 'sequelize-typescript'
 import { User } from 'src/users/models/users.model'
 import { MessageContent } from './message-content.model'
 
 @Table({ tableName: 'messages' })
 export class Message extends Model<Message> {
 
-    @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+    @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
         id: number
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
         userId: number
 
-    @BelongsTo(() => MessageContent)
+    @HasOne(() => MessageContent, { onDelete: 'cascade' })
         content: MessageContent
-
-    @Column({ type: DataType.INTEGER, unique: true, allowNull: false })
-    @ForeignKey(() => MessageContent)
-        contentId: number
 
     @Column({ type: DataType.STRING, allowNull: false })
         username: string

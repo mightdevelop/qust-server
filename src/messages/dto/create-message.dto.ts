@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer'
-import { IsNotEmptyObject, IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class CreateMessageDto {
 
@@ -11,12 +10,7 @@ export class CreateMessageDto {
     @MaxLength(25)
         username: string
 
-    @Type(() => Content)
-    @IsNotEmptyObject()
-        content: Content
+    @IsString()
+        text: string
 
-}
-
-class Content {
-    text?: string
 }

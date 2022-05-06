@@ -5,14 +5,14 @@ import { Chat } from './chats.model'
 @Table({ tableName: 'chat-user' })
 export class ChatUser extends Model<ChatUser> {
 
-    @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+    @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
         id: number
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
         userId: number
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Chat)
         chatId: number
 

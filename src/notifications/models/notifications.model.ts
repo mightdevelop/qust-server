@@ -5,10 +5,10 @@ import { User } from 'src/users/models/users.model'
 @Table({ tableName: 'notifications' })
 export class Notification extends Model<Notification> {
 
-    @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+    @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
         id: number
 
-    @Column({ type: DataType.INTEGER, allowNull: false })
+    @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
         userId: number
 

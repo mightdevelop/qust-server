@@ -77,7 +77,7 @@ export class FriendsController {
     async responseToFriendshipRequest(
         @Param('id') requestedUserId: number,
         @CurrentUser() user: RequestResponseUser,
-        @Body('response') isConfirm: boolean
+        @Body() { isConfirm }: {isConfirm: boolean}
     ): Promise<string> {
         await this.friendsService.responseToFriendshipRequest(requestedUserId, user.id, isConfirm)
         if (!isConfirm) return 'Friendship declined'

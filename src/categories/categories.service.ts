@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { TextChannel } from 'src/text-channels/models/text-channels.model'
-import { CreateCategoriesByLayoutDto } from './dto/category-layout.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
 import { Category } from './models/categories.model'
@@ -33,27 +32,6 @@ export class CategoriesService {
         if (!category)
             throw new NotFoundException({ message: 'Category not found' })
         return category
-    }
-
-    async createCategoriesAndTextChannelsByLayout(dto: CreateCategoriesByLayoutDto): Promise<void> {
-        const categories: Category[] =
-            await this.categoryRepository.bulkCreate(dto.categoryLayouts.map(categoryLayout => {
-                return {
-                    name: categoryLayout.name,
-                    groupId: dto.groupId
-                }
-            }), { validate: true })
-        await this.textChannelRepository.bulkCreate([].concat(
-            ...dto.categoryLayouts.map((categoryLayout, categoryIndex) => {
-                return categoryLayout.channels.map(channelLayout => {
-                    return {
-                        name: channelLayout.name,
-                        categoryId: categories[categoryIndex].id
-                    }
-                })
-            })
-        ), { validate: true })
-        return
     }
 
 }

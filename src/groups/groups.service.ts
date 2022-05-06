@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { CategoriesService } from 'src/categories/categories.service'
 import { StandardCategoryLayouts } from 'src/categories/types/standard-category-layouts'
 import { CreateGroupDto } from './dto/create-group.dto'
+import { LayoutsService } from './layouts.service'
 import { Group } from './models/groups.model'
 
 
@@ -10,13 +10,13 @@ import { Group } from './models/groups.model'
 export class GroupsService {
 
     constructor(
-        private categoriesService: CategoriesService,
+        private layoutsService: LayoutsService,
         @InjectModel(Group) private groupRepository: typeof Group,
     ) {}
 
     async createGroup(dto: CreateGroupDto): Promise<Group> {
         const group: Group = await this.groupRepository.create(dto)
-        await this.categoriesService.createCategoriesAndTextChannelsByLayout({
+        await this.layoutsService.createCategoriesAndTextChannelsByLayout({
             groupId: group.id,
             categoryLayouts: StandardCategoryLayouts[dto.layout ? dto.layout : 'DEFAULT']
         })

@@ -6,15 +6,15 @@ import { Role } from './roles.model'
 export class RoleUser extends Model<RoleUser> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Role)
-        roleId: number
+        roleId: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        userId: number
+        userId: string
 
 }
 

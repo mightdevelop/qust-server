@@ -40,7 +40,7 @@ export class MessagesController {
     @UseGuards(JwtAuthGuard)
     async deleteMessage(
         @CurrentUser() user: RequestResponseUser,
-        @Param('id') messageId: number
+        @Param('id') messageId: string
     ): Promise<Message> {
         const message: Message = await this.messagesService.getMessageById(messageId)
         if (!message)

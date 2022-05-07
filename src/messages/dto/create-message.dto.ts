@@ -1,9 +1,9 @@
-import { IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsUUID, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class CreateMessageDto {
 
-    @IsNumber()
-        userId: number
+    @IsUUID()
+        userId: string
 
     @IsString()
     @MinLength(4)

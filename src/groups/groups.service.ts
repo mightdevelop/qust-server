@@ -14,6 +14,11 @@ export class GroupsService {
         @InjectModel(Group) private groupRepository: typeof Group,
     ) {}
 
+    async getGroupById(groupId: string): Promise<Group> {
+        const group: Group = await this.groupRepository.findByPk(groupId)
+        return group
+    }
+
     async createGroup(dto: CreateGroupDto): Promise<Group> {
         const group: Group = await this.groupRepository.create(dto)
         await this.layoutsService.createCategoriesAndTextChannelsByLayout({
@@ -33,7 +38,7 @@ export class GroupsService {
     //     return chat
     // }
 
-    // async deleteChat(chatId: number): Promise<Chat> {
+    // async deleteChat(chatId: string): Promise<Chat> {
     //     const chat: Chat = await this.chatRepository.findByPk(chatId)
     //     if (!chat)
     //         throw new NotFoundException({ message: 'Chat not found' })
@@ -59,8 +64,8 @@ export class GroupsService {
     //     if (!chat)
     //         throw new NotFoundException({ message: 'Chat not found' })
     //     const arrayToCreateChatUserColumns: {
-    //         chatId: number,
-    //         userId: number
+    //         chatId: string,
+    //         userId: string
     //     }[] = dto.chattersIds.map(chatterId => {
     //         return {
     //             chatId: chat.id,

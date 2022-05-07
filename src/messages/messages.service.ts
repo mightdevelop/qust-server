@@ -16,12 +16,12 @@ export class MessagesService {
         @InjectModel(MessageContent) private messageContentRepository: typeof MessageContent,
     ) {}
 
-    async getMessageById(messageId: number): Promise<Message> {
+    async getMessageById(messageId: string): Promise<Message> {
         const message: Message = await this.messageRepository.findByPk(messageId, { include: MessageContent })
         return message
     }
 
-    async getMessagesByIds(messagesIds: { id: number }[]): Promise<Message[]> {
+    async getMessagesByIds(messagesIds: { id: string }[]): Promise<Message[]> {
         const messages: Message[] = await this.messageRepository.findAll({
             where: { [Op.or]: messagesIds }, include: MessageContent
         })

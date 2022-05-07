@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer'
-import { IsHexColor, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsHexColor, IsUUID, IsOptional, IsString } from 'class-validator'
 import { Role } from '../models/roles.model'
 
 export class UpdateRoleDto {
@@ -15,7 +15,7 @@ export class UpdateRoleDto {
     @IsOptional()
         color?: string
 
-    @IsNumber()
+    @IsUUID()
     @IsOptional()
         groupId?: number
 

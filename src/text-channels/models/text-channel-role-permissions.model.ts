@@ -7,18 +7,18 @@ import { TextChannel } from './text-channels.model'
 export class TextChannelRolePermissions extends Model<TextChannelRolePermissions> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Role)
-        roleId: number
+        roleId: string
 
     @BelongsTo(() => Role)
         role: Role
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => TextChannel)
-        channelId: number
+        channelId: string
 
     @BelongsTo(() => TextChannel)
         channel: TextChannel

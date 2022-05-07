@@ -6,7 +6,7 @@ import { FriendRequestStatus } from '../types/friend-request-status'
 export class Friend extends Model<Friend> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.ENUM(
         FriendRequestStatus.REQUEST,
@@ -16,11 +16,11 @@ export class Friend extends Model<Friend> {
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        userId: number
+        userId: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        friendId: number
+        friendId: string
 
 }
 

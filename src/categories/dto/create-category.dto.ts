@@ -1,11 +1,11 @@
-import { IsNumber, IsString } from 'class-validator'
+import { IsNumber, IsString, IsUUID } from 'class-validator'
 
 export class CreateCategoryDto {
 
     @IsString()
         name: string
 
-    @IsNumber()
-        groupId: number
+    @IsUUID()
+        groupId: string
 
 }

@@ -1,5 +1,5 @@
 export type TokenPayload = {
-    id: number
+    id: string
     username: string
     isAdmin: boolean
     iat?: number

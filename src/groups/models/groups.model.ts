@@ -8,14 +8,14 @@ import { Category } from 'src/categories/models/categories.model'
 export class Group extends Model<Group> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @BelongsTo(() => User)
         owner: User
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        ownerId: number
+        ownerId: string
 
     @Column({ type: DataType.STRING, allowNull: false })
         name: string

@@ -1,5 +1,5 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
-import { PermissionLevel } from '../types/permission-level'
+import { ForcedPermissionLevel } from '../types/permission-level'
 import { DefaultRolePermissions } from '../types/permissions/default-permissions'
 import { Role } from './roles.model'
 
@@ -7,11 +7,11 @@ import { Role } from './roles.model'
 export class RolePermissions extends Model<RolePermissions> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Role)
-        roleId: number
+        roleId: string
 
     @BelongsTo(() => Role)
         role: Role
@@ -21,134 +21,134 @@ export class RolePermissions extends Model<RolePermissions> {
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageGroup
     })
-        manageGroup: PermissionLevel
+        manageGroup: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageTextChannels
     })
-        manageTextChannels: PermissionLevel
+        manageTextChannels: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageCategories
     })
-        manageCategories: PermissionLevel
+        manageCategories: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageRoles
     })
-        manageRoles: PermissionLevel
+        manageRoles: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageEvents
     })
-        manageEvents: PermissionLevel
+        manageEvents: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageEmojis
     })
-        manageEmojis: PermissionLevel
+        manageEmojis: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.readAuditLog
     })
-        readAuditLog: PermissionLevel
+        readAuditLog: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.readAuditLog
     })
-        banUsers: PermissionLevel
+        banUsers: ForcedPermissionLevel
 
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.voiceConnect
     })
-        voiceConnect: PermissionLevel
+        voiceConnect: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.voiceConnect
     })
-        voiceSpeak: PermissionLevel
+        voiceSpeak: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.streamVideo
     })
-        streamVideo: PermissionLevel
+        streamVideo: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.muteMembers
     })
-        muteMembers: PermissionLevel
+        muteMembers: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.deafenMembers
     })
-        deafenMembers: PermissionLevel
+        deafenMembers: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.moveMembers
     })
-        moveMembers: PermissionLevel
+        moveMembers: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.inviteUsers
     })
-        inviteUsers: PermissionLevel
+        inviteUsers: ForcedPermissionLevel
 
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.viewTextChannels
     })
-        viewTextChannels: PermissionLevel
+        viewTextChannels: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.readMessages
     })
-        readMessages: PermissionLevel
+        readMessages: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.writeMessages
     })
-        writeMessages: PermissionLevel
+        writeMessages: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.deleteMessages
     })
-        deleteMessages: PermissionLevel
+        deleteMessages: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.embedLinks
     })
-        embedLinks: PermissionLevel
+        embedLinks: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.embedFiles
     })
-        embedFiles: PermissionLevel
+        embedFiles: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.addReactions
     })
-        addReactions: PermissionLevel
+        addReactions: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.useEmojis
     })
-        useEmojis: PermissionLevel
+        useEmojis: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.useExternalEmojis
     })
-        useExternalEmojis: PermissionLevel
+        useExternalEmojis: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.mentionDefaultRoles
     })
-        mentionDefaultRoles: PermissionLevel
+        mentionDefaultRoles: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.mentionCustomRoles
     })
-        mentionCustomRoles: PermissionLevel
+        mentionCustomRoles: ForcedPermissionLevel
 
 }
 

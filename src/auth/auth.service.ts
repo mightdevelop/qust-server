@@ -81,7 +81,7 @@ export class AuthService {
 
     async isRefreshTokenMatches(
         refreshTokenFromRequest: string,
-        userId: number
+        userId: string
     ): Promise<boolean> {
         const refreshTokenFromStore = await this.cache.get(`${userId}`)
         return refreshTokenFromRequest === refreshTokenFromStore

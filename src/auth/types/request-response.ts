@@ -9,7 +9,7 @@ export interface Response extends ExpressResponse {
 }
 
 export type RequestResponseUser = {
-    id: number
+    id: string
     email: string
     username: string
     isAdmin: boolean

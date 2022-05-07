@@ -6,6 +6,6 @@ export class CreateChatDto {
         name: string
 
     @IsArray()
-        chattersIds: number[]
+        chattersIds: string[]
 
 }

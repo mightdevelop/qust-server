@@ -1,5 +1,5 @@
 import { RoleCategoryPermissionsList } from 'src/roles/types/permissions/category-permissions'
-import { RolePermissionsList } from 'src/roles/types/permissions/permissions'
+import { RolePermissionsListClass } from 'src/roles/types/permissions/role-permissions-list.class'
 import { RoleTextChannelPermissionsList } from 'src/roles/types/permissions/text-channel-permissions'
 
 
@@ -10,7 +10,7 @@ export class GroupLayout {
 
 class RoleLayout {
     name: string
-    permissions?: Partial<RolePermissionsList>
+    permissions?: Partial<RolePermissionsListClass>
 }
 
 class CategoryLayout {

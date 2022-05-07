@@ -1,11 +1,11 @@
-import { IsNumber } from 'class-validator'
+import { IsUUID } from 'class-validator'
 
 export class CreateDialogueDto {
 
-    @IsNumber()
-        firstChatterId: number
+    @IsUUID()
+        firstChatterId: string
 
-    @IsNumber()
-        secondChatterId: number
+    @IsUUID()
+        secondChatterId: string
 
 }

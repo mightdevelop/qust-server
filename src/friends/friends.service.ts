@@ -15,8 +15,8 @@ export class FriendsService {
     ) {}
 
     async getUserFriendColumn(
-        friendId: number,
-        userId: number
+        friendId: string,
+        userId: string
     ): Promise<Friend> {
         const friend: User = await this.usersService.getUserById(friendId)
         if (!friend)
@@ -28,8 +28,8 @@ export class FriendsService {
     }
 
     async friendshipRequest(
-        friendId: number,
-        userId: number
+        friendId: string,
+        userId: string
     ): Promise<void> {
         if (friendId === userId)
             throw new BadRequestException({ message: 'You can`t request friendship from yourself' })
@@ -56,8 +56,8 @@ export class FriendsService {
     }
 
     async cancelFriendshipRequest(
-        friendId: number,
-        userId: number
+        friendId: string,
+        userId: string
     ): Promise<void> {
         const request: Friend = await this.userFriendsRepository.findOne(
             { where: { userId, friendId, status: FriendRequestStatus.REQUEST } }
@@ -69,8 +69,8 @@ export class FriendsService {
     }
 
     async responseToFriendshipRequest(
-        requestedUserId: number,
-        respondingUserId: number,
+        requestedUserId: string,
+        respondingUserId: string,
         isConfirm: boolean
     ): Promise<void> {
         const friendColumn: Friend = await this.userFriendsRepository.findOne({ where: {
@@ -94,8 +94,8 @@ export class FriendsService {
     }
 
     async removeFriend(
-        friendId: number,
-        userId: number
+        friendId: string,
+        userId: string
     ): Promise<void> {
         const isFriend = !!await this.userFriendsRepository.findOne( { where: { userId, friendId } })
         if (!isFriend)

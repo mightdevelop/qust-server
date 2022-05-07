@@ -6,11 +6,11 @@ import { MessageContent } from './message-content.model'
 export class Message extends Model<Message> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        userId: number
+        userId: string
 
     @HasOne(() => MessageContent, { onDelete: 'cascade' })
         content: MessageContent

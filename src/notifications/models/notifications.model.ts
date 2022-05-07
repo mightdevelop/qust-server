@@ -6,11 +6,11 @@ import { User } from 'src/users/models/users.model'
 export class Notification extends Model<Notification> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        userId: number
+        userId: string
 
     @Column({ type: DataType.STRING, allowNull: false })
         body: string

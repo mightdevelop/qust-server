@@ -24,7 +24,7 @@ export class UsersService {
     }
 
     async getUserById(
-        authorId: number
+        authorId: string
     ): Promise<User> {
         const user: User = await this.userRepository.findByPk(authorId)
         return user
@@ -44,9 +44,9 @@ export class UsersService {
         return user
     }
 
-    async getChattersByChatId(chatId: number): Promise<User[]> {
+    async getChattersByChatId(chatId: string): Promise<User[]> {
         const chatUserColumns: ChatUser[] = await this.chatUserRepository.findAll({ where: { chatId } })
-        const chattersIds: {id: number}[] = chatUserColumns.map(column => {
+        const chattersIds: {id: string}[] = chatUserColumns.map(column => {
             return { id: column.userId }
         })
         const chatters: User[] = await this.userRepository.findAll({
@@ -56,12 +56,12 @@ export class UsersService {
     }
 
     async getFriendsByUserId(
-        userId: number
+        userId: string
     ): Promise<User[]> {
         const userFriendColumns: Friend[] = await this.userFriendsRepository.findAll(
             { where: { userId, status: FriendRequestStatus.CONFIRM } }
         )
-        const friendsIds: {id: number}[] = userFriendColumns.map(column => {
+        const friendsIds: {id: string}[] = userFriendColumns.map(column => {
             return { id: column.userId }
         })
         const friends: User[] = await this.userRepository.findAll({
@@ -78,7 +78,7 @@ export class UsersService {
     }
 
     async updateUser(
-        userId: number,
+        userId: string,
         dto: UpdateUserDto
     ): Promise<User> {
         const user: User = await this.userRepository.findByPk(userId)
@@ -87,7 +87,7 @@ export class UsersService {
     }
 
     async deleteUser(
-        authorId: number
+        authorId: string
     ): Promise<User> {
         const user: User = await this.userRepository.findByPk(authorId)
         await this.userRepository.destroy({ where: { id: authorId } })

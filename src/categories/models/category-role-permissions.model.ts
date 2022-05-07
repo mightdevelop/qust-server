@@ -7,18 +7,18 @@ import { Category } from './categories.model'
 export class CategoryRolePermissions extends Model<CategoryRolePermissions> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Role)
-        roleId: number
+        roleId: string
 
     @BelongsTo(() => Role)
         role: Role
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Category)
-        categoryId: number
+        categoryId: string
 
     @BelongsTo(() => Category)
         category: Category

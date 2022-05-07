@@ -1,4 +1,4 @@
-import { IsHexColor, IsNumber, IsString } from 'class-validator'
+import { IsHexColor, IsUUID, IsString } from 'class-validator'
 
 export class CreateRoleDto {
 
@@ -6,9 +6,9 @@ export class CreateRoleDto {
         name: string
 
     @IsHexColor()
-        color: string
+        color?: string
 
-    @IsNumber()
-        groupId: number
+    @IsUUID()
+        groupId: string
 
 }

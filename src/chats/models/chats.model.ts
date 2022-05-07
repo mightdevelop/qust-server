@@ -9,7 +9,7 @@ import { ChatUser } from './chat-user.model'
 export class Chat extends Model<Chat> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.STRING, allowNull: false })
         name: string

@@ -14,8 +14,8 @@ export class TextChannelsService {
     //         name: dto.name, chatType: ChatType.chat
     //     })
     //     const arrayToCreateChatUserColumns: {
-    //         chatId: number,
-    //         userId: number
+    //         chatId: string,
+    //         userId: string
     //     }[] = dto.chattersIds.map(chatterId => {
     //         return {
     //             chatId: chat.id,
@@ -36,7 +36,7 @@ export class TextChannelsService {
     //     return chat
     // }
 
-    // async deleteChat(chatId: number): Promise<Chat> {
+    // async deleteChat(chatId: string): Promise<Chat> {
     //     const chat: Chat = await this.chatRepository.findByPk(chatId)
     //     if (!chat)
     //         throw new NotFoundException({ message: 'Chat not found' })
@@ -62,8 +62,8 @@ export class TextChannelsService {
     //     if (!chat)
     //         throw new NotFoundException({ message: 'Chat not found' })
     //     const arrayToCreateChatUserColumns: {
-    //         chatId: number,
-    //         userId: number
+    //         chatId: string,
+    //         userId: string
     //     }[] = dto.chattersIds.map(chatterId => {
     //         return {
     //             chatId: chat.id,

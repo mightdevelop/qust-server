@@ -8,7 +8,7 @@ import { Role } from 'src/roles/models/roles.model'
 export class User extends Model<User> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.STRING, allowNull: false })
         username: string

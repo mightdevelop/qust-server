@@ -61,8 +61,8 @@ export class ChatsController {
     @Post('/:id')
     @UseGuards(JwtAuthGuard)
     async addUsersToChat(
-        @Param('id') chatId: number,
-        @Body() { chattersIds }: { chattersIds: number[] },
+        @Param('id') chatId: string,
+        @Body() { chattersIds }: { chattersIds: string[] },
         @CurrentUser() user: RequestResponseUser,
     ): Promise<Chat> {
         const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
@@ -83,7 +83,7 @@ export class ChatsController {
     @Post('/:id/messages')
     @UseGuards(JwtAuthGuard)
     async sendMessageToChat(
-        @Param('id') chatId: number,
+        @Param('id') chatId: string,
         @CurrentUser() user: RequestResponseUser,
         @Body() { text }: {text: string}
     ): Promise<Message> {
@@ -103,7 +103,7 @@ export class ChatsController {
     @Get('/:id/messages')
     @UseGuards(JwtAuthGuard)
     async getMessagesFromChat(
-        @Param('id') chatId: number,
+        @Param('id') chatId: string,
         @CurrentUser() user: RequestResponseUser
     ): Promise<Message[]> {
         if (!isUserChatParticipant(user.id, chatId))

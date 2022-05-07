@@ -5,7 +5,7 @@ import { Message } from './messages.model'
 export class MessageContent extends Model<MessageContent> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.STRING, allowNull: true })
         text: string
@@ -15,7 +15,7 @@ export class MessageContent extends Model<MessageContent> {
 
     @Column({ type: DataType.UUID, unique: true, allowNull: false })
     @ForeignKey(() => Message)
-        messageId: number
+        messageId: string
 
 }
 

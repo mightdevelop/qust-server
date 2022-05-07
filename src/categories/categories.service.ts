@@ -25,7 +25,7 @@ export class CategoriesService {
         return category
     }
 
-    async deleteCategory(categoryId: number): Promise<Category> {
+    async deleteCategory(categoryId: string): Promise<Category> {
         const category: Category = await this.categoryRepository.findByPk(categoryId)
         if (!category)
             throw new NotFoundException({ message: 'Category not found' })

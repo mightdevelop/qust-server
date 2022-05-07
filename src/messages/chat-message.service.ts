@@ -14,7 +14,7 @@ export class ChatMessageService {
         @InjectModel(ChatMessage) private chatMessageRepository: typeof ChatMessage,
     ) {}
 
-    async getChatMessageColumn(messageId: number): Promise<ChatMessage> {
+    async getChatMessageColumn(messageId: string): Promise<ChatMessage> {
         const column: ChatMessage = await this.chatMessageRepository.findOne({ where: { messageId } })
         return column
     }

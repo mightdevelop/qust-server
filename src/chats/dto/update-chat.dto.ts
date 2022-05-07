@@ -1,9 +1,9 @@
-import { IsNumber, IsString } from 'class-validator'
+import { IsUUID, IsString } from 'class-validator'
 
 export class UpdateChatDto {
 
-    @IsNumber()
-        chatId: number
+    @IsUUID()
+        chatId: string
 
     @IsString()
         name: string

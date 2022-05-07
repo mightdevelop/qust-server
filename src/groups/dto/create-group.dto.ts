@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsUUID, IsOptional, IsString } from 'class-validator'
 import { GroupLayoutName } from 'src/groups/types/group-layout-names.enum'
 
 export class CreateGroupDto {
@@ -6,8 +6,8 @@ export class CreateGroupDto {
     @IsString()
         name: string
 
-    @IsNumber()
-        ownerId: number
+    @IsUUID()
+        ownerId: string
 
     @IsOptional()
         layout?: GroupLayoutName

@@ -10,7 +10,7 @@ import { RolePermissions } from './role-permissions.model'
 export class Role extends Model<Role> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.STRING, allowNull: false, defaultValue: 'new role' })
         name: string
@@ -20,7 +20,7 @@ export class Role extends Model<Role> {
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Group)
-        groupId: number
+        groupId: string
 
     @BelongsTo(() => Group)
         group: Group

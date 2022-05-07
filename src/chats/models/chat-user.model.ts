@@ -6,15 +6,15 @@ import { Chat } from './chats.model'
 export class ChatUser extends Model<ChatUser> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        userId: number
+        userId: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Chat)
-        chatId: number
+        chatId: string
 
 }
 

@@ -18,12 +18,12 @@ export class ChatsService {
         @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
     ) {}
 
-    async getChatById(chatId: number): Promise<Chat> {
+    async getChatById(chatId: string): Promise<Chat> {
         const chat: Chat = await this.chatRepository.findByPk(chatId)
         return chat
     }
 
-    async getMessagesFromChat(chatId: number): Promise<Message[]> {
+    async getMessagesFromChat(chatId: string): Promise<Message[]> {
         const chat: Chat = await this.chatRepository.findByPk(chatId, { include: Message })
         return chat.messages
     }
@@ -33,8 +33,8 @@ export class ChatsService {
             name: dto.name, chatType: ChatType.chat
         })
         const arrayToCreateChatUserColumns: {
-            chatId: number,
-            userId: number
+            chatId: string,
+            userId: string
         }[] = dto.chattersIds.map(chatterId => {
             return {
                 chatId: chat.id,
@@ -55,7 +55,7 @@ export class ChatsService {
         return chat
     }
 
-    async deleteChat(chatId: number): Promise<Chat> {
+    async deleteChat(chatId: string): Promise<Chat> {
         const chat: Chat = await this.chatRepository.findByPk(chatId)
         if (!chat)
             throw new NotFoundException({ message: 'Chat not found' })
@@ -81,8 +81,8 @@ export class ChatsService {
         if (!chat)
             throw new NotFoundException({ message: 'Chat not found' })
         const arrayToCreateChatUserColumns: {
-            chatId: number,
-            userId: number
+            chatId: string,
+            userId: string
         }[] = dto.chattersIds.map(chatterId => {
             return {
                 chatId: chat.id,

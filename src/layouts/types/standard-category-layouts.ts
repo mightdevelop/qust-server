@@ -1,4 +1,4 @@
-import { PermissionLevel } from 'src/roles/types/permission-level'
+import { ForcedPermissionLevel, PermissionLevel } from 'src/roles/types/permission-level'
 import { GroupLayout } from './group-layout.class'
 
 export const StandardGroupLayouts: { [key:string]: GroupLayout } = {
@@ -7,10 +7,10 @@ export const StandardGroupLayouts: { [key:string]: GroupLayout } = {
             {
                 name: 'moderator',
                 permissions: {
-                    deleteMessages: PermissionLevel.ALOWED,
-                    banUsers: PermissionLevel.ALOWED,
-                    manageTextChannels: PermissionLevel.ALOWED,
-                    deafenMembers: PermissionLevel.ALOWED,
+                    deleteMessages: ForcedPermissionLevel.ALOWED,
+                    banUsers: ForcedPermissionLevel.ALOWED,
+                    manageTextChannels: ForcedPermissionLevel.ALOWED,
+                    deafenMembers: ForcedPermissionLevel.ALOWED,
                 }
             }
         ],

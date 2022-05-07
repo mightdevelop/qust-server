@@ -1,11 +1,11 @@
-import { IsArray, IsNumber } from 'class-validator'
+import { IsArray, IsUUID } from 'class-validator'
 
 export class AddUsersToChatDto {
 
-    @IsNumber()
-        chatId: number
+    @IsUUID()
+        chatId: string
 
     @IsArray()
-        chattersIds: number[]
+        chattersIds: string[]
 
 }

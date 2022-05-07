@@ -6,15 +6,15 @@ import { Group } from './groups.model'
 export class GroupUser extends Model<GroupUser> {
 
     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-        id: number
+        id: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => Group)
-        groupId: number
+        groupId: string
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => User)
-        userId: number
+        userId: string
 
 }
 

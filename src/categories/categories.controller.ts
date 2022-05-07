@@ -45,7 +45,7 @@ export class CategoriesController {
     // @Post('/:id')
     // @UseGuards(JwtAuthGuard)
     // async addUsersToChat(
-    //     @Param('id') chatId: number,
+    //     @Param('id') chatId: string,
     //     @Body() { chattersIds }: { chattersIds: number[] },
     //     @CurrentUser() user: RequestResponseUser,
     // ): Promise<Chat> {
@@ -68,7 +68,7 @@ export class CategoriesController {
     // @Post('/:id/messages')
     // @UseGuards(JwtAuthGuard)
     // async sendMessageToChat(
-    //     @Param('id') chatId: number,
+    //     @Param('id') chatId: string,
     //     @CurrentUser() user: RequestResponseUser,
     //     @Body() dto: CreateMessageContentDto
     // ): Promise<Message> {
@@ -85,7 +85,7 @@ export class CategoriesController {
     // @Get('/:id/messages')
     // @UseGuards(JwtAuthGuard)
     // async getMessagesWithContentFromChat(
-    //     @Param('id') chatId: number,
+    //     @Param('id') chatId: string,
     //     @CurrentUser() user: RequestResponseUser
     // ): Promise<Message[]> {
     //     isUserChatParticipantValidate(user.id, chatId)

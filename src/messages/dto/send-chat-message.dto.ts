@@ -1,17 +1,17 @@
-import { IsNumber, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsUUID, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class SendChatMessageDto {
 
-    @IsNumber()
-        userId: number
+    @IsUUID()
+        userId: string
 
     @IsString()
     @MinLength(4)
     @MaxLength(25)
         username: string
 
-    @IsNumber()
-        chatId: number
+    @IsUUID()
+        chatId: string
 
     @IsString()
         text: string

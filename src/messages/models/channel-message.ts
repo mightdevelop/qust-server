@@ -6,15 +6,15 @@
 // export class TextChannelMessage extends Model<TextChannelMessage> {
 
 //     @Column({ type: DataType.UUID, unique: true, primaryKey: true, defaultValue: DataType.UUIDV4 })
-//         id: number
+//         id: string
 
 //     @Column({ type: DataType.INTEGER, allowNull: false })
 //     @ForeignKey(() => Message)
-//         messageId: number
+//         messageId: string
 
 //     @Column({ type: DataType.INTEGER, allowNull: false })
 //     @ForeignKey(() => TextChannel)
-//         channelId: number
+//         channelId: string
 
 // }
 

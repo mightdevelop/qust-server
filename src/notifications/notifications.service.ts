@@ -28,7 +28,7 @@ export class NotificationsService {
     }
 
     async sendFriendshipRequestNotification(
-        userId: number,
+        userId: string,
         { requesterUsername }: SendFriendshipRequestNotificationDto
     ): Promise<Notification> {
         const notification: Notification = await this.notificationRepository.create({

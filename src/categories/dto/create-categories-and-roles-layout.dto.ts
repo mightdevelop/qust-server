@@ -1,11 +1,11 @@
 import { Type } from 'class-transformer'
-import { IsNumber } from 'class-validator'
+import { IsUUID } from 'class-validator'
 import { GroupLayout } from '../../layouts/types/group-layout.class'
 
 export class CreateCategoriesAndRolesByLayoutsDto {
 
-    @IsNumber()
-        groupId: number
+    @IsUUID()
+        groupId: string
 
     @Type(() => GroupLayout)
         groupLayout: GroupLayout

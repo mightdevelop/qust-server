@@ -1,6 +1,6 @@
 const StandartBots = {
     CHAT_BOT: {
-        id: 999,
+        id: '999',
         username: 'chat-bot'
     }
 }

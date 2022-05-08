@@ -8,28 +8,28 @@ export class GroupLayout {
     categoryLayouts: CategoryLayout[]
 }
 
-class RoleLayout {
+export class RoleLayout {
     name: string
     permissions?: Partial<RolePermissionsListClass>
 }
 
-class CategoryLayout {
+export class CategoryLayout {
     name: string
     permissionsOfRoles?: CategoryRolePermissionsLayout[]
     channelLayouts: TextChannelLayout[]
 }
 
-class TextChannelLayout {
+export class TextChannelLayout {
     name: string
     permissionsOfRoles?: TextChannelRolePermissionsLayout[]
 }
 
 
-class CategoryRolePermissionsLayout {
+export class CategoryRolePermissionsLayout {
     roleName: string
     permissions: Partial<RoleCategoryPermissionsList>
 }
-class TextChannelRolePermissionsLayout {
+export class TextChannelRolePermissionsLayout {
     roleName: string
     permissions: Partial<RoleTextChannelPermissionsList>
 }

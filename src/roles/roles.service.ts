@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Op } from 'sequelize'
+import { RolePermissions } from 'src/permissions/models/role-permissions.model'
+import { PermissionsService } from 'src/permissions/permissions.service'
 import { CreateRoleDto } from './dto/create-role.dto'
 import { DeleteRoleDto } from './dto/delete-role.dto'
 import { UpdateRoleDto } from './dto/update-role.dto'
-import { RolePermissions } from './models/role-permissions.model'
 import { RoleUser } from './models/role-user.model'
 import { Role } from './models/roles.model'
 
@@ -13,6 +14,7 @@ import { Role } from './models/roles.model'
 export class RolesService {
 
     constructor(
+        @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
         @InjectModel(Role) private roleRepository: typeof Role,
         @InjectModel(RoleUser) private roleUserRepository: typeof RoleUser,
     ) {}
@@ -22,13 +24,13 @@ export class RolesService {
         return role
     }
 
-    async getUserRolesByGroupId(userId: string, groupId: string, include?: boolean): Promise<Role[]> {
-        // const groupRoles: Role[] = await this.roleRepository.findAll({
-        //     where: { groupId },
-        //     include: include ? RolePermissions: 'none'
-        // })
+    async getUserRolesByGroupId(
+        userId: string,
+        groupId: string,
+        includePermissions?: boolean
+    ): Promise<Role[]> {
         const groupRoles: Role[] =
-            include
+            includePermissions
                 ?
                 await this.roleRepository.findAll({ where: { groupId }, include: RolePermissions })
                 :
@@ -49,6 +51,9 @@ export class RolesService {
 
     async createRole(dto: CreateRoleDto): Promise<Role> {
         const role: Role = await this.roleRepository.create(dto)
+        const permissions: RolePermissions =
+            await this.permissionsService.createDefaultRolePermissions(role.id)
+        await role.$set('permissions', permissions)
         return role
     }
 

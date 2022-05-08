@@ -1,19 +1,17 @@
 import { Body, Controller, Delete, NotFoundException, Param, Put, UseGuards } from '@nestjs/common'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { RequiredPermissions } from './decorators/required-permissions.decorator'
-import { TextChannelPermissionsGuard } from './guards/text-channel-permissions.guard'
+import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
+import { TextChannelPermissionsGuard } from 'src/permissions/guards/text-channel-permissions.guard'
+import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
 import { Role } from './models/roles.model'
-import { PermissionsService } from './permissions.service'
 import { RolesService } from './roles.service'
-import { RolePermissionsEnum } from './types/permissions/role-permissions.enum'
 
 
 @Controller('/roles')
 export class RolesController {
 
     constructor(
-        private rolesService: RolesService,
-        private permissionsService: PermissionsService,
+        private rolesService: RolesService
     ) {}
 
     @Put('/:id')

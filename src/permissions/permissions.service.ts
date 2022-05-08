@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { GroupsService } from 'src/groups/groups.service'
 import { Group } from 'src/groups/models/groups.model'
+import { Role } from 'src/roles/models/roles.model'
+import { RolesService } from 'src/roles/roles.service'
 import { UserPermissionsInGroupDto } from './dto/user-group-permissions.dto'
 import { UserPermissionsInTextChannelDto } from './dto/user-text-channel-permissions.dto'
 import { RolePermissions } from './models/role-permissions.model'
-import { Role } from './models/roles.model'
-import { RolesService } from './roles.service'
 import { ForcedPermissionLevel } from './types/permission-level'
 import { DefaultRolePermissions } from './types/permissions/default-permissions'
 import { RolePermissionsEnum } from './types/permissions/role-permissions.enum'
@@ -16,8 +16,8 @@ import { RolePermissionsEnum } from './types/permissions/role-permissions.enum'
 export class PermissionsService {
 
     constructor(
-        private rolesService: RolesService,
-        private groupsService: GroupsService,
+        @Inject(forwardRef(() => RolesService)) private rolesService: RolesService,
+        @Inject(forwardRef(() => GroupsService)) private groupsService: GroupsService,
         @InjectModel(RolePermissions) private permissionsRepository: typeof RolePermissions,
     ) {}
 

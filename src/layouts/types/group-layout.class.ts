@@ -1,6 +1,6 @@
-import { RoleCategoryPermissionsList } from 'src/roles/types/permissions/category-permissions'
-import { RolePermissionsListClass } from 'src/roles/types/permissions/role-permissions-list.class'
-import { RoleTextChannelPermissionsList } from 'src/roles/types/permissions/text-channel-permissions'
+import { RoleCategoryPermissionsList } from 'src/permissions/types/permissions/category-permissions'
+import { RolePermissionsListClass } from 'src/permissions/types/permissions/role-permissions-list.class'
+import { RoleTextChannelPermissionsList } from 'src/permissions/types/permissions/text-channel-permissions'
 
 
 export class GroupLayout {

@@ -1,4 +1,4 @@
-import { ForcedPermissionLevel, PermissionLevel } from 'src/roles/types/permission-level'
+import { ForcedPermissionLevel, PermissionLevel } from 'src/permissions/types/permission-level'
 import { GroupLayout } from './group-layout.class'
 
 export const StandardGroupLayouts: { [key:string]: GroupLayout } = {

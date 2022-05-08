@@ -27,7 +27,9 @@ import { CategoriesModule } from './categories/categories.module'
 import { GroupsModule } from './groups/groups.module'
 import { Friend } from './friends/models/friends.model'
 import { FriendsModule } from './friends/friends.module'
-import { RolePermissions } from './roles/models/role-permissions.model'
+import { RolePermissions } from './permissions/models/role-permissions.model'
+import { PermissionsModule } from './permissions/permissions.module'
+import { RolesModule } from './roles/roles.module'
 
 
 @Module({
@@ -64,13 +66,15 @@ import { RolePermissions } from './roles/models/role-permissions.model'
             autoLoadModels: true,
             retryAttempts: 0
         }),
-        forwardRef(() => AuthModule),
         forwardRef(() => UsersModule),
+        forwardRef(() => AuthModule),
         forwardRef(() => FriendsModule),
         forwardRef(() => NotificationsModule),
         forwardRef(() => MessagesModule),
         forwardRef(() => ChatsModule),
         forwardRef(() => GroupsModule),
+        forwardRef(() => RolesModule),
+        forwardRef(() => PermissionsModule),
         forwardRef(() => CategoriesModule),
         forwardRef(() => TextChannelsModule),
     ]

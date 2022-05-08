@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common'
+import { Injectable, CanActivate, ExecutionContext, forwardRef, Inject } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { Request } from 'src/auth/types/request-response'
 import { PERMISSIONS_KEY } from '../decorators/required-permissions.decorator'
@@ -10,7 +10,7 @@ export class GroupPermissionsGuard implements CanActivate {
 
     constructor(
         private reflector: Reflector,
-        private permissionsService: PermissionsService,
+        @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

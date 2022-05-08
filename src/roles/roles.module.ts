@@ -4,21 +4,18 @@ import { RolesController } from './roles.controller'
 import { RolesService } from './roles.service'
 import { Role } from './models/roles.model'
 import { RoleUser } from './models/role-user.model'
-import { RolePermissions } from './models/role-permissions.model'
-import { PermissionsService } from './permissions.service'
-import { GroupsModule } from 'src/groups/groups.module'
+import { PermissionsModule } from 'src/permissions/permissions.module'
 
 @Module({
     controllers: [ RolesController ],
-    providers: [ RolesService, PermissionsService ],
+    providers: [ RolesService ],
     imports: [
         SequelizeModule.forFeature([
             Role,
             RoleUser,
-            RolePermissions,
         ]),
-        forwardRef(() => GroupsModule)
+        forwardRef(() => PermissionsModule)
     ],
-    exports: [ RolesService, PermissionsService ]
+    exports: [ RolesService ]
 })
 export class RolesModule {}

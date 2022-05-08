@@ -1,7 +1,7 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
+import { Role } from 'src/roles/models/roles.model'
 import { ForcedPermissionLevel } from '../types/permission-level'
 import { DefaultRolePermissions } from '../types/permissions/default-permissions'
-import { Role } from './roles.model'
 
 @Table({ tableName: 'role-permissions' })
 export class RolePermissions extends Model<RolePermissions> {

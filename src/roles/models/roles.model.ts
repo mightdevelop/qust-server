@@ -4,7 +4,7 @@ import { RoleUser } from './role-user.model'
 import { CategoryRolePermissions } from 'src/categories/models/category-role-permissions.model'
 import { TextChannelRolePermissions } from 'src/text-channels/models/text-channel-role-permissions.model'
 import { User } from 'src/users/models/users.model'
-import { RolePermissions } from './role-permissions.model'
+import { RolePermissions } from 'src/permissions/models/role-permissions.model'
 
 @Table({ tableName: 'roles' })
 export class Role extends Model<Role> {

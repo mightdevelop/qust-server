@@ -54,10 +54,10 @@ export class FriendsController {
         return requests
     }
 
-    @Post('/:id')
+    @Post('/:friendId')
     @UseGuards(JwtAuthGuard)
     async friendshipRequest(
-        @Param('id') friendId: string,
+        @Param('friendId') friendId: string,
         @CurrentUser() user: RequestResponseUser,
         @Body('cancel') cancel: boolean
     ): Promise<string> {
@@ -72,10 +72,10 @@ export class FriendsController {
         return 'Friendship requested'
     }
 
-    @Put('/:id')
+    @Put('/:requestedUserId')
     @UseGuards(JwtAuthGuard)
     async responseToFriendshipRequest(
-        @Param('id') requestedUserId: string,
+        @Param('requestedUserId') requestedUserId: string,
         @CurrentUser() user: RequestResponseUser,
         @Body() { isConfirm }: {isConfirm: boolean}
     ): Promise<string> {
@@ -84,10 +84,10 @@ export class FriendsController {
         return 'Friendship comfirmed'
     }
 
-    @Delete('/:id')
+    @Delete('/:friendId')
     @UseGuards(JwtAuthGuard)
     async removeFriend(
-        @Param('id') friendId: string,
+        @Param('friendId') friendId: string,
         @CurrentUser() user: RequestResponseUser,
     ): Promise<string> {
         const userFriendColumn: Friend = await this.friendsService.getUserFriendColumn(friendId, user.id)

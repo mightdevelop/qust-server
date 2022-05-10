@@ -24,9 +24,12 @@ export class LayoutsService {
             private channelPermissionsRepository: typeof TextChannelRolePermissions,
     ) {}
 
-    async createCategoriesAndTextChannelsByLayout(
+    async createRolesCategoriesAndTextChannelsByLayout(
         { groupId, groupLayout }: CreateCategoriesAndRolesByLayoutsDto
     ): Promise<void> {
+
+        if (!groupLayout.roleLayouts.find(layout => layout.name === 'everyone'))
+            groupLayout.roleLayouts.push({ name: 'everyone' })
 
         const roles: Role[] = await this.createRolesByRoleLayouts(
             groupLayout.roleLayouts,
@@ -47,11 +50,11 @@ export class LayoutsService {
             categories
         )
 
-        const channels: TextChannel[] = await this.createChannelByCategoryLayouts(
+        const channels: TextChannel[] = await this.createChannelsByCategoryLayouts(
             groupLayout.categoryLayouts,
             categories
         )
-        await this.createRoleChannelPermissionsByChannelLayouts(
+        await this.createRoleTextChannelPermissionsByCategoryLayouts(
             groupLayout.categoryLayouts,
             roles,
             channels
@@ -65,12 +68,10 @@ export class LayoutsService {
         groupId: string
     ): Promise<Role[]> {
         const roles: Role[] =
-            await this.roleRepository.bulkCreate(roleLayouts.map(roleLayout => {
-                return {
-                    name: roleLayout.name,
-                    groupId
-                }
-            }))
+            await this.roleRepository.bulkCreate(roleLayouts.map(roleLayout => ({
+                name: roleLayout.name,
+                groupId
+            })))
         return roles
     }
 
@@ -79,9 +80,9 @@ export class LayoutsService {
         roles: Role[]
     ): Promise<RolePermissions[]> {
         const permissionsColumns: RolePermissions[] =
-            await this.rolePermissionsRepository.bulkCreate(roleLayouts.map(roleLayout => {
-                return { roleId: roles.find(role => role.name === roleLayout.name).id }
-            }), { validate: true })
+            await this.rolePermissionsRepository.bulkCreate(roleLayouts.map(roleLayout => (
+                { roleId: roles.find(role => role.name === roleLayout.name).id }
+            )), { validate: true })
         return permissionsColumns
     }
 
@@ -90,12 +91,10 @@ export class LayoutsService {
         groupId: string
     ): Promise<Category[]> {
         const categories: Category[] =
-            await this.categoryRepository.bulkCreate(categoryLayouts.map(categoryLayout => {
-                return {
-                    name: categoryLayout.name,
-                    groupId
-                }
-            }), { validate: true })
+            await this.categoryRepository.bulkCreate(categoryLayouts.map(categoryLayout => ({
+                name: categoryLayout.name,
+                groupId
+            })), { validate: true })
         return categories
     }
 
@@ -107,37 +106,33 @@ export class LayoutsService {
         const permissionsColumns: CategoryRolePermissions[] =
             await this.categoryPermissionsRepository.bulkCreate([].concat(
                 ...categoryLayouts.map((categoryLayout, categoryIndex) => {
-                    return categoryLayout.permissionsOfRoles?.map(roleWithPermissions => {
-                        return {
-                            roleId: roles.find(role => role.name === roleWithPermissions.roleName).id,
-                            categoryId: categories[categoryIndex].id,
-                            ...roleWithPermissions.permissions
-                        }
-                    })
+                    return categoryLayout.permissionsOfRoles?.map(roleWithPermissions => ({
+                        roleId: roles.find(role => role.name === roleWithPermissions.roleName).id,
+                        categoryId: categories[categoryIndex].id,
+                        ...roleWithPermissions.permissions
+                    }))
                 })
             ).filter(value => value), { validate: true })
         return permissionsColumns
     }
 
-    private async createChannelByCategoryLayouts(
+    private async createChannelsByCategoryLayouts(
         categoryLayouts: CategoryLayout[],
         categories: Category[]
     ): Promise<TextChannel[]> {
         const channels: TextChannel[] =
             await this.textChannelRepository.bulkCreate([].concat(
                 ...categoryLayouts.map((categoryLayout, categoryIndex) => {
-                    return categoryLayout.channelLayouts.map(channelLayout => {
-                        return {
-                            name: channelLayout.name,
-                            categoryId: categories[categoryIndex].id
-                        }
-                    })
+                    return categoryLayout.channelLayouts.map(channelLayout => ({
+                        name: channelLayout.name,
+                        categoryId: categories[categoryIndex].id
+                    }))
                 })
             ), { validate: true })
         return channels
     }
 
-    private async createRoleChannelPermissionsByChannelLayouts(
+    private async createRoleTextChannelPermissionsByCategoryLayouts(
         categoryLayouts: CategoryLayout[],
         roles: Role[],
         channels: TextChannel[]
@@ -146,13 +141,11 @@ export class LayoutsService {
             await this.channelPermissionsRepository.bulkCreate([].concat(...[].concat(
                 ...categoryLayouts.map(categoryLayout => {
                     return categoryLayout.channelLayouts.map((channelLayout, channelIndex) => {
-                        return channelLayout.permissionsOfRoles?.map(roleWithPermissions => {
-                            return {
-                                roleId: roles.find(role => role.name === roleWithPermissions.roleName).id,
-                                channelId: channels[channelIndex].id,
-                                ...roleWithPermissions.permissions
-                            }
-                        })
+                        return channelLayout.permissionsOfRoles?.map(roleWithPermissions => ({
+                            roleId: roles.find(role => role.name === roleWithPermissions.roleName).id,
+                            channelId: channels[channelIndex].id,
+                            ...roleWithPermissions.permissions
+                        }))
                     })
                 })
             ).filter(value => value)), { validate: true })

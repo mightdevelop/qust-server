@@ -1,77 +1,47 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { InjectModel } from '@nestjs/sequelize'
+import { CategoriesService } from 'src/categories/categories.service'
+import { Category } from 'src/categories/models/categories.model'
+import { CreateTextChannelDto } from './dto/create-text-channel.dto'
+import { DeleteTextChannelDto } from './dto/delete-text-channel.dto'
+import { UpdateTextChannelDto } from './dto/update-text-channel.dto'
+import { TextChannel } from './models/text-channels.model'
 
 
 @Injectable()
 export class TextChannelsService {
 
-    // constructor(
-    //     @InjectModel(Chat) private chatRepository: typeof Chat,
-    //     @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
-    // ) {}
+    constructor(
+        private categoriesService: CategoriesService,
+        @InjectModel(TextChannel) private channelRepository: typeof TextChannel,
+    ) {}
 
-    // async createChat(dto: CreateChatDto): Promise<Chat> {
-    //     const chat: Chat = await this.chatRepository.create({
-    //         name: dto.name, chatType: ChatType.chat
-    //     })
-    //     const arrayToCreateChatUserColumns: {
-    //         chatId: string,
-    //         userId: string
-    //     }[] = dto.chattersIds.map(chatterId => {
-    //         return {
-    //             chatId: chat.id,
-    //             userId: chatterId
-    //         }
-    //     })
-    //     await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns)
-    //     return chat
-    // }
+    async getTextChannelById(channelId: string): Promise<TextChannel> {
+        const channel: TextChannel = await this.channelRepository.findByPk(channelId)
+        return channel
+    }
 
-    // async updateChat(dto: UpdateChatDto): Promise<Chat> {
-    //     const chat: Chat = await this.chatRepository.findOne({
-    //         where: { id: dto.chatId, chatType: ChatType.chat }
-    //     })
-    //     if (!chat)
-    //         throw new NotFoundException({ message: 'Chat not found' })
-    //     await chat.update(dto)
-    //     return chat
-    // }
+    async getGroupIdByTextChannelId(channelId: string): Promise<string> {
+        const channel: TextChannel = await this.channelRepository.findByPk(channelId)
+        if (!channel)
+            throw new NotFoundException({ message: 'Text channel not found' })
+        const category: Category = await this.categoriesService.getCategoryById(channel.categoryId)
+        return category.groupId
+    }
 
-    // async deleteChat(chatId: string): Promise<Chat> {
-    //     const chat: Chat = await this.chatRepository.findByPk(chatId)
-    //     if (!chat)
-    //         throw new NotFoundException({ message: 'Chat not found' })
-    //     await this.chatUserRepository.destroy({ where: { chatId } })
-    //     return chat
-    // }
+    async createTextChannel(dto: CreateTextChannelDto): Promise<TextChannel> {
+        const channel: TextChannel = await this.channelRepository.create(dto)
+        return channel
+    }
 
-    // async createDialogue({ firstChatterId, secondChatterId }: CreateDialogueDto): Promise<Chat> {
-    //     const chat: Chat = await this.chatRepository.create({
-    //         name: `${firstChatterId} AND ${secondChatterId} DIALOGUE`, chatType: ChatType.dialogue
-    //     })
-    //     await this.chatUserRepository.create([
-    //         { chatId: chat.id, userId: firstChatterId },
-    //         { chatId: chat.id, userId: secondChatterId }
-    //     ])
-    //     return chat
-    // }
+    async updateTextChannel({ channel, name }: UpdateTextChannelDto): Promise<TextChannel> {
+        await channel.update({ name })
+        return channel
+    }
 
-    // async addUsersToChat(dto: AddUsersToChatDto): Promise<Chat> {
-    //     const chat: Chat = await this.chatRepository.findOne({
-    //         where: { id: dto.chatId, chatType: ChatType.chat }
-    //     })
-    //     if (!chat)
-    //         throw new NotFoundException({ message: 'Chat not found' })
-    //     const arrayToCreateChatUserColumns: {
-    //         chatId: string,
-    //         userId: string
-    //     }[] = dto.chattersIds.map(chatterId => {
-    //         return {
-    //             chatId: chat.id,
-    //             userId: chatterId
-    //         }
-    //     })
-    //     await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns)
-    //     return chat
-    // }
+    async deleteTextChannel({ channel }: DeleteTextChannelDto): Promise<TextChannel> {
+        await channel.destroy()
+        return channel
+    }
 
 }

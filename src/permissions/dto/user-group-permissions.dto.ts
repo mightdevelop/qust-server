@@ -10,6 +10,6 @@ export class UserPermissionsInGroupDto {
         groupId: string
 
     @IsArray()
-        permissions: RolePermissionsEnum[]
+        requiredPermissions: RolePermissionsEnum[]
 
 }

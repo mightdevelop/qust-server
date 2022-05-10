@@ -35,12 +35,10 @@ export class ChatsService {
         const arrayToCreateChatUserColumns: {
             chatId: string,
             userId: string
-        }[] = dto.chattersIds.map(chatterId => {
-            return {
-                chatId: chat.id,
-                userId: chatterId
-            }
-        })
+        }[] = dto.chattersIds.map(chatterId => ({
+            chatId: chat.id,
+            userId: chatterId
+        }))
         await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns, { validate: true })
         return chat
     }
@@ -83,12 +81,10 @@ export class ChatsService {
         const arrayToCreateChatUserColumns: {
             chatId: string,
             userId: string
-        }[] = dto.chattersIds.map(chatterId => {
-            return {
-                chatId: chat.id,
-                userId: chatterId
-            }
-        })
+        }[] = dto.chattersIds.map(chatterId => ({
+            chatId: chat.id,
+            userId: chatterId
+        }))
         await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns, { validate: true })
         return chat
     }

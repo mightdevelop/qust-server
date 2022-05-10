@@ -1,6 +1,6 @@
-import { PermissionLevel } from '../permission-level'
+import { PermissionLevel } from './permission-level'
 
-export class RoleTextChannelPermissionsList {
+export class RoleTextChannelPermissionsListClass {
     viewTextChannels: PermissionLevel
     readMessages: PermissionLevel
     writeMessages: PermissionLevel

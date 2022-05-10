@@ -36,16 +36,16 @@ export class RolesService {
                 :
                 await this.roleRepository.findAll({ where: { groupId } })
         const roleUserColumns: RoleUser[] = await this.roleUserRepository.findAll({ where: {
-            [Op.or]: groupRoles.map(role => {
-                return {
-                    userId,
-                    roleId: role.id
-                }
-            })
+            [Op.or]: groupRoles.map(role => ({
+                userId,
+                roleId: role.id
+            }))
         } })
         const userRoles: Role[] = await this.roleRepository.findAll({ where: {
-            [Op.or]: roleUserColumns.map(role => { return { roleId: role.id } }) }
+            [Op.or]: roleUserColumns.map(role => ({ roleId: role.id })) }
         })
+        const everyone: Role = await this.roleRepository.findOne({ where: { name: 'everyone' } })
+        userRoles.push(everyone)
         return userRoles
     }
 

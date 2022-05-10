@@ -1,11 +1,11 @@
 import { IsString, IsUUID } from 'class-validator'
 
-export class CreateCategoryDto {
+export class CreateTextChannelDto {
 
     @IsString()
         name: string
 
     @IsUUID()
-        groupId: string
+        categoryId: string
 
 }

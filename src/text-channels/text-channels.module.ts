@@ -5,6 +5,8 @@ import { TextChannelsController } from './text-channels.controller'
 import { TextChannelsService } from './text-channels.service'
 import { TextChannelRolePermissions } from './models/text-channel-role-permissions.model'
 import { TextChannel } from './models/text-channels.model'
+import { CategoriesModule } from 'src/categories/categories.module'
+import { PermissionsModule } from 'src/permissions/permissions.module'
 
 @Module({
     controllers: [ TextChannelsController ],
@@ -12,6 +14,8 @@ import { TextChannel } from './models/text-channels.model'
     imports: [
         SequelizeModule.forFeature([ TextChannel, TextChannelRolePermissions ]),
         MessagesModule,
+        CategoriesModule,
+        PermissionsModule
     ],
     exports: [ TextChannelsService ]
 })

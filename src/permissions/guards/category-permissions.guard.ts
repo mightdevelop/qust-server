@@ -6,7 +6,7 @@ import { PermissionsService } from '../permissions.service'
 import { RolePermissionsEnum } from '../types/permissions/role-permissions.enum'
 
 @Injectable()
-export class TextChannelPermissionsGuard implements CanActivate {
+export class CategoryPermissionsGuard implements CanActivate {
 
     constructor(
         private reflector: Reflector,
@@ -23,10 +23,9 @@ export class TextChannelPermissionsGuard implements CanActivate {
         )
         if (!requiredPermissions) return true
         const req: Request = context.switchToHttp().getRequest()
-        return await this.permissionsService.doesUserHavePermissionsInTextChannel({
+        return await this.permissionsService.doesUserCanManageCategory({
             userId: req.user.id,
-            channelId: req.params.channelId,
-            requiredPermissions
+            categoryId: req.params.categoryId
         })
     }
 }

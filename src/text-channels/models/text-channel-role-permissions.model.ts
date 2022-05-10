@@ -1,5 +1,5 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
-import { PermissionLevel } from 'src/permissions/types/permission-level'
+import { PermissionLevel } from 'src/permissions/types/permissions/permission-level'
 import { Role } from 'src/roles/models/roles.model'
 import { TextChannel } from './text-channels.model'
 

@@ -1,6 +1,6 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript'
 import { Role } from 'src/roles/models/roles.model'
-import { ForcedPermissionLevel } from '../types/permission-level'
+import { ForcedPermissionLevel } from '../types/permissions/permission-level'
 import { DefaultRolePermissions } from '../types/permissions/default-permissions'
 
 @Table({ tableName: 'role-permissions' })
@@ -24,19 +24,14 @@ export class RolePermissions extends Model<RolePermissions> {
         manageGroup: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
-        defaultValue: DefaultRolePermissions.manageTextChannels
-    })
-        manageTextChannels: ForcedPermissionLevel
-
-    @Column({ type: DataType.SMALLINT, allowNull: false,
-        defaultValue: DefaultRolePermissions.manageCategories
-    })
-        manageCategories: ForcedPermissionLevel
-
-    @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageRoles
     })
         manageRoles: ForcedPermissionLevel
+
+    @Column({ type: DataType.SMALLINT, allowNull: false,
+        defaultValue: DefaultRolePermissions.manageCategoriesAndChannels
+    })
+        manageCategoriesAndChannels: ForcedPermissionLevel
 
     @Column({ type: DataType.SMALLINT, allowNull: false,
         defaultValue: DefaultRolePermissions.manageEvents

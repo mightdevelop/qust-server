@@ -1,7 +1,6 @@
 export enum RolePermissionsEnum {
     manageGroup = 'manageGroup',
-    manageTextChannels = 'manageTextChannels',
-    manageCategories = 'manageCategories',
+    manageCategoriesAndChannels = 'manageCategoriesAndChannels',
     manageRoles = 'manageRoles',
     manageEvents = 'manageEvents',
     manageEmojis = 'manageEmojis',

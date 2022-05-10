@@ -1,4 +1,11 @@
-import { Controller } from '@nestjs/common'
+import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
+import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
+import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
+import { TextChannelPermissionsGuard } from 'src/permissions/guards/text-channel-permissions.guard'
+import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
+import { CreateTextChannelDto } from './dto/create-text-channel.dto'
+import { TextChannel } from './models/text-channels.model'
 import { TextChannelsService } from './text-channels.service'
 
 
@@ -9,88 +16,40 @@ export class TextChannelsController {
         private textChannelsService: TextChannelsService,
     ) {}
 
-    // @Post('/')
-    // @UseGuards(JwtAuthGuard)
-    // async createChat(
-    //     @Body() createChatDto: CreateChatDto,
-    //     @CurrentUser() user: RequestResponseUser
-    // ): Promise<Chat> {
-    //     const chat: Chat = await this.chatsService.createChat({
-    //         ...createChatDto, chattersIds: [ ...createChatDto.chattersIds, user.id ]
-    //     })
-    //     const chatters: User[] = await this.usersService.getChattersByChatId(chat.id)
-    //     const sendChatMessageDto: SendChatMessageDto = {
-    //         userId: StandartBots.CHAT_BOT.id,
-    //         username: StandartBots.CHAT_BOT.username,
-    //         chatId: chat.id,
-    //         content: {
-    //             text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-    //         }
-    //     }
-    //     await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
-    //     return chat
-    // }
+    @Post('/')
+    @RequiredPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
+    @UseGuards(JwtAuthGuard, TextChannelPermissionsGuard)
+    async createTextChannel(
+        @Body() dto: CreateTextChannelDto
+    ): Promise<TextChannel> {
+        const channel: TextChannel = await this.textChannelsService.createTextChannel(dto)
+        return channel
+    }
 
-    // @Put('/')
-    // @UseGuards(JwtAuthGuard)
-    // async updateChat(
-    //     @Body() dto: UpdateChatDto,
-    //     @CurrentUser() user: RequestResponseUser
-    // ): Promise<Chat> {
-    //     isUserChatParticipantValidate(user.id, dto.chatId)
-    //     const chat: Chat = await this.chatsService.updateChat(dto)
-    //     return chat
-    // }
+    @Put('/:channelId')
+    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    async updateTextChannel(
+        @Param('channelId') channelId: string,
+        @Body() { name }: { name: string }
+    ): Promise<TextChannel> {
+        const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        if (!channel)
+            throw new NotFoundException({ message: 'Text channel not found' })
+        const updatedChannel: TextChannel =
+            await this.textChannelsService.updateTextChannel({ name, channel })
+        return updatedChannel
+    }
 
-    // @Post('/:id')
-    // @UseGuards(JwtAuthGuard)
-    // async addUsersToChat(
-    //     @Param('id') chatId: string,
-    //     @Body() { chattersIds }: { chattersIds: number[] },
-    //     @CurrentUser() user: RequestResponseUser,
-    // ): Promise<Chat> {
-    //     const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
-    //     isUserChatParticipantValidate(user.id, chatId)
-    //     const chat: Chat = await this.chatsService.addUsersToChat(addUsersDto)
-    //     const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
-    //     const sendChatMessageDto: SendChatMessageDto = {
-    //         userId: StandartBots.CHAT_BOT.id,
-    //         username: StandartBots.CHAT_BOT.username,
-    //         chatId,
-    //         content: {
-    //             text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-    //         }
-    //     }
-    //     await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
-    //     return chat
-    // }
-
-    // @Post('/:id/messages')
-    // @UseGuards(JwtAuthGuard)
-    // async sendMessageToChat(
-    //     @Param('id') chatId: string,
-    //     @CurrentUser() user: RequestResponseUser,
-    //     @Body() dto: CreateMessageContentDto
-    // ): Promise<Message> {
-    //     isUserChatParticipantValidate(user.id, chatId)
-    //     const message: Message = await this.chatMessageService.sendMessageToChat({
-    //         userId: user.id,
-    //         username: user.username,
-    //         chatId,
-    //         content: dto
-    //     })
-    //     return message
-    // }
-
-    // @Get('/:id/messages')
-    // @UseGuards(JwtAuthGuard)
-    // async getMessagesWithContentFromChat(
-    //     @Param('id') chatId: string,
-    //     @CurrentUser() user: RequestResponseUser
-    // ): Promise<Message[]> {
-    //     isUserChatParticipantValidate(user.id, chatId)
-    //     const messages: Message[] = await this.chatMessageService.getMessagesWithContentFromChat(chatId)
-    //     return messages
-    // }
+    @Delete('/:channelId')
+    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    async deleteTextChannel(
+        @Param('channelId') channelId: string
+    ): Promise<TextChannel> {
+        const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        if (!channel)
+            throw new NotFoundException({ message: 'Text channel not found' })
+        await this.textChannelsService.deleteTextChannel({ channel })
+        return channel
+    }
 
 }

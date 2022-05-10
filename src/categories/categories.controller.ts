@@ -1,5 +1,11 @@
-import { Controller } from '@nestjs/common'
+import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
+import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
+import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
+import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
 import { CategoriesService } from './categories.service'
+import { CreateCategoryDto } from './dto/create-category.dto'
+import { Category } from './models/categories.model'
 
 
 @Controller('/categories')
@@ -9,88 +15,41 @@ export class CategoriesController {
         private categoriesService: CategoriesService,
     ) {}
 
-    // @Post('/')
-    // @UseGuards(JwtAuthGuard)
-    // async createChat(
-    //     @Body() createChatDto: CreateChatDto,
-    //     @CurrentUser() user: RequestResponseUser
-    // ): Promise<Chat> {
-    //     const chat: Chat = await this.chatsService.createChat({
-    //         ...createChatDto, chattersIds: [ ...createChatDto.chattersIds, user.id ]
-    //     })
-    //     const chatters: User[] = await this.usersService.getChattersByChatId(chat.id)
-    //     const sendChatMessageDto: SendChatMessageDto = {
-    //         userId: StandartBots.CHAT_BOT.id,
-    //         username: StandartBots.CHAT_BOT.username,
-    //         chatId: chat.id,
-    //         content: {
-    //             text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-    //         }
-    //     }
-    //     await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
-    //     return chat
-    // }
+    @Post('/')
+    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    async createCategory(
+        @Body() dto: CreateCategoryDto
+    ): Promise<Category> {
+        const category: Category = await this.categoriesService.createCategory(dto)
+        return category
+    }
 
-    // @Put('/')
-    // @UseGuards(JwtAuthGuard)
-    // async updateChat(
-    //     @Body() dto: UpdateChatDto,
-    //     @CurrentUser() user: RequestResponseUser
-    // ): Promise<Chat> {
-    //     isUserChatParticipantValidate(user.id, dto.chatId)
-    //     const chat: Chat = await this.chatsService.updateChat(dto)
-    //     return chat
-    // }
+    @Put('/:categoryId')
+    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    async updateCategory(
+        @Param('categoryId') categoryId: string,
+        @Body() { name }: { name: string }
+    ): Promise<Category> {
+        const category: Category = await this.categoriesService.getCategoryById(categoryId)
+        if (!category)
+            throw new NotFoundException({ message: 'Category not found' })
+        const updatedCategory: Category =
+            await this.categoriesService.updateCategory({ name, category })
+        return updatedCategory
+    }
 
-    // @Post('/:id')
-    // @UseGuards(JwtAuthGuard)
-    // async addUsersToChat(
-    //     @Param('id') chatId: string,
-    //     @Body() { chattersIds }: { chattersIds: number[] },
-    //     @CurrentUser() user: RequestResponseUser,
-    // ): Promise<Chat> {
-    //     const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
-    //     isUserChatParticipantValidate(user.id, chatId)
-    //     const chat: Chat = await this.chatsService.addUsersToChat(addUsersDto)
-    //     const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
-    //     const sendChatMessageDto: SendChatMessageDto = {
-    //         userId: StandartBots.CHAT_BOT.id,
-    //         username: StandartBots.CHAT_BOT.username,
-    //         chatId,
-    //         content: {
-    //             text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-    //         }
-    //     }
-    //     await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
-    //     return chat
-    // }
-
-    // @Post('/:id/messages')
-    // @UseGuards(JwtAuthGuard)
-    // async sendMessageToChat(
-    //     @Param('id') chatId: string,
-    //     @CurrentUser() user: RequestResponseUser,
-    //     @Body() dto: CreateMessageContentDto
-    // ): Promise<Message> {
-    //     isUserChatParticipantValidate(user.id, chatId)
-    //     const message: Message = await this.chatMessageService.sendMessageToChat({
-    //         userId: user.id,
-    //         username: user.username,
-    //         chatId,
-    //         content: dto
-    //     })
-    //     return message
-    // }
-
-    // @Get('/:id/messages')
-    // @UseGuards(JwtAuthGuard)
-    // async getMessagesWithContentFromChat(
-    //     @Param('id') chatId: string,
-    //     @CurrentUser() user: RequestResponseUser
-    // ): Promise<Message[]> {
-    //     isUserChatParticipantValidate(user.id, chatId)
-    //     const messages: Message[] = await this.chatMessageService.getMessagesWithContentFromChat(chatId)
-    //     return messages
-    // }
+    @Delete('/:categoryId')
+    @RequiredPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
+    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    async deleteCategory(
+        @Param('categoryId') categoryId: string
+    ): Promise<Category> {
+        const category: Category = await this.categoriesService.getCategoryById(categoryId)
+        if (!category)
+            throw new NotFoundException({ message: 'Category not found' })
+        const updatedCategory: Category =
+            await this.categoriesService.deleteCategory({ category })
+        return updatedCategory
+    }
 
 }

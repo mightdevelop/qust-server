@@ -17,11 +17,11 @@ export class MessagesController {
         // private channelMessagesService: TextChannelMessagesService,
     ) {}
 
-    @Put('/:id')
+    @Put('/:messageId')
     @UseGuards(JwtAuthGuard)
     async updateMessage(
         @CurrentUser() user: RequestResponseUser,
-        @Param('id') messageId,
+        @Param('messageId') messageId,
         @Body() { text }: { text: string }
     ): Promise<Message> {
         const message: Message = await this.messagesService.getMessageById(messageId)
@@ -36,11 +36,11 @@ export class MessagesController {
         return updatedMessage
     }
 
-    @Delete('/:id')
+    @Delete('/:messageId')
     @UseGuards(JwtAuthGuard)
     async deleteMessage(
         @CurrentUser() user: RequestResponseUser,
-        @Param('id') messageId: string
+        @Param('messageId') messageId: string
     ): Promise<Message> {
         const message: Message = await this.messagesService.getMessageById(messageId)
         if (!message)

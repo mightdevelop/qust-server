@@ -33,9 +33,9 @@ export class UsersController {
         return users
     }
 
-    @Get('/:id')
+    @Get('/:userId')
     async getUserById(
-        @Param('id') userId: string,
+        @Param('userId') userId: string,
     ): Promise<User> {
         const user: User = await this.usersService.getUserById(userId)
         if (!user)
@@ -43,9 +43,9 @@ export class UsersController {
         return user
     }
 
-    @Get('/:id/friends')
+    @Get('/:userId/friends')
     async getFriendsByUserId(
-        @Param('id') userId: string,
+        @Param('userId') userId: string,
     ): Promise<User[]> {
         const user = await this.usersService.getUserById(userId)
         if (!user)
@@ -64,10 +64,10 @@ export class UsersController {
         return user
     }
 
-    @Put('/:id')
+    @Put('/:userId')
     @UseGuards(JwtAuthGuard)
     async updateUser(
-        @Param('id') userId: string,
+        @Param('userId') userId: string,
         @Body() dto: UpdateUserDto,
         @CurrentUser() { id, isAdmin },
     ): Promise<User> {
@@ -84,13 +84,13 @@ export class UsersController {
         return updatedUser
     }
 
-    @Delete('/:id')
+    @Delete('/:userId')
     @isAdmin()
     @UseGuards(JwtAuthGuard, AdminGuard)
     async deleteUser(
-        @Param('id') authorId: string,
+        @Param('userId') userId: string,
     ): Promise<User> {
-        const user: User = await this.usersService.deleteUser(authorId)
+        const user: User = await this.usersService.deleteUser(userId)
         return user
     }
 

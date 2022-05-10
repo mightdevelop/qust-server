@@ -46,9 +46,7 @@ export class UsersService {
 
     async getChattersByChatId(chatId: string): Promise<User[]> {
         const chatUserColumns: ChatUser[] = await this.chatUserRepository.findAll({ where: { chatId } })
-        const chattersIds: {id: string}[] = chatUserColumns.map(column => {
-            return { id: column.userId }
-        })
+        const chattersIds: {id: string}[] = chatUserColumns.map(column => ({ id: column.userId }))
         const chatters: User[] = await this.userRepository.findAll({
             where: { [Op.or]: chattersIds }
         })
@@ -61,9 +59,7 @@ export class UsersService {
         const userFriendColumns: Friend[] = await this.userFriendsRepository.findAll(
             { where: { userId, status: FriendRequestStatus.CONFIRM } }
         )
-        const friendsIds: {id: string}[] = userFriendColumns.map(column => {
-            return { id: column.userId }
-        })
+        const friendsIds: {id: string}[] = userFriendColumns.map(column => ({ id: column.userId }))
         const friends: User[] = await this.userRepository.findAll({
             where: { [Op.or]: friendsIds }
         })

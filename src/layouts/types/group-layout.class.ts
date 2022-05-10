@@ -1,11 +1,11 @@
-import { RoleCategoryPermissionsList } from 'src/permissions/types/permissions/category-permissions'
+import { RoleCategoryPermissionsListClass } from 'src/permissions/types/permissions/role-category-permissions-list.class'
 import { RolePermissionsListClass } from 'src/permissions/types/permissions/role-permissions-list.class'
-import { RoleTextChannelPermissionsList } from 'src/permissions/types/permissions/text-channel-permissions'
+import { RoleTextChannelPermissionsListClass } from 'src/permissions/types/permissions/role-text-channel-permissions-list.class'
 
 
 export class GroupLayout {
-    roleLayouts: RoleLayout[]
-    categoryLayouts: CategoryLayout[]
+    roleLayouts?: RoleLayout[]
+    categoryLayouts?: CategoryLayout[]
 }
 
 export class RoleLayout {
@@ -27,9 +27,9 @@ export class TextChannelLayout {
 
 export class CategoryRolePermissionsLayout {
     roleName: string
-    permissions: Partial<RoleCategoryPermissionsList>
+    permissions: Partial<RoleCategoryPermissionsListClass>
 }
 export class TextChannelRolePermissionsLayout {
     roleName: string
-    permissions: Partial<RoleTextChannelPermissionsList>
+    permissions: Partial<RoleTextChannelPermissionsListClass>
 }

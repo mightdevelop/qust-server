@@ -23,10 +23,11 @@ export class GroupPermissionsGuard implements CanActivate {
         )
         if (!requiredPermissions) return true
         const req: Request = context.switchToHttp().getRequest()
-        return await this.permissionsService.doesUserHavePermissionsInGroup({
-            userId: `${req.user.id}`,
-            groupId: req.params.id,
-            permissions: requiredPermissions
+        const bool = await this.permissionsService.doesUserHavePermissionsInGroup({
+            userId: req.user.id,
+            groupId: req.body.groupId,
+            requiredPermissions
         })
+        return bool
     }
 }

@@ -1,9 +1,8 @@
-import { ForcedPermissionLevel } from '../permission-level'
+import { ForcedPermissionLevel } from './permission-level'
 
 export class RolePermissionsListClass {
     manageGroup: ForcedPermissionLevel
-    manageTextChannels: ForcedPermissionLevel
-    manageCategories: ForcedPermissionLevel
+    manageCategoriesAndChannels: ForcedPermissionLevel
     manageRoles: ForcedPermissionLevel
     manageEvents: ForcedPermissionLevel
     manageEmojis: ForcedPermissionLevel

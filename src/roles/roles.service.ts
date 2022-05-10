@@ -44,8 +44,8 @@ export class RolesService {
         const userRoles: Role[] = await this.roleRepository.findAll({ where: {
             [Op.or]: roleUserColumns.map(role => ({ roleId: role.id })) }
         })
-        const everyone: Role = await this.roleRepository.findOne({ where: { name: 'everyone' } })
-        userRoles.push(everyone)
+        if (!userRoles.find(r => r.name === 'everyone'))
+            userRoles.push(await this.roleRepository.findOne({ where: { name: 'everyone' } }))
         return userRoles
     }
 

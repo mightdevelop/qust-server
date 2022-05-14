@@ -7,7 +7,6 @@ import { Group } from 'src/groups/models/groups.model'
 import { Role } from 'src/roles/models/roles.model'
 import { RolesService } from 'src/roles/roles.service'
 import { TextChannelsService } from 'src/text-channels/text-channels.service'
-import { PermissionsByRolesInCategoryDto } from './dto/roles-category-permissions.dto'
 import { PermissionsByRolesInGroupDto } from './dto/roles-group-permissions.dto'
 import { PermissionsByRolesInTextChannelDto } from './dto/roles-text-channel-permissions.dto'
 import { UserPermissionsInCategoryDto } from './dto/user-category-permissions.dto'
@@ -76,10 +75,10 @@ export class PermissionsService {
                     .map(p => [ p[0], permissionsRow.getDataValue(p[0] as keyof RolePermissions) ])
                 ))
 
-        const allowed: [RolePermissionsEnum, ForcedPermissionLevel][] = permissions
-            .filter(p => p[1] === ForcedPermissionLevel.ALOWED)
-        const notAllowed: [RolePermissionsEnum, ForcedPermissionLevel][] = permissions
-            .filter(p => !allowed.map(p => p[0]).includes(p[0]))
+        const allowed: [RolePermissionsEnum, ForcedPermissionLevel][] = [ ...new Set(permissions
+            .filter(p => p[1] === ForcedPermissionLevel.ALOWED)) ]
+        const notAllowed: [RolePermissionsEnum, ForcedPermissionLevel][] = [ ...new Set(permissions
+            .filter(p => !allowed.map(p => p[0]).includes(p[0]))) ]
 
         return {
             allowed: allowed.map(p => p[0]),
@@ -130,15 +129,15 @@ export class PermissionsService {
                         .getDataValue(p[0] as keyof TextChannelRolePermissions) ])
                 ))
 
-        const allowed: [RoleTextChannelPermissionsEnum, PermissionLevel][] = permissions
-            .filter(p => p[1] === PermissionLevel.ALOWED)
-        const notSpecified: [RoleTextChannelPermissionsEnum, PermissionLevel][] = permissions
+        const allowed: [RoleTextChannelPermissionsEnum, PermissionLevel][] = [ ...new Set(permissions
+            .filter(p => p[1] === PermissionLevel.ALOWED)) ]
+        const notSpecified: [RoleTextChannelPermissionsEnum, PermissionLevel][] = [ ...new Set(permissions
             .filter(p => p[1] === PermissionLevel.NONE)
-            .filter(p => !allowed.map(p => p[0]).includes(p[0]))
-        const notAllowed: [RoleTextChannelPermissionsEnum, PermissionLevel][] = permissions
+            .filter(p => !allowed.map(p => p[0]).includes(p[0]))) ]
+        const notAllowed: [RoleTextChannelPermissionsEnum, PermissionLevel][] = [ ...new Set(permissions
             .filter(p => p[1] === PermissionLevel.NOT_ALOWED)
             .filter(p => !allowed.map(p => p[0]).includes(p[0]))
-            .filter(p => !notSpecified.map(p => p[0]).includes(p[0]))
+            .filter(p => !notSpecified.map(p => p[0]).includes(p[0]))) ]
 
         return {
             allowed: allowed.map(p => p[0]),
@@ -153,42 +152,15 @@ export class PermissionsService {
             throw new NotFoundException({ message: 'Category not found' })
         if (await this.isUserOwner(dto.userId, category.groupId)) return true
         const roles: Role[] = await this.rolesService.getUserRolesByGroupId(dto.userId, category.groupId)
-        const userCategoryPermissions =
-            await this.getPermissionsByRolesArrayInCategory({ roles, categoryId: dto.categoryId })
-        return userCategoryPermissions.allowed.includes(RolePermissionsEnum.manageCategoriesAndChannels)
-    }
-
-    private async getPermissionsByRolesArrayInCategory(
-        dto: PermissionsByRolesInCategoryDto
-    ): Promise<{
-        allowed: RolePermissionsEnum[],
-        notSpecified: RolePermissionsEnum[]
-        notAllowed: RolePermissionsEnum[]
-    }> {
-        const permissions: [RolePermissionsEnum, PermissionLevel][] = [ ...new Set(
-            [].concat(...
-            dto.roles
-                .map(role => role.categoryPermissions)
-                .map(permissionsRow => Object
-                    .entries(permissionsRow)
-                    .filter(p => p[1] === PermissionLevel))
-            )) ]
-
-        const allowed: RolePermissionsEnum[] = permissions
-            .filter(p => p[1] === PermissionLevel.ALOWED)
-            .map(p => p[0])
-        const notSpecified: RolePermissionsEnum[] = permissions
-            .filter(p => p[1] === PermissionLevel.NONE)
-            .map(p => p[0])
-        const notAllowed: RolePermissionsEnum[] = permissions
-            .filter(p => p[1] === PermissionLevel.NOT_ALOWED)
-            .map(p => p[0])
-
-        return {
-            allowed,
-            notSpecified,
-            notAllowed
-        }
+        const manageCategoryPermissions = roles.map(role => role.categoryPermissions.manageCategory)
+        if (manageCategoryPermissions.some(p => p === PermissionLevel.ALOWED))
+            return true
+        if (manageCategoryPermissions.every(p => p === PermissionLevel.NOT_ALOWED))
+            return false
+        const userGroupPermissions =
+            await this.getPermissionsByRolesArrayInGroup({ roles, groupId: category.groupId })
+        const groupPermsAllowed: RolePermissionsEnum[] = userGroupPermissions.allowed
+        return groupPermsAllowed.includes(RolePermissionsEnum.manageCategoriesAndChannels)
     }
 
 }

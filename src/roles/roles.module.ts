@@ -5,6 +5,7 @@ import { RolesService } from './roles.service'
 import { Role } from './models/roles.model'
 import { RoleUser } from './models/role-user.model'
 import { PermissionsModule } from 'src/permissions/permissions.module'
+import { GroupsModule } from 'src/groups/groups.module'
 
 @Module({
     controllers: [ RolesController ],
@@ -14,6 +15,7 @@ import { PermissionsModule } from 'src/permissions/permissions.module'
             Role,
             RoleUser,
         ]),
+        forwardRef(() => GroupsModule),
         forwardRef(() => PermissionsModule)
     ],
     exports: [ RolesService ]

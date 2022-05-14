@@ -1,5 +1,5 @@
 import { IsArray, IsUUID } from 'class-validator'
-import { RolePermissionsEnum } from '../types/permissions/role-permissions.enum'
+import { RoleTextChannelPermissionsEnum } from '../types/permissions/role-text-channel-permissions.enum'
 
 export class UserPermissionsInTextChannelDto {
 
@@ -10,6 +10,6 @@ export class UserPermissionsInTextChannelDto {
         channelId: string
 
     @IsArray()
-        requiredPermissions: RolePermissionsEnum[]
+        requiredPermissions: RoleTextChannelPermissionsEnum[]
 
 }

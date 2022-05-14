@@ -1,8 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Op } from 'sequelize'
+import { GroupsService } from 'src/groups/groups.service'
 import { RolePermissions } from 'src/permissions/models/role-permissions.model'
 import { PermissionsService } from 'src/permissions/permissions.service'
+import { RoleIdAndUserIdDto } from './dto/roleid-and-userid.dto'
 import { CreateRoleDto } from './dto/create-role.dto'
 import { DeleteRoleDto } from './dto/delete-role.dto'
 import { UpdateRoleDto } from './dto/update-role.dto'
@@ -15,6 +17,7 @@ export class RolesService {
 
     constructor(
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
+        @Inject(forwardRef(() => GroupsService)) private groupsService: GroupsService,
         @InjectModel(Role) private roleRepository: typeof Role,
         @InjectModel(RoleUser) private roleUserRepository: typeof RoleUser,
     ) {}
@@ -35,6 +38,7 @@ export class RolesService {
         groupId: string,
         includePermissions?: boolean
     ): Promise<Role[]> {
+        if (!await this.groupsService.isUserGroupParticipant(userId, groupId)) return []
         const groupRoles: Role[] =
             includePermissions
                 ?
@@ -51,11 +55,11 @@ export class RolesService {
         includePermissions
             ?
             await this.roleRepository.findAll({ where: {
-                [Op.or]: roleUserRows.map(role => ({ roleId: role.id })) }, include: RolePermissions
+                [Op.or]: roleUserRows.map(row => ({ id: row.roleId })) }, include: RolePermissions
             })
             :
             await this.roleRepository.findAll({ where: {
-                [Op.or]: roleUserRows.map(role => ({ roleId: role.id })) }
+                [Op.or]: roleUserRows.map(row => ({ id: row.roleId })) }
             })
         if (!userRoles.find(r => r.name === 'everyone')) {
             const everyone: Role =
@@ -77,6 +81,17 @@ export class RolesService {
             await this.permissionsService.createDefaultRolePermissions(role.id)
         await role.$set('permissions', permissions)
         return role
+    }
+
+    async addRoleToUser(dto: RoleIdAndUserIdDto): Promise<RoleUser> {
+        const roleUserRow: RoleUser = await this.roleUserRepository.create(dto)
+        return roleUserRow
+    }
+
+    async removeRoleFromUser(dto: RoleIdAndUserIdDto): Promise<RoleUser> {
+        const roleUserRow: RoleUser = await this.roleUserRepository.findOne({ where: { ...dto } })
+        await roleUserRow.destroy()
+        return roleUserRow
     }
 
     async updateRole({ role, color, name }: UpdateRoleDto): Promise<Role> {

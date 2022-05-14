@@ -7,6 +7,7 @@ import { Group } from './models/groups.model'
 import { LayoutsModule } from 'src/layouts/layouts.module'
 import { PermissionsModule } from 'src/permissions/permissions.module'
 import { UsersModule } from 'src/users/users.module'
+import { RolesModule } from 'src/roles/roles.module'
 
 @Module({
     controllers: [ GroupsController ],
@@ -15,6 +16,7 @@ import { UsersModule } from 'src/users/users.module'
         SequelizeModule.forFeature([ Group, GroupUser ]),
         LayoutsModule,
         UsersModule,
+        forwardRef(() => RolesModule),
         forwardRef(() => PermissionsModule),
     ],
     exports: [ GroupsService ]

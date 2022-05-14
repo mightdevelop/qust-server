@@ -22,6 +22,10 @@ export class GroupsService {
         return group
     }
 
+    async isUserGroupParticipant(userId: string, groupId: string): Promise<boolean> {
+        return !!await this.groupUserRepository.findOne({ where: { userId, groupId } })
+    }
+
     async createGroup(dto: CreateGroupDto): Promise<Group> {
         const group: Group = await this.groupRepository.create(dto)
         await this.layoutsService.createRolesCategoriesAndTextChannelsByLayout({

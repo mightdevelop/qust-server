@@ -49,8 +49,7 @@ export class InvitesService {
         const expiredInvitesIds: { id: string }[] = invites
             .filter(inv => inv.createdAt < Date.now() - inv.ttl)
             .map(inv => ({ id: inv.id }))
-        const a = await this.inviteRepository.destroy({ where: { [Op.or]: expiredInvitesIds } })
-        console.log(a)
+        await this.inviteRepository.destroy({ where: { [Op.or]: expiredInvitesIds } })
         return
     }
 

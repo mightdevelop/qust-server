@@ -6,6 +6,7 @@ import { User } from './models/users.model'
 import { UsersController } from './users.controller'
 import { ChatUser } from 'src/chats/models/chat-user.model'
 import { Friend } from 'src/friends/models/friends.model'
+import { GroupUser } from 'src/groups/models/group-user.model'
 
 
 @Module({
@@ -14,7 +15,7 @@ import { Friend } from 'src/friends/models/friends.model'
         UsersService,
     ],
     imports: [
-        SequelizeModule.forFeature([ User, ChatUser, Friend ]),
+        SequelizeModule.forFeature([ User, Friend, ChatUser, GroupUser ]),
         JwtModule.register({}),
     ],
     exports: [

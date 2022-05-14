@@ -4,6 +4,7 @@ import { Op } from 'sequelize'
 import { ChatUser } from 'src/chats/models/chat-user.model'
 import { Friend } from 'src/friends/models/friends.model'
 import { FriendRequestStatus } from 'src/friends/types/friend-request-status'
+import { GroupUser } from 'src/groups/models/group-user.model'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { User } from './models/users.model'
@@ -16,6 +17,7 @@ export class UsersService {
         @InjectModel(User) private userRepository: typeof User,
         @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
         @InjectModel(Friend) private userFriendsRepository: typeof Friend,
+        @InjectModel(GroupUser) private groupUserRepository: typeof GroupUser,
     ) {}
 
     async getAllUsers(): Promise<User[]> {
@@ -45,8 +47,8 @@ export class UsersService {
     }
 
     async getChattersByChatId(chatId: string): Promise<User[]> {
-        const chatUserColumns: ChatUser[] = await this.chatUserRepository.findAll({ where: { chatId } })
-        const chattersIds: {id: string}[] = chatUserColumns.map(column => ({ id: column.userId }))
+        const chatUserRows: ChatUser[] = await this.chatUserRepository.findAll({ where: { chatId } })
+        const chattersIds: {id: string}[] = chatUserRows.map(row => ({ id: row.userId }))
         const chatters: User[] = await this.userRepository.findAll({
             where: { [Op.or]: chattersIds }
         })
@@ -56,14 +58,27 @@ export class UsersService {
     async getFriendsByUserId(
         userId: string
     ): Promise<User[]> {
-        const userFriendColumns: Friend[] = await this.userFriendsRepository.findAll(
+        const userFriendRows: Friend[] = await this.userFriendsRepository.findAll(
             { where: { userId, status: FriendRequestStatus.CONFIRM } }
         )
-        const friendsIds: {id: string}[] = userFriendColumns.map(column => ({ id: column.userId }))
+        const friendsIds: {id: string}[] = userFriendRows.map(row => ({ id: row.userId }))
         const friends: User[] = await this.userRepository.findAll({
             where: { [Op.or]: friendsIds }
         })
         return friends
+    }
+
+    async getUsersByGroupId(
+        groupId: string
+    ): Promise<User[]> {
+        const userGroupRows: GroupUser[] = await this.groupUserRepository.findAll(
+            { where: { groupId } }
+        )
+        const usersIds: {id: string}[] = userGroupRows.map(row => ({ id: row.userId }))
+        const users: User[] = await this.userRepository.findAll({
+            where: { [Op.or]: usersIds }
+        })
+        return users
     }
 
     async createUser(

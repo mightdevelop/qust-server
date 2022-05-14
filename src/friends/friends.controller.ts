@@ -90,10 +90,10 @@ export class FriendsController {
         @Param('friendId') friendId: string,
         @CurrentUser() user: RequestResponseUser,
     ): Promise<string> {
-        const userFriendColumn: Friend = await this.friendsService.getUserFriendColumn(friendId, user.id)
-        if (!userFriendColumn)
+        const userFriendRow: Friend = await this.friendsService.getUserFriendRow(friendId, user.id)
+        if (!userFriendRow)
             throw new BadRequestException({ message: `User ID ${friendId} is not a friend to ID ${user.id}` })
-        await userFriendColumn.destroy()
+        await userFriendRow.destroy()
         return 'Friend removed'
     }
 

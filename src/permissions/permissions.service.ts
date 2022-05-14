@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { CategoriesService } from 'src/categories/categories.service'
 import { Category } from 'src/categories/models/categories.model'
@@ -50,7 +50,9 @@ export class PermissionsService {
     async doesUserHavePermissionsInGroup(dto: UserPermissionsInGroupDto): Promise<boolean> {
         const isOwner: boolean = await this.isUserOwner(dto.userId, dto.groupId)
         if (isOwner) return true
-        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(dto.userId, dto.groupId)
+        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(dto.userId, dto.groupId, true)
+        if (!roles)
+            throw new ForbiddenException({ message: 'You are not a group participant' })
         const userGroupPermissions =
             await this.getPermissionsByRolesArrayInGroup({ roles, groupId: dto.groupId })
         const isAllPermissionAllowed = !!dto.requiredPermissions
@@ -69,10 +71,21 @@ export class PermissionsService {
             [].concat(...
             dto.roles
                 .map(role => role.permissions)
-                .map(permissionsColumn => Object
-                    .entries(permissionsColumn)
+                .map(permissionsRow => Object
+                    .entries(permissionsRow)
                     .filter(p => p[1] === ForcedPermissionLevel))
             )) ]
+        // const permissions: [RolePermissionsEnum, ForcedPermissionLevel][] = [ ...new Set(
+        //     [].concat(...
+        //     dto.roles
+        //         .map(role => {
+        //             console.log(role.permissions)
+        //             return role.permissions
+        //         })
+        //         .map(permissionsRow => Object
+        //             .entries(permissionsRow)
+        //             .filter(p => p[1] === ForcedPermissionLevel))
+        //     )) ]
 
         const allowed: RolePermissionsEnum[] = permissions
             .filter(p => p[1] === ForcedPermissionLevel.ALOWED)
@@ -91,6 +104,8 @@ export class PermissionsService {
         const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(dto.channelId)
         if (await this.isUserOwner(dto.userId, groupId)) return true
         const roles: Role[] = await this.rolesService.getUserRolesByGroupId(dto.userId, groupId)
+        if (!roles)
+            throw new ForbiddenException({ message: 'You are not a group participant' })
         const userTextChannelPermissions =
             await this.getPermissionsByRolesArrayInTextChannel({ roles, channelId: dto.channelId })
 
@@ -121,8 +136,8 @@ export class PermissionsService {
             [].concat(...
             dto.roles
                 .map(role => role.textChannelPermissions)
-                .map(permissionsColumn => Object
-                    .entries(permissionsColumn)
+                .map(permissionsRow => Object
+                    .entries(permissionsRow)
                     .filter(p => p[1] === PermissionLevel))
             )) ]
 
@@ -165,8 +180,8 @@ export class PermissionsService {
             [].concat(...
             dto.roles
                 .map(role => role.categoryPermissions)
-                .map(permissionsColumn => Object
-                    .entries(permissionsColumn)
+                .map(permissionsRow => Object
+                    .entries(permissionsRow)
                     .filter(p => p[1] === PermissionLevel))
             )) ]
 

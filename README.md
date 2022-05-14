@@ -8,5 +8,4 @@
 <h5>NestJS - Node.js framework<h5>
 <h5>Typescript<h5>
 <h5>PostgreSQL - основная база данных<h5>
-<h5>Redis - для хранения refresh токенов и кеширования<h5>
-<h5>Python - скрипты автоматизации<h5>
+<h5>Redis - для хранения refresh токенов и кэша<h5>

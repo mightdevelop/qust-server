@@ -1,5 +1,5 @@
 import { BelongsToMany, Column, DataType, Model, Table } from 'sequelize-typescript'
-import { ChatMessage } from 'src/messages/models/chat-message'
+import { ChatMessage } from 'src/messages/models/chat-message.model'
 import { Message } from 'src/messages/models/messages.model'
 import { User } from 'src/users/models/users.model'
 import { ChatType } from '../types/chat-type'

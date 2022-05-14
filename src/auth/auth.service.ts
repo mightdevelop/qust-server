@@ -15,7 +15,7 @@ import { Cache } from 'cache-manager'
 export class AuthService {
 
     constructor(
-        @Inject(CACHE_MANAGER) private cache: Cache,
+        @Inject(CACHE_MANAGER) private store: Cache,
         private usersService: UsersService,
         private jwtService: JwtService,
     ) {}
@@ -63,7 +63,7 @@ export class AuthService {
             }, { secret: refreshConfig.secret }),
         }
         if (tokens) {
-            await this.cache.set(`${user.id}`, tokens.refreshToken)
+            await this.store.set(`${user.id}`, tokens.refreshToken)
             return tokens
         }
         throw new InternalServerErrorException({ message: 'Internal generate tokens server error' })
@@ -83,7 +83,7 @@ export class AuthService {
         refreshTokenFromRequest: string,
         userId: string
     ): Promise<boolean> {
-        const refreshTokenFromStore = await this.cache.get(`${userId}`)
+        const refreshTokenFromStore = await this.store.get(`${userId}`)
         return refreshTokenFromRequest === refreshTokenFromStore
     }
 

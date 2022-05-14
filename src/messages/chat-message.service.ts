@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { SendChatMessageDto } from './dto/send-chat-message.dto'
 import { MessagesService } from './messages.service'
-import { ChatMessage } from './models/chat-message'
+import { ChatMessage } from './models/chat-message.model'
 import { Message } from './models/messages.model'
 
 
@@ -14,9 +14,9 @@ export class ChatMessageService {
         @InjectModel(ChatMessage) private chatMessageRepository: typeof ChatMessage,
     ) {}
 
-    async getChatMessageColumn(messageId: string): Promise<ChatMessage> {
-        const column: ChatMessage = await this.chatMessageRepository.findOne({ where: { messageId } })
-        return column
+    async getChatMessageRow(messageId: string): Promise<ChatMessage> {
+        const row: ChatMessage = await this.chatMessageRepository.findOne({ where: { messageId } })
+        return row
     }
 
     async sendMessageToChat(dto: SendChatMessageDto): Promise<Message> {

@@ -24,6 +24,12 @@ export class RolesService {
         return role
     }
 
+    async getEveryoneRoleByGroupId(groupId: string): Promise<Role> {
+        const everyoneRole: Role =
+            await this.roleRepository.findOne({ where: { groupId, name: 'everyone' } })
+        return everyoneRole
+    }
+
     async getUserRolesByGroupId(
         userId: string,
         groupId: string,
@@ -35,17 +41,33 @@ export class RolesService {
                 await this.roleRepository.findAll({ where: { groupId }, include: RolePermissions })
                 :
                 await this.roleRepository.findAll({ where: { groupId } })
-        const roleUserColumns: RoleUser[] = await this.roleUserRepository.findAll({ where: {
+        const roleUserRows: RoleUser[] = await this.roleUserRepository.findAll({ where: {
             [Op.or]: groupRoles.map(role => ({
                 userId,
                 roleId: role.id
             }))
         } })
-        const userRoles: Role[] = await this.roleRepository.findAll({ where: {
-            [Op.or]: roleUserColumns.map(role => ({ roleId: role.id })) }
-        })
-        if (!userRoles.find(r => r.name === 'everyone'))
-            userRoles.push(await this.roleRepository.findOne({ where: { name: 'everyone' } }))
+        const userRoles: Role[] =
+        includePermissions
+            ?
+            await this.roleRepository.findAll({ where: {
+                [Op.or]: roleUserRows.map(role => ({ roleId: role.id })) }, include: RolePermissions
+            })
+            :
+            await this.roleRepository.findAll({ where: {
+                [Op.or]: roleUserRows.map(role => ({ roleId: role.id })) }
+            })
+        if (!userRoles.find(r => r.name === 'everyone')) {
+            const everyone: Role =
+                includePermissions
+                    ?
+                    await this.roleRepository.findOne(
+                        { where: { name: 'everyone' }, include: RolePermissions }
+                    )
+                    :
+                    await this.roleRepository.findOne({ where: { name: 'everyone' } })
+            userRoles.push(everyone)
+        }
         return userRoles
     }
 

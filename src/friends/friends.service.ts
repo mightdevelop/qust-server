@@ -14,17 +14,17 @@ export class FriendsService {
         @InjectModel(Friend) private userFriendsRepository: typeof Friend,
     ) {}
 
-    async getUserFriendColumn(
+    async getUserFriendRow(
         friendId: string,
         userId: string
     ): Promise<Friend> {
         const friend: User = await this.usersService.getUserById(friendId)
         if (!friend)
             throw new NotFoundException({ message: 'Friend not found' })
-        const userFriendColumn: Friend = await this.userFriendsRepository.findOne(
+        const userFriendRow: Friend = await this.userFriendsRepository.findOne(
             { where: { userId, friendId } }
         )
-        return userFriendColumn
+        return userFriendRow
     }
 
     async friendshipRequest(
@@ -36,13 +36,13 @@ export class FriendsService {
         const requestRecipient: User = await this.usersService.getUserById(friendId)
         if (!requestRecipient)
             throw new BadRequestException({ message: 'User doesn`t exists' })
-        const friendColumn: Friend = await this.userFriendsRepository.findOne(
+        const friendRow: Friend = await this.userFriendsRepository.findOne(
             { where: { userId, friendId } }
         )
-        if (friendColumn)
+        if (friendRow)
             throw new BadRequestException(
                 { message:
-                    friendColumn.status === FriendRequestStatus.CONFIRM
+                    friendRow.status === FriendRequestStatus.CONFIRM
                         ? 'User is already a friend'
                         : 'Already requested'
                 }
@@ -73,18 +73,18 @@ export class FriendsService {
         respondingUserId: string,
         isConfirm: boolean
     ): Promise<void> {
-        const friendColumn: Friend = await this.userFriendsRepository.findOne({ where: {
+        const friendRow: Friend = await this.userFriendsRepository.findOne({ where: {
             userId: requestedUserId,
             friendId: respondingUserId,
             status: FriendRequestStatus.REQUEST
         } })
-        if (!friendColumn)
+        if (!friendRow)
             throw new BadRequestException({ message: 'Not requested' })
         if (!isConfirm) {
-            await friendColumn.destroy()
+            await friendRow.destroy()
             return
         }
-        await friendColumn.update({ status: FriendRequestStatus.CONFIRM })
+        await friendRow.update({ status: FriendRequestStatus.CONFIRM })
         await this.userFriendsRepository.create({
             userId: respondingUserId,
             friendId: requestedUserId,

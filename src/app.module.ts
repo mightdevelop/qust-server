@@ -13,7 +13,7 @@ import { Chat } from './chats/models/chats.model'
 import { Message } from './messages/models/messages.model'
 import { MessageContent } from './messages/models/message-content.model'
 import { ChatUser } from './chats/models/chat-user.model'
-import { ChatMessage } from './messages/models/chat-message'
+import { ChatMessage } from './messages/models/chat-message.model'
 import { Group } from './groups/models/groups.model'
 import { GroupUser } from './groups/models/group-user.model'
 import { TextChannel } from './text-channels/models/text-channels.model'
@@ -30,6 +30,7 @@ import { FriendsModule } from './friends/friends.module'
 import { RolePermissions } from './permissions/models/role-permissions.model'
 import { PermissionsModule } from './permissions/permissions.module'
 import { RolesModule } from './roles/roles.module'
+import { InvitesModule } from './invites/invites.module'
 
 
 @Module({
@@ -77,6 +78,7 @@ import { RolesModule } from './roles/roles.module'
         forwardRef(() => PermissionsModule),
         forwardRef(() => CategoriesModule),
         forwardRef(() => TextChannelsModule),
+        forwardRef(() => InvitesModule),
     ]
 })
 export class AppModule {}

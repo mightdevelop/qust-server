@@ -28,7 +28,9 @@ export class LayoutsService {
         { groupId, groupLayout }: CreateCategoriesAndRolesByLayoutsDto
     ): Promise<void> {
 
-        if (!groupLayout.roleLayouts.find(layout => layout.name === 'everyone'))
+        if (!groupLayout.roleLayouts)
+            groupLayout.roleLayouts = [ { name: 'everyone' } ]
+        else if (!groupLayout.roleLayouts.find(layout => layout.name === 'everyone'))
             groupLayout.roleLayouts.push({ name: 'everyone' })
 
         const roles: Role[] = await this.createRolesByRoleLayouts(
@@ -79,11 +81,11 @@ export class LayoutsService {
         roleLayouts: RoleLayout[],
         roles: Role[]
     ): Promise<RolePermissions[]> {
-        const permissionsColumns: RolePermissions[] =
+        const permissionsRows: RolePermissions[] =
             await this.rolePermissionsRepository.bulkCreate(roleLayouts.map(roleLayout => (
                 { roleId: roles.find(role => role.name === roleLayout.name).id }
             )), { validate: true })
-        return permissionsColumns
+        return permissionsRows
     }
 
     private async createCategoryByCategoryLayouts(
@@ -103,7 +105,7 @@ export class LayoutsService {
         roles: Role[],
         categories: Category[]
     ): Promise<CategoryRolePermissions[]> {
-        const permissionsColumns: CategoryRolePermissions[] =
+        const permissionsRows: CategoryRolePermissions[] =
             await this.categoryPermissionsRepository.bulkCreate([].concat(
                 ...categoryLayouts.map((categoryLayout, categoryIndex) => {
                     return categoryLayout.permissionsOfRoles?.map(roleWithPermissions => ({
@@ -113,7 +115,7 @@ export class LayoutsService {
                     }))
                 })
             ).filter(value => value), { validate: true })
-        return permissionsColumns
+        return permissionsRows
     }
 
     private async createChannelsByCategoryLayouts(
@@ -137,7 +139,7 @@ export class LayoutsService {
         roles: Role[],
         channels: TextChannel[]
     ): Promise<TextChannelRolePermissions[]> {
-        const permissionsColumns: TextChannelRolePermissions[] =
+        const permissionsRows: TextChannelRolePermissions[] =
             await this.channelPermissionsRepository.bulkCreate([].concat(...[].concat(
                 ...categoryLayouts.map(categoryLayout => {
                     return categoryLayout.channelLayouts.map((channelLayout, channelIndex) => {
@@ -149,7 +151,7 @@ export class LayoutsService {
                     })
                 })
             ).filter(value => value)), { validate: true })
-        return permissionsColumns
+        return permissionsRows
     }
 
 }

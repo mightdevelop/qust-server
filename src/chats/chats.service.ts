@@ -32,14 +32,14 @@ export class ChatsService {
         const chat: Chat = await this.chatRepository.create({
             name: dto.name, chatType: ChatType.chat
         })
-        const arrayToCreateChatUserColumns: {
+        const arrayToCreateChatUserRows: {
             chatId: string,
             userId: string
         }[] = dto.chattersIds.map(chatterId => ({
             chatId: chat.id,
             userId: chatterId
         }))
-        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns, { validate: true })
+        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserRows, { validate: true })
         return chat
     }
 
@@ -78,14 +78,14 @@ export class ChatsService {
         })
         if (!chat)
             throw new NotFoundException({ message: 'Chat not found' })
-        const arrayToCreateChatUserColumns: {
+        const arrayToCreateChatUserRows: {
             chatId: string,
             userId: string
         }[] = dto.chattersIds.map(chatterId => ({
             chatId: chat.id,
             userId: chatterId
         }))
-        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserColumns, { validate: true })
+        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserRows, { validate: true })
         return chat
     }
 

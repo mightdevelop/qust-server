@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { nanoid } from 'nanoid'
+import { Op } from 'sequelize'
 import { CreateInviteDto } from './dto/create-invite.dto'
 import { Invite } from './models/invites.model'
 
@@ -41,6 +42,16 @@ export class InvitesService {
         }
         await invite.update({ remainingUsages: invite.remainingUsages - 1 })
         return invite
+    }
+
+    async deleteExpiredInvites(): Promise<void> {
+        const invites: Invite[] = await this.inviteRepository.findAll()
+        const expiredInvitesIds: { id: string }[] = invites
+            .filter(inv => inv.createdAt < Date.now() - inv.ttl)
+            .map(inv => ({ id: inv.id }))
+        const a = await this.inviteRepository.destroy({ where: { [Op.or]: expiredInvitesIds } })
+        console.log(a)
+        return
     }
 
 }

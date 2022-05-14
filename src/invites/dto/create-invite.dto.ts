@@ -13,8 +13,8 @@ export class CreateInviteDto {
 
     @IsNumber()
     @IsOptional()
-    @Min(300)     // 5 mins
-    @Max(5097600) // 2 months
+    @Min(300000)     // 5 mins
+    @Max(5097600000) // 2 months
         ttl?: number
 
 }

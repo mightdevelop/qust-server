@@ -19,4 +19,14 @@ import { UsersModule } from 'src/users/users.module'
     ],
     exports: [ InvitesService ]
 })
-export class InvitesModule {}
+export class InvitesModule {
+
+    constructor(
+        private invitesService: InvitesService
+    ) {}
+
+    async onModuleInit(): Promise<void> {
+        setInterval(async () => await this.invitesService.deleteExpiredInvites(), 1800)
+    }
+
+}

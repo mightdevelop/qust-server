@@ -17,7 +17,7 @@ export class Invite extends Model<Invite> {
     @Column({ type: DataType.SMALLINT, allowNull: true, defaultValue: 100 })
         remainingUsages: number
 
-    @Column({ type: DataType.DATE, allowNull: false, defaultValue: 1209600 /* 2 weeks */ })
+    @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 1209600 /* 2 weeks */ })
         ttl: number
 
 }

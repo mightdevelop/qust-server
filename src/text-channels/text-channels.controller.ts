@@ -2,7 +2,7 @@ import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuard
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
 import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
-import { TextChannelPermissionsGuard } from 'src/permissions/guards/text-channel-permissions.guard'
+import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
 import { CreateTextChannelDto } from './dto/create-text-channel.dto'
 import { TextChannel } from './models/text-channels.model'
@@ -18,7 +18,7 @@ export class TextChannelsController {
 
     @Post('/')
     @RequiredPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
-    @UseGuards(JwtAuthGuard, TextChannelPermissionsGuard)
+    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async createTextChannel(
         @Body() dto: CreateTextChannelDto
     ): Promise<TextChannel> {

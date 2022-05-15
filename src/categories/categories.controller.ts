@@ -2,6 +2,7 @@ import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuard
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
 import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
+import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
 import { CategoriesService } from './categories.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
@@ -16,7 +17,8 @@ export class CategoriesController {
     ) {}
 
     @Post('/')
-    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    @RequiredPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
+    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async createCategory(
         @Body() dto: CreateCategoryDto
     ): Promise<Category> {
@@ -39,7 +41,6 @@ export class CategoriesController {
     }
 
     @Delete('/:categoryId')
-    @RequiredPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
     @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
     async deleteCategory(
         @Param('categoryId') categoryId: string

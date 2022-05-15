@@ -1,9 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext, forwardRef, Inject } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { Request } from 'src/auth/types/request-response'
-import { PERMISSIONS_KEY } from '../decorators/required-permissions.decorator'
+import { TextChannelsService } from 'src/text-channels/text-channels.service'
 import { PermissionsService } from '../permissions.service'
-import { RolePermissionsEnum } from '../types/permissions/role-permissions.enum'
 
 @Injectable()
 export class CategoryPermissionsGuard implements CanActivate {
@@ -11,21 +10,17 @@ export class CategoryPermissionsGuard implements CanActivate {
     constructor(
         private reflector: Reflector,
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
+        @Inject(forwardRef(() => TextChannelsService)) private textChannelsService: TextChannelsService,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const requiredPermissions = this.reflector.getAllAndOverride<RolePermissionsEnum[]>(
-            PERMISSIONS_KEY,
-            [
-                context.getHandler(),
-                context.getClass(),
-            ]
-        )
-        if (!requiredPermissions) return true
         const req: Request = context.switchToHttp().getRequest()
         return await this.permissionsService.doesUserCanManageCategory({
             userId: req.user.id,
-            categoryId: req.params.categoryId
+            categoryId:
+                req.body.categoryId ||
+                req.params.categoryId ||
+                (await this.textChannelsService.getTextChannelById(req.params.channelId)).categoryId
         })
     }
 }

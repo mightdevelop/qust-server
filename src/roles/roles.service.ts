@@ -79,7 +79,7 @@ export class RolesService {
         const role: Role = await this.roleRepository.create(dto)
         const permissions: RolePermissions =
             await this.permissionsService.createDefaultRolePermissions(role.id)
-        await role.$set('permissions', permissions)
+        role.permissions = permissions
         return role
     }
 

@@ -28,6 +28,18 @@ export class ChatsService {
         return chat.messages
     }
 
+
+    async isUserChatParticipant (
+        userId: string,
+        chatId: string
+    ): Promise<boolean> {
+        const isChatParticipant = !!await this.chatUserRepository.findOne({ where: {
+            userId,
+            chatId
+        } })
+        return isChatParticipant
+    }
+
     async createChat(dto: CreateChatDto): Promise<Chat> {
         const chat: Chat = await this.chatRepository.create({
             name: dto.name, chatType: ChatType.chat

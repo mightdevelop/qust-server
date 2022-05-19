@@ -37,7 +37,7 @@ export class MessagesService {
             text: dto.text,
             messageId: message.id
         })
-        await message.$set('content', content)
+        message.content = content
         return message
     }
 

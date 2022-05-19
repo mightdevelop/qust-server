@@ -14,7 +14,6 @@ import StandartBots from 'src/utils/standart-bots-const'
 import { User } from 'src/users/models/users.model'
 import { Message } from 'src/messages/models/messages.model'
 import { UsersService } from 'src/users/users.service'
-import { isUserChatParticipant } from './utils/is-user-chat-participant'
 
 
 @Controller('/chats')
@@ -52,7 +51,7 @@ export class ChatsController {
         @Body() dto: UpdateChatDto,
         @CurrentUser() user: RequestResponseUser
     ): Promise<Chat> {
-        if (!isUserChatParticipant(user.id, dto.chatId))
+        if (!await this.chatsService.isUserChatParticipant(user.id, dto.chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
         const chat: Chat = await this.chatsService.updateChat(dto)
         return chat
@@ -66,7 +65,7 @@ export class ChatsController {
         @CurrentUser() user: RequestResponseUser,
     ): Promise<Chat> {
         const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
-        if (!isUserChatParticipant(user.id, chatId))
+        if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
         const chat: Chat = await this.chatsService.addUsersToChat(addUsersDto)
         const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
@@ -85,11 +84,11 @@ export class ChatsController {
     async sendMessageToChat(
         @Param('chatId') chatId: string,
         @CurrentUser() user: RequestResponseUser,
-        @Body() { text }: {text: string}
+        @Body() { text }: { text: string }
     ): Promise<Message> {
         if (!await this.chatsService.getChatById(chatId))
             throw new NotFoundException({ message: 'Chat not found' })
-        if (!isUserChatParticipant(user.id, chatId))
+        if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
         const message: Message = await this.chatMessageService.sendMessageToChat({
             userId: user.id,
@@ -106,7 +105,7 @@ export class ChatsController {
         @Param('chatId') chatId: string,
         @CurrentUser() user: RequestResponseUser
     ): Promise<Message[]> {
-        if (!isUserChatParticipant(user.id, chatId))
+        if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
         const messages: Message[] = await this.chatsService.getMessagesFromChat(chatId)
         return messages

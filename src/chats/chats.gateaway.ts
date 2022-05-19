@@ -1,38 +1,61 @@
-// import {
-//     ConnectedSocket,
-//     MessageBody, OnGatewayConnection,
-//     SubscribeMessage,
-//     WebSocketGateway,
-//     WebSocketServer,
-// } from '@nestjs/websockets'
-// import { Server, Socket } from 'socket.io'
-// import { ChatService } from './chat.service'
+import { ForbiddenException, NotFoundException, UseGuards } from '@nestjs/common'
+import {
+    ConnectedSocket,
+    MessageBody, OnGatewayConnection,
+    OnGatewayDisconnect,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
+} from '@nestjs/websockets'
+import { Server, Socket } from 'socket.io'
+import { SocketIoCurrentUser } from 'src/auth/decorators/socket.io-current-user.decorator'
+import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
+import { RequestResponseUser } from 'src/auth/types/request-response'
+import { ChatMessageService } from 'src/messages/chat-message.service'
+import { Message } from 'src/messages/models/messages.model'
+import { User } from 'src/users/models/users.model'
+import { ChatsService } from './chats.service'
 
-// @WebSocketGateway()
-// export class ChatGateway implements OnGatewayConnection {
+@WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/chats' })
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
-//     constructor(
-//       private readonly chatService: ChatService
-//     ) {}
+    constructor(
+        private chatsService: ChatsService,
+        private chatMessageService: ChatMessageService
+    ) {}
 
-//     @WebSocketServer()
-//         server: Server
+    users: User[] = []
 
-//     async handleConnection(socket: Socket) {
-//         await this.chatService.getUserFromSocket(socket)
-//     }
+    @WebSocketServer()
+        server: Server
 
-//     @SubscribeMessage('send_message')
-//     async listenForMessages(
-//       @MessageBody() content: string,
-//       @ConnectedSocket() socket: Socket,
-//     ) {
-//         const author = await this.chatService.getUserFromSocket(socket)
+    async handleConnection(@ConnectedSocket() socket: Socket) {
+        this.server.emit('user-connected', socket.id)
+    }
+    async handleDisconnect(@ConnectedSocket() socket: Socket) {
+        this.server.emit('user-disconnected', socket.id)
+    }
 
-//         this.server.sockets.emit('receive_message', {
-//             content,
-//             author
-//         })
-//     }
+    @SubscribeMessage('message')
+    @UseGuards(SocketIoJwtAuthGuard)
+    async sendMessageToChat(
+        @SocketIoCurrentUser() user: RequestResponseUser,
+        @MessageBody() data: { chatId: string, text: string }
+    ): Promise<void> {
+        if (!await this.chatsService.getChatById(data.chatId))
+            throw new NotFoundException({ message: 'Chat not found' })
+        if (!await this.chatsService.isUserChatParticipant(user.id, data.chatId))
+            throw new ForbiddenException({ message: 'You are not a chat participant' })
+        const message: Message = await this.chatMessageService.sendMessageToChat({
+            userId: user.id,
+            username: user.username,
+            ...data
+        })
+        this.server.emit('message', user.username + ': ' + message.content.text)
+    }
 
-// }
+}
+
+// PostgreSQL adapter https://socket.io/docs/v4/postgres-adapter/
+
+// { "chatId": "402b052c-4550-40c1-9f81-43b93686346f", "text": "text" }

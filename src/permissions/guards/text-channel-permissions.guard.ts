@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core'
 import { Request } from 'src/auth/types/request-response'
 import { PERMISSIONS_KEY } from '../decorators/required-permissions.decorator'
 import { PermissionsService } from '../permissions.service'
-import { RolePermissionsEnum } from '../types/permissions/role-permissions.enum'
+import { RoleTextChannelPermissionsEnum } from '../types/permissions/role-text-channel-permissions.enum'
 
 @Injectable()
 export class TextChannelPermissionsGuard implements CanActivate {
@@ -14,7 +14,7 @@ export class TextChannelPermissionsGuard implements CanActivate {
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const requiredPermissions = this.reflector.getAllAndOverride<RolePermissionsEnum[]>(
+        const requiredPermissions = this.reflector.getAllAndOverride<RoleTextChannelPermissionsEnum[]>(
             PERMISSIONS_KEY,
             [
                 context.getHandler(),

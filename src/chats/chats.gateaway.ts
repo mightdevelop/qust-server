@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException, UseGuards } from '@nestjs/common'
+import { ForbiddenException, UseGuards } from '@nestjs/common'
 import {
     ConnectedSocket,
     MessageBody, OnGatewayConnection,
@@ -39,12 +39,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('message')
     @UseGuards(SocketIoJwtAuthGuard)
     async sendMessageToChat(
+        @ConnectedSocket() socket: Socket,
         @SocketIoCurrentUser() user: RequestResponseUser,
         @MessageBody() data: { chatId: string, text: string }
     ): Promise<void> {
-        if (!await this.chatsService.getChatById(data.chatId))
-            throw new NotFoundException({ message: 'Chat not found' })
-        if (!await this.chatsService.isUserChatParticipant(user.id, data.chatId))
+        if (!socket.rooms.has(data.chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
         const message: Message = await this.chatMessageService.sendMessageToChat({
             userId: user.id,
@@ -52,6 +51,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             ...data
         })
         this.server.emit('message', user.username + ': ' + message.content.text)
+    }
+
+    @SubscribeMessage('connect-to-chat-rooms')
+    @UseGuards(SocketIoJwtAuthGuard)
+    async connectToChatRooms(
+        @SocketIoCurrentUser() user: RequestResponseUser,
+        @ConnectedSocket() socket: Socket
+    ): Promise<void> {
+        const chatsIds: string[] = await this.chatsService.getChatsIdsByUserId(user.id)
+        socket.join(chatsIds)
     }
 
 }

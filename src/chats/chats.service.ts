@@ -8,6 +8,7 @@ import { ChatUser } from './models/chat-user.model'
 import { Chat } from './models/chats.model'
 import { ChatType } from './types/chat-type'
 import { Message } from 'src/messages/models/messages.model'
+import { Op } from 'sequelize'
 
 
 @Injectable()
@@ -28,6 +29,17 @@ export class ChatsService {
         return chat.messages
     }
 
+    async getChatsByUserId(userId: string): Promise<Chat[]> {
+        const chatsIds: { id: string }[] = (await this.getChatsIdsByUserId(userId)).map(id => ({ id }))
+        const chats: Chat[] = await this.chatRepository.findAll({ where: { [Op.or]: chatsIds } })
+        return chats
+    }
+
+    async getChatsIdsByUserId(userId: string): Promise<string[]> {
+        const chatUserRows: ChatUser[] = await this.chatUserRepository.findAll({ where: { userId } })
+        const chatsIds: string[] = chatUserRows.map(row => row.chatId)
+        return chatsIds
+    }
 
     async isUserChatParticipant (
         userId: string,

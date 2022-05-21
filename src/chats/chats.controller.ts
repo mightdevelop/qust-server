@@ -6,10 +6,8 @@ import { ChatMessageService } from 'src/messages/chat-message.service'
 import { ChatsService } from './chats.service'
 import { CreateChatDto } from './dto/create-chat.dto'
 import { AddUsersToChatDto } from './dto/add-users-to-chat.dto'
-import { UpdateChatDto } from './dto/update-chat.dto'
 import { Chat } from './models/chats.model'
-import { addUsersMessageContent } from 'src/messages/utils/messages-text-content'
-import { SendChatMessageDto } from 'src/messages/dto/send-chat-message.dto'
+import { generateAddUsersMessageContent } from 'src/messages/utils/messages-text-content'
 import StandartBots from 'src/utils/standart-bots-const'
 import { User } from 'src/users/models/users.model'
 import { Message } from 'src/messages/models/messages.model'
@@ -28,32 +26,32 @@ export class ChatsController {
     @Post('/')
     @UseGuards(JwtAuthGuard)
     async createChat(
-        @Body() createChatDto: CreateChatDto,
+        @Body() dto: CreateChatDto,
         @CurrentUser() user: UserFromRequest
     ): Promise<Chat> {
         const chat: Chat = await this.chatsService.createChat({
-            ...createChatDto, chattersIds: [ ...createChatDto.chattersIds, user.id ]
+            ...dto, chattersIds: [ ...dto.chattersIds, user.id ]
         })
         const chatters: User[] = await this.usersService.getChattersByChatId(chat.id)
-        const sendChatMessageDto: SendChatMessageDto = {
+        await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
             username: StandartBots.CHAT_BOT.username,
             chatId: chat.id,
-            text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-        }
-        await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
+            text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
+        })
         return chat
     }
 
-    @Put('/')
+    @Put('/:chatId')
     @UseGuards(JwtAuthGuard)
     async updateChat(
-        @Body() dto: UpdateChatDto,
+        @Param('chatId') chatId,
+        @Body() { name }: {name: string},
         @CurrentUser() user: UserFromRequest
     ): Promise<Chat> {
-        if (!await this.chatsService.isUserChatParticipant(user.id, dto.chatId))
+        if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
-        const chat: Chat = await this.chatsService.updateChat(dto)
+        const chat: Chat = await this.chatsService.updateChat({ name, chatId })
         return chat
     }
 
@@ -69,13 +67,12 @@ export class ChatsController {
             throw new ForbiddenException({ message: 'You are not a chat participant' })
         const chat: Chat = await this.chatsService.addUsersToChat(addUsersDto)
         const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
-        const sendChatMessageDto: SendChatMessageDto = {
+        await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
             username: StandartBots.CHAT_BOT.username,
             chatId,
-            text: addUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
-        }
-        await this.chatMessageService.sendMessageToChat(sendChatMessageDto)
+            text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
+        })
         return chat
     }
 

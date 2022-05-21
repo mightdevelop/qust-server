@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
@@ -73,6 +73,21 @@ export class ChatsController {
             chatId,
             text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         })
+        return chat
+    }
+
+    @Delete('/:chatId')
+    @UseGuards(JwtAuthGuard)
+    async leaveFromChat(
+        @Param('chatId') chatId,
+        @CurrentUser() user: UserFromRequest
+    ): Promise<Chat> {
+        if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
+            throw new ForbiddenException({ message: 'You are not a chat participant' })
+        const chat: Chat = await this.chatsService.leaveFromChat({ userId: user.id, chatId })
+        const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
+        if (chatters.length === 0)
+            await this.chatsService.deleteChat(chat)
         return chat
     }
 

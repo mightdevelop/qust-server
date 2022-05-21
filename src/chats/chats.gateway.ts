@@ -35,7 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         private chatMessageService: ChatMessageService
     ) {}
 
-    users: { id: string, socket: Socket }[] = []
+    private users: { id: string, socket: Socket }[] = []
 
     @WebSocketServer()
         server: Server
@@ -95,7 +95,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             username: user.username,
             text: data.text
         })
-        socket.emit('200', 'message sent')
+        socket.emit('200', 'message sent:' )
     }
 
     @SubscribeMessage('create-chat')
@@ -115,10 +115,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             chatId: chat.id,
             text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         })
-        this.users
+        const socketsOfChatters = this.users
             .filter(user => chatters.some(chatter => chatter.id === user.id))
-            .forEach(user => user.socket.join('chat:' + chat.id))
-        socket.emit('200', 'chat created')
+            .map(user => user.socket)
+        socketsOfChatters.forEach(socket => socket.join('chat:' + chat.id))
+
+        socket.emit('200', 'chat created:' + chat.id)
+        this.server.to(socketsOfChatters.map(socket => socket.id)).emit('chat-created', chat)
     }
 
     @SubscribeMessage('update-chat')
@@ -132,7 +135,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             return
         }
         await this.chatsService.updateChat(dto)
-        socket.emit('200', 'chat updated')
+        socket.emit('200', 'chat updated:' + dto.chatId)
     }
 
     @SubscribeMessage('add-users-to-chat')
@@ -143,7 +146,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @MessageBody() dto: AddUsersToChatDto,
     ): Promise<Chat> {
         if (!socket.rooms.has('chat:' + dto.chatId)) {
-            socket.emit('400', 'You are not connected to chat')
+            socket.emit('400', 'You are not connected to chat:' + dto.chatId)
             return
         }
         await this.chatsService.addUsersToChat(dto)
@@ -154,7 +157,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             chatId: dto.chatId,
             text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         })
-        socket.emit('200', 'users added')
+        socket.emit('200', 'users added:' + chatters.map(chatter => chatter.id))
+    }
+
+    @SubscribeMessage('leave-from-chat')
+    @UseGuards(SocketIoJwtAuthGuard)
+    async leaveFromChat(
+        @ConnectedSocket() socket: Socket,
+        @SocketIoCurrentUser() user: UserFromRequest,
+        @MessageBody() { chatId }: { chatId: string }
+    ): Promise<Chat> {
+        if (!socket.rooms.has('chat:' + chatId)) {
+            socket.emit('400', 'You are not connected to chat')
+            return
+        }
+        const chat: Chat = await this.chatsService.leaveFromChat({ userId: user.id, chatId })
+        const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
+        if (chatters.length === 0)
+            await this.chatsService.deleteChat(chat)
+        socket.emit('200', 'left the chat:' + chatId)
     }
 
 }

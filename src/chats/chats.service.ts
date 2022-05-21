@@ -9,6 +9,7 @@ import { Chat } from './models/chats.model'
 import { ChatType } from './types/chat-type'
 import { Message } from 'src/messages/models/messages.model'
 import { Op } from 'sequelize'
+import { LeaveFromChatDto } from './dto/leave-from-chat.dto'
 
 
 @Injectable()
@@ -77,11 +78,8 @@ export class ChatsService {
         return chat
     }
 
-    async deleteChat(chatId: string): Promise<Chat> {
-        const chat: Chat = await this.chatRepository.findByPk(chatId)
-        if (!chat)
-            throw new NotFoundException({ message: 'Chat not found' })
-        await this.chatUserRepository.destroy({ where: { chatId } })
+    async deleteChat(chat: Chat): Promise<Chat> {
+        chat.destroy()
         return chat
     }
 
@@ -110,6 +108,16 @@ export class ChatsService {
             userId: chatterId
         }))
         await this.chatUserRepository.bulkCreate(arrayToCreateChatUserRows, { validate: true })
+        return chat
+    }
+
+    async leaveFromChat({ userId, chatId }: LeaveFromChatDto): Promise<Chat> {
+        const chat: Chat = await this.chatRepository.findOne({
+            where: { id: chatId, chatType: ChatType.chat }
+        })
+        if (!chat)
+            throw new NotFoundException({ message: 'Chat not found' })
+        await this.chatUserRepository.destroy({ where: { userId } })
         return chat
     }
 

@@ -2,7 +2,7 @@ import { Controller, Get, UseGuards } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { RequestResponseUser } from 'src/auth/types/request-response'
+import { UserFromRequest } from 'src/auth/types/request-response'
 import { Notification } from './models/notifications.model'
 import { NotificationsService } from './notifications.service'
 
@@ -19,7 +19,7 @@ export class NotificationsController {
     @Get('/')
     @UseGuards(JwtAuthGuard)
     async getMyNotifications(
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<Notification[]> {
         const notifications: Notification[] = await this.notificationRepository.findAll({
             where: { userId: user.id }

@@ -1,14 +1,14 @@
 import { Request as ExpressRequest, Response as ExpressResponse } from 'express'
 
 export interface Request extends ExpressRequest {
-    user: RequestResponseUser
+    user: UserFromRequest
 }
 
 export interface Response extends ExpressResponse {
-    user: RequestResponseUser
+    user: UserFromRequest
 }
 
-export type RequestResponseUser = {
+export type UserFromRequest = {
     id: string
     email: string
     username: string

@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { RequestResponseUser } from 'src/auth/types/request-response'
+import { UserFromRequest } from 'src/auth/types/request-response'
 import { GroupsService } from 'src/groups/groups.service'
 import { Group } from 'src/groups/models/groups.model'
 import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
@@ -50,7 +50,7 @@ export class InvitesController {
     @UseGuards(JwtAuthGuard)
     async useInvite(
         @Param('inviteId') inviteId: string,
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<string> {
         const { groupId }: Invite = await this.invitesService.useInvite(inviteId)
         const groupUsers: User[] = await this.usersService.getUsersByGroupId(groupId)

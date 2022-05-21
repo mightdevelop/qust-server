@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, ForbiddenException, NotFoundException, Param, Put, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { RequestResponseUser } from 'src/auth/types/request-response'
+import { UserFromRequest } from 'src/auth/types/request-response'
 import { ChatMessageService } from './chat-message.service'
 import { MessagesService } from './messages.service'
 import { ChatMessage } from './models/chat-message.model'
@@ -20,7 +20,7 @@ export class MessagesController {
     @Put('/:messageId')
     @UseGuards(JwtAuthGuard)
     async updateMessage(
-        @CurrentUser() user: RequestResponseUser,
+        @CurrentUser() user: UserFromRequest,
         @Param('messageId') messageId,
         @Body() { text }: { text: string }
     ): Promise<Message> {
@@ -39,7 +39,7 @@ export class MessagesController {
     @Delete('/:messageId')
     @UseGuards(JwtAuthGuard)
     async deleteMessage(
-        @CurrentUser() user: RequestResponseUser,
+        @CurrentUser() user: UserFromRequest,
         @Param('messageId') messageId: string
     ): Promise<Message> {
         const message: Message = await this.messagesService.getMessageById(messageId)

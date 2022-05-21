@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
-import { RequestResponseUser } from 'src/auth/types/request-response'
+import { UserFromRequest } from 'src/auth/types/request-response'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { FriendsService } from './friends.service'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
@@ -24,7 +24,7 @@ export class FriendsController {
     @Get('/')
     @UseGuards(JwtAuthGuard)
     async getAllMyFriends(
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<User[]> {
         const friends: User[] = await this.usersService.getFriendsByUserId(user.id)
         return friends
@@ -33,7 +33,7 @@ export class FriendsController {
     @Get('/requests/fromme')
     @UseGuards(JwtAuthGuard)
     async getFriendshipRequestsFromMe(
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<Friend[]> {
         const requests: Friend[] = await this.userFriendsRepository.findAll({ where: {
             userId: user.id,
@@ -45,7 +45,7 @@ export class FriendsController {
     @Get('/requests/tome')
     @UseGuards(JwtAuthGuard)
     async getFriendshipRequestsToMe(
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<Friend[]> {
         const requests: Friend[] = await this.userFriendsRepository.findAll({ where: {
             friendId: user.id,
@@ -58,7 +58,7 @@ export class FriendsController {
     @UseGuards(JwtAuthGuard)
     async friendshipRequest(
         @Param('friendId') friendId: string,
-        @CurrentUser() user: RequestResponseUser,
+        @CurrentUser() user: UserFromRequest,
         @Body('cancel') cancel: boolean
     ): Promise<string> {
         if (cancel) {
@@ -76,7 +76,7 @@ export class FriendsController {
     @UseGuards(JwtAuthGuard)
     async responseToFriendshipRequest(
         @Param('requestedUserId') requestedUserId: string,
-        @CurrentUser() user: RequestResponseUser,
+        @CurrentUser() user: UserFromRequest,
         @Body() { isConfirm }: {isConfirm: boolean}
     ): Promise<string> {
         await this.friendsService.responseToFriendshipRequest(requestedUserId, user.id, isConfirm)
@@ -88,7 +88,7 @@ export class FriendsController {
     @UseGuards(JwtAuthGuard)
     async removeFriend(
         @Param('friendId') friendId: string,
-        @CurrentUser() user: RequestResponseUser,
+        @CurrentUser() user: UserFromRequest,
     ): Promise<string> {
         const userFriendRow: Friend = await this.friendsService.getUserFriendRow(friendId, user.id)
         if (!userFriendRow)

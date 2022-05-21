@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
-import { RequestResponseUser, Response } from './types/request-response'
+import { UserFromRequest, Response } from './types/request-response'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { AuthService } from './auth.service'
 import { ValidateUserDto } from './dto/validate-user.dto'
@@ -40,7 +40,7 @@ export class AuthController {
     @UseGuards(JwtRefreshGuard)
     async refresh(
         @Body('refresh_token') refreshToken: string,
-        @CurrentUser() { id }: RequestResponseUser
+        @CurrentUser() { id }: UserFromRequest
     ): Promise<Tokens> {
         const user: User = await this.usersService.getUserById(id)
         const isRefreshTokenMatches: boolean = await this.authService.isRefreshTokenMatches(refreshToken, id)

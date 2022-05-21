@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/sequelize": "^8.0.0",
     "@nestjs/websockets": "^8.4.4",
+    "@socket.io/redis-adapter": "^7.2.0",
     "bcrypt": "^5.0.1",
     "cache-manager": "^3.6.1",
     "cache-manager-redis-store": "^2.0.0",

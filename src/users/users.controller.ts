@@ -18,6 +18,8 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
+import { usersToResponse } from './utils/users-to-UserToResponse-array'
+import { UserToResponse } from './types/user-to-response.class'
 
 
 @Controller('/users')
@@ -28,30 +30,30 @@ export class UsersController {
     ) {}
 
     @Get('/')
-    async getAllUsers(): Promise<User[]> {
+    async getAllUsers(): Promise<UserToResponse[]> {
         const users: User[] = await this.usersService.getAllUsers()
-        return users
+        return await usersToResponse(users)
     }
 
     @Get('/:userId')
     async getUserById(
         @Param('userId') userId: string,
-    ): Promise<User> {
+    ): Promise<UserToResponse> {
         const user: User = await this.usersService.getUserById(userId)
         if (!user)
             throw new NotFoundException({ message: 'User not found' })
-        return user
+        return await usersToResponse([ user ])[0]
     }
 
     @Get('/:userId/friends')
     async getFriendsByUserId(
         @Param('userId') userId: string,
-    ): Promise<User[]> {
+    ): Promise<UserToResponse[]> {
         const user = await this.usersService.getUserById(userId)
         if (!user)
             throw new NotFoundException({ message: 'User not found' })
         const friends: User[] = await this.usersService.getFriendsByUserId(userId)
-        return friends
+        return await usersToResponse(friends)
     }
 
     @Post('/')
@@ -59,9 +61,9 @@ export class UsersController {
     @UseGuards(JwtAuthGuard, AdminGuard)
     async createUser(
         @Body() dto: CreateUserDto,
-    ): Promise<User> {
+    ): Promise<UserToResponse> {
         const user: User = await this.usersService.createUser(dto)
-        return user
+        return await usersToResponse([ user ])[0]
     }
 
     @Put('/:userId')
@@ -70,7 +72,7 @@ export class UsersController {
         @Param('userId') userId: string,
         @Body() dto: UpdateUserDto,
         @CurrentUser() { id, isAdmin },
-    ): Promise<User> {
+    ): Promise<UserToResponse> {
         if (!userId)
             userId = id
         const user: User = await this.usersService.getUserById(userId)
@@ -81,7 +83,7 @@ export class UsersController {
             throw new ForbiddenException({ message: 'You have no access' })
         }
         const updatedUser: User = await this.usersService.updateUser(userId, dto)
-        return updatedUser
+        return await usersToResponse([ updatedUser ])[0]
     }
 
     @Delete('/:userId')
@@ -89,9 +91,9 @@ export class UsersController {
     @UseGuards(JwtAuthGuard, AdminGuard)
     async deleteUser(
         @Param('userId') userId: string,
-    ): Promise<User> {
+    ): Promise<UserToResponse> {
         const user: User = await this.usersService.deleteUser(userId)
-        return user
+        return await usersToResponse([ user ])[0]
     }
 
 }

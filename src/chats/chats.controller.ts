@@ -1,7 +1,7 @@
 import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { RequestResponseUser } from 'src/auth/types/request-response'
+import { UserFromRequest } from 'src/auth/types/request-response'
 import { ChatMessageService } from 'src/messages/chat-message.service'
 import { ChatsService } from './chats.service'
 import { CreateChatDto } from './dto/create-chat.dto'
@@ -29,7 +29,7 @@ export class ChatsController {
     @UseGuards(JwtAuthGuard)
     async createChat(
         @Body() createChatDto: CreateChatDto,
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<Chat> {
         const chat: Chat = await this.chatsService.createChat({
             ...createChatDto, chattersIds: [ ...createChatDto.chattersIds, user.id ]
@@ -49,7 +49,7 @@ export class ChatsController {
     @UseGuards(JwtAuthGuard)
     async updateChat(
         @Body() dto: UpdateChatDto,
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<Chat> {
         if (!await this.chatsService.isUserChatParticipant(user.id, dto.chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
@@ -62,7 +62,7 @@ export class ChatsController {
     async addUsersToChat(
         @Param('chatId') chatId: string,
         @Body() { chattersIds }: { chattersIds: string[] },
-        @CurrentUser() user: RequestResponseUser,
+        @CurrentUser() user: UserFromRequest,
     ): Promise<Chat> {
         const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
@@ -83,7 +83,7 @@ export class ChatsController {
     @UseGuards(JwtAuthGuard)
     async sendMessageToChat(
         @Param('chatId') chatId: string,
-        @CurrentUser() user: RequestResponseUser,
+        @CurrentUser() user: UserFromRequest,
         @Body() { text }: { text: string }
     ): Promise<Message> {
         if (!await this.chatsService.getChatById(chatId))
@@ -103,7 +103,7 @@ export class ChatsController {
     @UseGuards(JwtAuthGuard)
     async getMessagesFromChat(
         @Param('chatId') chatId: string,
-        @CurrentUser() user: RequestResponseUser
+        @CurrentUser() user: UserFromRequest
     ): Promise<Message[]> {
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })

@@ -62,10 +62,10 @@ export class ChatsController {
         @Body() { chattersIds }: { chattersIds: string[] },
         @CurrentUser() user: UserFromRequest,
     ): Promise<Chat> {
-        const addUsersDto: AddUsersToChatDto = { chatId, chattersIds }
+        const dto: AddUsersToChatDto = { chatId, chattersIds }
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
-        const chat: Chat = await this.chatsService.addUsersToChat(addUsersDto)
+        const chat: Chat = await this.chatsService.addUsersToChat(dto)
         const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,

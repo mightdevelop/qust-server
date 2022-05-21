@@ -20,6 +20,7 @@ import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import StandartBots from 'src/utils/standart-bots-const'
 import { ChatsService } from './chats.service'
+import { AddUsersToChatDto } from './dto/add-users-to-chat.dto'
 import { CreateChatDto } from './dto/create-chat.dto'
 import { UpdateChatDto } from './dto/update-chat.dto'
 import { Chat } from './models/chats.model'
@@ -44,11 +45,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             socket.handshake.headers.authorization.split(' ')[1]
         ) as TokenPayload
         this.users.push({ id, socket })
-        socket.emit('user-connected', socket.id)
+        socket.emit('200', socket.id)
     }
     async handleDisconnect(@ConnectedSocket() socket: Socket) {
         this.users.filter(user => user.socket.id !== socket.id)
-        socket.emit('user-disconnected', socket.id)
     }
 
     @SubscribeMessage('connect-to-chat-rooms')
@@ -68,11 +68,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @MessageBody() { chatId }: { chatId: string }
     ): Promise<void> {
         if (!socket.rooms.has('chat:' + chatId)) {
-            socket.emit('error', 'You are not connected to chat')
+            socket.emit('400', 'You are not connected to chat')
             return
         }
         const messages: Message[] = await this.chatsService.getMessagesFromChat(chatId)
-        socket.emit('get-messages-from-chat', messages)
+        socket.emit('200', messages)
     }
 
     @SubscribeMessage('send-message')
@@ -83,7 +83,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @MessageBody() data: { chatId: string, text: string }
     ): Promise<void> {
         if (!socket.rooms.has('chat:' + data.chatId)) {
-            socket.emit('error', 'You are not connected to chat')
+            socket.emit('400', 'You are not connected to chat')
             return
         }
         await this.chatMessageService.sendMessageToChat({
@@ -95,6 +95,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             username: user.username,
             text: data.text
         })
+        socket.emit('200', 'message sent')
     }
 
     @SubscribeMessage('create-chat')
@@ -117,7 +118,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.users
             .filter(user => chatters.some(chatter => chatter.id === user.id))
             .forEach(user => user.socket.join('chat:' + chat.id))
-        socket.emit('chat-created')
+        socket.emit('200', 'chat created')
     }
 
     @SubscribeMessage('update-chat')
@@ -127,11 +128,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @MessageBody() dto: UpdateChatDto
     ): Promise<void> {
         if (!socket.rooms.has('chat:' + dto.chatId)) {
-            socket.emit('error', 'You are not connected to chat')
+            socket.emit('400', 'You are not connected to chat')
             return
         }
         await this.chatsService.updateChat(dto)
-        socket.emit('chat-updated')
+        socket.emit('200', 'chat updated')
+    }
+
+    @SubscribeMessage('add-users-to-chat')
+    @UseGuards(SocketIoJwtAuthGuard)
+    async addUsersToChat(
+        @ConnectedSocket() socket: Socket,
+        @SocketIoCurrentUser() user: UserFromRequest,
+        @MessageBody() dto: AddUsersToChatDto,
+    ): Promise<Chat> {
+        if (!socket.rooms.has('chat:' + dto.chatId)) {
+            socket.emit('400', 'You are not connected to chat')
+            return
+        }
+        await this.chatsService.addUsersToChat(dto)
+        const chatters: User[] = await this.usersService.getChattersByChatId(dto.chatId)
+        await this.chatMessageService.sendMessageToChat({
+            userId: StandartBots.CHAT_BOT.id,
+            username: StandartBots.CHAT_BOT.username,
+            chatId: dto.chatId,
+            text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
+        })
+        socket.emit('200', 'users added')
     }
 
 }

@@ -59,6 +59,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     ): Promise<void> {
         const chatsIds: string[] = await this.chatsService.getChatsIdsByUserId(user.id)
         socket.join(chatsIds.map(id => 'chat:' + id))
+        socket.emit('200', chatsIds)
     }
 
     @SubscribeMessage('get-messages-from-chat')

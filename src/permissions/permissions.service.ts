@@ -18,6 +18,9 @@ import { DefaultRolePermissions } from './types/permissions/default-permissions'
 import { RolePermissionsEnum } from './types/permissions/role-permissions.enum'
 import { TextChannelRolePermissions } from 'src/text-channels/models/text-channel-role-permissions.model'
 import { RoleTextChannelPermissionsEnum } from './types/permissions/role-text-channel-permissions.enum'
+import { UserIdAndGroupIdDto } from './dto/user-id and-group-id.dto'
+import { TextChannel } from 'src/text-channels/models/text-channels.model'
+import { CategoryRolePermissions } from 'src/categories/models/category-role-permissions.model'
 
 
 @Injectable()
@@ -51,7 +54,9 @@ export class PermissionsService {
     async doesUserHavePermissionsInGroup(dto: UserPermissionsInGroupDto): Promise<boolean> {
         const isOwner: boolean = await this.isUserOwner(dto.userId, dto.groupId)
         if (isOwner) return true
-        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(dto.userId, dto.groupId, true)
+        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
+            dto.userId, dto.groupId, [ RolePermissions ]
+        )
         if (!roles.length)
             throw new ForbiddenException({ message: 'You are not a group participant' })
         const userGroupPermissions =
@@ -64,7 +69,7 @@ export class PermissionsService {
     private async getPermissionsByRolesArrayInGroup(
         dto: PermissionsByRolesInGroupDto
     ): Promise<{
-        allowed: RolePermissionsEnum[],
+        allowed: RolePermissionsEnum[]
         notAllowed: RolePermissionsEnum[]
     }> {
         const permissions: [RolePermissionsEnum, ForcedPermissionLevel][] =
@@ -89,11 +94,14 @@ export class PermissionsService {
     async doesUserHavePermissionsInTextChannel(dto: UserPermissionsInTextChannelDto): Promise<boolean> {
         const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(dto.channelId)
         if (await this.isUserOwner(dto.userId, groupId)) return true
-        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(dto.userId, groupId)
+        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
+            dto.userId, groupId, [ RolePermissions, TextChannelRolePermissions ]
+        )
         if (!roles.length)
             throw new ForbiddenException({ message: 'You are not a group participant' })
         const userTextChannelPermissions =
             await this.getPermissionsByRolesArrayInTextChannel({ roles, channelId: dto.channelId })
+        dto.requiredPermissions.push(RoleTextChannelPermissionsEnum.viewTextChannels)
 
         const isSomePermissionNotAllowed = !!dto.requiredPermissions
             .filter(p => userTextChannelPermissions.notAllowed.includes(p)).length
@@ -114,15 +122,16 @@ export class PermissionsService {
     }
 
     private async getPermissionsByRolesArrayInTextChannel(
-        dto: PermissionsByRolesInTextChannelDto
+        { roles, channelId }: PermissionsByRolesInTextChannelDto
     ): Promise<{
-        allowed: RoleTextChannelPermissionsEnum[],
+        allowed: RoleTextChannelPermissionsEnum[]
         notSpecified: RoleTextChannelPermissionsEnum[]
         notAllowed: RoleTextChannelPermissionsEnum[]
     }> {
         const permissions: [RoleTextChannelPermissionsEnum, PermissionLevel][] =
             [].concat(...
-            dto.roles.map(role => role.textChannelPermissions)
+            roles
+                .map(role => role.textChannelPermissions.find(row => row.channelId === channelId))
                 .map(permissionsRow => Object
                     .entries(TextChannelRolePermissions)
                     .map(p => [ p[0], permissionsRow
@@ -146,21 +155,53 @@ export class PermissionsService {
         }
     }
 
-    async doesUserCanManageCategory(dto: UserPermissionsInCategoryDto): Promise<boolean> {
-        const category: Category = await this.categoriesService.getCategoryById(dto.categoryId)
+    async doesUserCanManageCategory(
+        { categoryId, userId }: UserPermissionsInCategoryDto
+    ): Promise<boolean> {
+        const category: Category = await this.categoriesService.getCategoryById(categoryId)
         if (!category)
             throw new NotFoundException({ message: 'Category not found' })
-        if (await this.isUserOwner(dto.userId, category.groupId)) return true
-        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(dto.userId, category.groupId)
-        const manageCategoryPermissions = roles.map(role => role.categoryPermissions.manageCategory)
+        if (await this.isUserOwner(userId, category.groupId)) return true
+        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
+            userId, category.groupId, [ RolePermissions, CategoryRolePermissions ]
+        )
+        const manageCategoryPermissions: PermissionLevel[] =
+            roles.map(role => role.categoryPermissions
+                .find(row => row.categoryId === categoryId).manageCategory)
+
         if (manageCategoryPermissions.some(p => p === PermissionLevel.ALOWED))
             return true
         if (manageCategoryPermissions.every(p => p === PermissionLevel.NOT_ALOWED))
             return false
         const userGroupPermissions =
             await this.getPermissionsByRolesArrayInGroup({ roles, groupId: category.groupId })
-        const groupPermsAllowed: RolePermissionsEnum[] = userGroupPermissions.allowed
-        return groupPermsAllowed.includes(RolePermissionsEnum.manageCategoriesAndChannels)
+        return userGroupPermissions.allowed.includes(RolePermissionsEnum.manageCategoriesAndChannels)
+    }
+
+    async getAllowedToViewTextChannelsIdsInGroup(dto: UserIdAndGroupIdDto): Promise<string[]> {
+        const group: Group = await this.groupsService.getGroupById(dto.groupId, true)
+        const channels: TextChannel[] = [].concat(...group.categories.map(category => category.channels))
+        if (await this.isUserOwner(dto.userId, dto.groupId))
+            return channels.map(channel => channel.id)
+        const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
+            dto.userId, dto.groupId, [ RolePermissions, TextChannelRolePermissions ]
+        )
+        const userGroupPermissions =
+            await this.getPermissionsByRolesArrayInGroup({ roles, groupId: dto.groupId })
+        const allowedToViewChannelsIds: string[] = []
+        for (const channel of channels) {
+            const viewChannelPermissions: PermissionLevel[] =
+                roles.map(role => role.textChannelPermissions
+                    .find(row => row.channelId === channel.id).viewTextChannels)
+
+            if (
+                viewChannelPermissions.every(p => p === PermissionLevel.NOT_ALOWED)
+                &&
+                userGroupPermissions.notAllowed.includes(RolePermissionsEnum.viewTextChannels)
+            ) continue
+            allowedToViewChannelsIds.push(channel.id)
+        }
+        return allowedToViewChannelsIds
     }
 
 }

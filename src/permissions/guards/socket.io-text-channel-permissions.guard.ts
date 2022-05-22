@@ -1,8 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, forwardRef, Inject } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { Request } from 'src/auth/types/request-response'
-import { GroupsService } from 'src/groups/groups.service'
-import { TextChannelsService } from 'src/text-channels/text-channels.service'
 import { PERMISSIONS_KEY } from '../decorators/required-permissions.decorator'
 import { PermissionsService } from '../permissions.service'
 import { RoleTextChannelPermissionsEnum } from '../types/permissions/role-text-channel-permissions.enum'
@@ -13,8 +11,6 @@ export class TextChannelPermissionsGuard implements CanActivate {
     constructor(
         private reflector: Reflector,
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
-        @Inject(forwardRef(() => GroupsService)) private groupsService: GroupsService,
-        @Inject(forwardRef(() => TextChannelsService)) private textChannelsService: TextChannelsService
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,11 +21,8 @@ export class TextChannelPermissionsGuard implements CanActivate {
                 context.getClass(),
             ]
         )
-        const req: Request = context.switchToHttp().getRequest()
-        if (!requiredPermissions)
-            return await this.groupsService.isUserGroupParticipant(
-                req.user.id, await this.textChannelsService.getGroupIdByTextChannelId(req.params.channelId)
-            )
+        if (!requiredPermissions) return true
+        const req: Request = context.switchToWs().getClient().handshake
         return await this.permissionsService.doesUserHavePermissionsInTextChannel({
             userId: req.user.id,
             channelId: req.params.channelId,

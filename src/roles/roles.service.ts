@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { Op } from 'sequelize'
+import { Includeable, Op } from 'sequelize'
 import { GroupsService } from 'src/groups/groups.service'
 import { RolePermissions } from 'src/permissions/models/role-permissions.model'
 import { PermissionsService } from 'src/permissions/permissions.service'
@@ -10,6 +10,8 @@ import { DeleteRoleDto } from './dto/delete-role.dto'
 import { UpdateRoleDto } from './dto/update-role.dto'
 import { RoleUser } from './models/role-user.model'
 import { Role } from './models/roles.model'
+import { TextChannelRolePermissions } from 'src/text-channels/models/text-channel-role-permissions.model'
+import { CategoryRolePermissions } from 'src/categories/models/category-role-permissions.model'
 
 
 @Injectable()
@@ -36,40 +38,25 @@ export class RolesService {
     async getUserRolesByGroupId(
         userId: string,
         groupId: string,
-        includePermissions?: boolean
+        include: Includeable | Includeable[]
     ): Promise<Role[]> {
         if (!await this.groupsService.isUserGroupParticipant(userId, groupId)) return []
-        const groupRoles: Role[] =
-            includePermissions
-                ?
-                await this.roleRepository.findAll({ where: { groupId }, include: RolePermissions })
-                :
-                await this.roleRepository.findAll({ where: { groupId } })
+        const groupRoles: Role[] = await this.roleRepository.findAll(
+            { where: { groupId }, include: RolePermissions }
+        )
         const roleUserRows: RoleUser[] = await this.roleUserRepository.findAll({ where: {
             [Op.or]: groupRoles.map(role => ({
                 userId,
                 roleId: role.id
             }))
         } })
-        const userRoles: Role[] =
-        includePermissions
-            ?
-            await this.roleRepository.findAll({ where: {
-                [Op.or]: roleUserRows.map(row => ({ id: row.roleId })) }, include: RolePermissions
-            })
-            :
-            await this.roleRepository.findAll({ where: {
-                [Op.or]: roleUserRows.map(row => ({ id: row.roleId })) }
-            })
+        const userRoles: Role[] = await this.roleRepository.findAll({ where: {
+            [Op.or]: roleUserRows.map(row => ({ id: row.roleId })) }, include
+        })
         if (!userRoles.find(r => r.name === 'everyone')) {
-            const everyone: Role =
-                includePermissions
-                    ?
-                    await this.roleRepository.findOne(
-                        { where: { name: 'everyone' }, include: RolePermissions }
-                    )
-                    :
-                    await this.roleRepository.findOne({ where: { name: 'everyone' } })
+            const everyone: Role = await this.roleRepository.findOne(
+                { where: { name: 'everyone' }, include: RolePermissions }
+            )
             userRoles.push(everyone)
         }
         return userRoles
@@ -95,8 +82,8 @@ export class RolesService {
     }
 
     async updateRole({ role, color, name }: UpdateRoleDto): Promise<Role> {
-        await role.update({ color, name })
-        return role
+        const updatedRole: Role = await role.update({ color, name })
+        return updatedRole
     }
 
     async deleteRole({ role }: DeleteRoleDto): Promise<Role> {

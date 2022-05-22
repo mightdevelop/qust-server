@@ -31,10 +31,10 @@ export class Role extends Model<Role> {
 
 
     @HasMany(() => CategoryRolePermissions, { onDelete: 'cascade' })
-        categoryPermissions: CategoryRolePermissions
+        categoryPermissions: CategoryRolePermissions[]
 
     @HasMany(() => TextChannelRolePermissions, { onDelete: 'cascade' })
-        textChannelPermissions: TextChannelRolePermissions
+        textChannelPermissions: TextChannelRolePermissions[]
 
     @HasOne(() => RolePermissions, { onDelete: 'cascade' })
         permissions: RolePermissions

@@ -4,9 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { User } from './users/models/users.model'
 import 'dotenv/config'
 import { AuthModule } from './auth/auth.module'
-import { Notification } from './notifications/models/notifications.model'
 import { UsersModule } from './users/users.module'
-import { NotificationsModule } from './notifications/notifications.module'
 import { MessagesModule } from './messages/messages.module'
 import { ChatsModule } from './chats/chats.module'
 import { Chat } from './chats/models/chats.model'
@@ -48,7 +46,6 @@ import { InvitesModule } from './invites/invites.module'
             models: [
                 User,
                 Friend,
-                Notification,
                 Chat,
                 ChatUser,
                 Message,
@@ -70,7 +67,6 @@ import { InvitesModule } from './invites/invites.module'
         forwardRef(() => UsersModule),
         forwardRef(() => AuthModule),
         forwardRef(() => FriendsModule),
-        forwardRef(() => NotificationsModule),
         forwardRef(() => MessagesModule),
         forwardRef(() => ChatsModule),
         forwardRef(() => GroupsModule),

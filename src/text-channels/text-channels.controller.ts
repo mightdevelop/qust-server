@@ -9,7 +9,7 @@ import { TextChannel } from './models/text-channels.model'
 import { TextChannelsService } from './text-channels.service'
 
 
-@Controller('/channels')
+@Controller('/text-channels')
 export class TextChannelsController {
 
     constructor(

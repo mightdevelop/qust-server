@@ -6,6 +6,8 @@ import { LayoutsService } from '../layouts/layouts.service'
 import { Group } from './models/groups.model'
 import { AddUserToGroupDto } from './dto/add-user-to-group.dto'
 import { GroupUser } from './models/group-user.model'
+import { Category } from 'src/categories/models/categories.model'
+import { TextChannel } from 'src/text-channels/models/text-channels.model'
 
 
 @Injectable()
@@ -17,9 +19,20 @@ export class GroupsService {
         @InjectModel(GroupUser) private groupUserRepository: typeof GroupUser,
     ) {}
 
-    async getGroupById(groupId: string): Promise<Group> {
-        const group: Group = await this.groupRepository.findByPk(groupId)
+    async getGroupById(groupId: string, includeCategoriesAndChannels?: boolean): Promise<Group> {
+        const group: Group =
+            includeCategoriesAndChannels
+                ?
+                await this.groupRepository.findByPk(groupId,
+                    { include: [ { model: Category, include: [ TextChannel ] } ] }
+                )
+                :
+                await this.groupRepository.findByPk(groupId)
         return group
+    }
+
+    async getGroupsIdsByUserId(userId: string): Promise<string[]> {
+        return (await this.groupUserRepository.findAll({ where: { userId } })).map(row => row.groupId)
     }
 
     async isUserGroupParticipant(userId: string, groupId: string): Promise<boolean> {

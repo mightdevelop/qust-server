@@ -1,6 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
-import { NotificationsModule } from 'src/notifications/notifications.module'
 import { UsersModule } from 'src/users/users.module'
 import { FriendsController } from './friends.controller'
 import { FriendsService } from './friends.service'
@@ -15,7 +14,6 @@ import { Friend } from './models/friends.model'
     imports: [
         SequelizeModule.forFeature([ Friend ]),
         forwardRef(() => UsersModule),
-        NotificationsModule
     ],
     exports: [ FriendsService ]
 })

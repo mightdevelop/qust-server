@@ -7,7 +7,6 @@ import { User } from 'src/users/models/users.model'
 import { Friend } from './models/friends.model'
 import { InjectModel } from '@nestjs/sequelize'
 import { FriendRequestStatus } from './types/friend-request-status'
-import { NotificationsService } from 'src/notifications/notifications.service'
 import { UsersService } from 'src/users/users.service'
 
 
@@ -17,7 +16,6 @@ export class FriendsController {
     constructor(
         private friendsService: FriendsService,
         private usersService: UsersService,
-        private notificationsService: NotificationsService,
         @InjectModel(Friend) private userFriendsRepository: typeof Friend,
     ) {}
 
@@ -66,9 +64,9 @@ export class FriendsController {
             return 'Friendship request canceled'
         }
         await this.friendsService.friendshipRequest(friendId, user.id)
-        await this.notificationsService.sendFriendshipRequestNotification(
-            friendId, { requesterUsername: user.username }
-        )
+        // await this.notificationsService.sendFriendshipRequestNotification(
+        //     friendId, { requesterUsername: user.username }
+        // )
         return 'Friendship requested'
     }
 

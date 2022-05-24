@@ -29,6 +29,7 @@ import { RolePermissions } from './permissions/models/role-permissions.model'
 import { PermissionsModule } from './permissions/permissions.module'
 import { RolesModule } from './roles/roles.module'
 import { InvitesModule } from './invites/invites.module'
+import { TextChannelMessage } from './messages/models/text-channel-message.model'
 
 
 @Module({
@@ -58,6 +59,7 @@ import { InvitesModule } from './invites/invites.module'
                 RolePermissions,
                 TextChannel,
                 TextChannelRolePermissions,
+                TextChannelMessage,
                 Category,
                 CategoryRolePermissions,
             ],

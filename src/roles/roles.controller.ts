@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
+import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { TextChannelPermissionsGuard } from 'src/permissions/guards/text-channel-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
@@ -17,7 +17,7 @@ export class RolesController {
     ) {}
 
     @Post('/')
-    @RequiredPermissions([ RolePermissionsEnum.manageRoles ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.manageRoles ])
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async createRole(
         @Body() dto: CreateRoleDto,
@@ -27,7 +27,7 @@ export class RolesController {
     }
 
     @Put('/:roleId')
-    @RequiredPermissions([ RolePermissionsEnum.manageRoles ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.manageRoles ])
     @UseGuards(JwtAuthGuard, TextChannelPermissionsGuard)
     async updateRole(
         @Param('roleId') roleId: string,
@@ -44,7 +44,7 @@ export class RolesController {
     }
 
     @Delete('/:roleId')
-    @RequiredPermissions([ RolePermissionsEnum.manageRoles ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.manageRoles ])
     @UseGuards(JwtAuthGuard, TextChannelPermissionsGuard)
     async deleteRole(
         @Param('roleId') roleId: string,

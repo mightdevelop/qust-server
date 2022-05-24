@@ -8,16 +8,22 @@ import { TextChannel } from './models/text-channels.model'
 import { CategoriesModule } from 'src/categories/categories.module'
 import { PermissionsModule } from 'src/permissions/permissions.module'
 import { GroupsModule } from 'src/groups/groups.module'
+import { UsersModule } from 'src/users/users.module'
+import { TextChannelsGateway } from './text-channels.gateway'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
     controllers: [ TextChannelsController ],
-    providers: [ TextChannelsService ],
+    providers: [ TextChannelsService, TextChannelsGateway ],
     imports: [
         SequelizeModule.forFeature([ TextChannel, TextChannelRolePermissions ]),
         MessagesModule,
         CategoriesModule,
         PermissionsModule,
-        forwardRef(() => GroupsModule)
+        forwardRef(() => GroupsModule),
+        UsersModule,
+        JwtModule.register({}),
+        MessagesModule,
     ],
     exports: [ TextChannelsService ]
 })

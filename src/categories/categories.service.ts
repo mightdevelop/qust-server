@@ -23,9 +23,10 @@ export class CategoriesService {
         return category
     }
 
-    async updateCategory(dto: UpdateCategoryDto): Promise<Category> {
-        const updatedCategory: Category = await dto.category.update({ name: dto.name })
-        return updatedCategory
+    async updateCategory({ category, name }: UpdateCategoryDto): Promise<Category> {
+        category.name = name
+        category.save()
+        return category
     }
 
     async deleteCategory({ category }: DeleteCategoryDto): Promise<Category> {

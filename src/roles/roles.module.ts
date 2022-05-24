@@ -6,6 +6,7 @@ import { Role } from './models/roles.model'
 import { RoleUser } from './models/role-user.model'
 import { PermissionsModule } from 'src/permissions/permissions.module'
 import { GroupsModule } from 'src/groups/groups.module'
+import { TextChannelsModule } from 'src/text-channels/text-channels.module'
 
 @Module({
     controllers: [ RolesController ],
@@ -16,7 +17,8 @@ import { GroupsModule } from 'src/groups/groups.module'
             RoleUser,
         ]),
         forwardRef(() => GroupsModule),
-        forwardRef(() => PermissionsModule)
+        forwardRef(() => PermissionsModule),
+        forwardRef(() => TextChannelsModule)
     ],
     exports: [ RolesService ]
 })

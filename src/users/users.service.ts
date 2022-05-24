@@ -26,10 +26,17 @@ export class UsersService {
     }
 
     async getUserById(
-        authorId: string
+        userId: string
     ): Promise<User> {
-        const user: User = await this.userRepository.findByPk(authorId)
+        const user: User = await this.userRepository.findByPk(userId)
         return user
+    }
+
+    async getUsersByIdsArray(
+        usersIds: string[]
+    ): Promise<User[]> {
+        const users: User[] = await this.userRepository.findAll({ where: { [Op.or]: { id: usersIds } } })
+        return users
     }
 
     async getUserByUsername(
@@ -93,7 +100,8 @@ export class UsersService {
         dto: UpdateUserDto
     ): Promise<User> {
         const user: User = await this.userRepository.findByPk(userId)
-        await user.update(dto)
+        user.setAttributes(dto)
+        await user.save()
         return user
     }
 

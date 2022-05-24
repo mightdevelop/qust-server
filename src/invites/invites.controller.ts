@@ -4,7 +4,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { GroupsService } from 'src/groups/groups.service'
 import { Group } from 'src/groups/models/groups.model'
-import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
+import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
 import { User } from 'src/users/models/users.model'
@@ -24,7 +24,7 @@ export class InvitesController {
     ) {}
 
     @Get('/')
-    @RequiredPermissions([ RolePermissionsEnum.manageGroup ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.manageGroup ])
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async getInvitesByGroupId(
         @Body() { groupId }: { groupId: string }
@@ -34,7 +34,7 @@ export class InvitesController {
     }
 
     @Post('/')
-    @RequiredPermissions([ RolePermissionsEnum.inviteUsers ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.inviteUsers ])
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async createInvite(
         @Body() dto: CreateInviteDto

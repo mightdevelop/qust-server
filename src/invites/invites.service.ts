@@ -40,7 +40,8 @@ export class InvitesService {
             await invite.destroy()
             return invite
         }
-        await invite.update({ remainingUsages: invite.remainingUsages - 1 })
+        invite.remainingUsages =- 1
+        await invite.save()
         return invite
     }
 

@@ -7,12 +7,12 @@ import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { UsersService } from 'src/users/users.service'
 
 @Injectable()
-export class JwtAuthStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class SocketIoJwtAuthStrategy extends PassportStrategy(Strategy, 'socket.io-jwt') {
     constructor(
         private usersService: UsersService,
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromUrlQueryParameter('access_token'),
             ignoreExpiration: false,
             secretOrKey: accessConfig.secret,
         })

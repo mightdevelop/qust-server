@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
+import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
@@ -17,7 +17,7 @@ export class CategoriesController {
     ) {}
 
     @Post('/')
-    @RequiredPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async createCategory(
         @Body() dto: CreateCategoryDto

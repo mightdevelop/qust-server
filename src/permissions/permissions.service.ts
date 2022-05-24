@@ -18,7 +18,7 @@ import { DefaultRolePermissions } from './types/permissions/default-permissions'
 import { RolePermissionsEnum } from './types/permissions/role-permissions.enum'
 import { TextChannelRolePermissions } from 'src/text-channels/models/text-channel-role-permissions.model'
 import { RoleTextChannelPermissionsEnum } from './types/permissions/role-text-channel-permissions.enum'
-import { UserIdAndGroupIdDto } from './dto/user-id and-group-id.dto'
+import { UserIdAndGroupIdDto } from './dto/user-id-and-group-id.dto'
 import { TextChannel } from 'src/text-channels/models/text-channels.model'
 import { CategoryRolePermissions } from 'src/categories/models/category-role-permissions.model'
 
@@ -42,7 +42,8 @@ export class PermissionsService {
 
     async restoreDefaultRolePermissions(roleId: string): Promise<RolePermissions> {
         const permissions: RolePermissions = await this.roleGroupPermissionsRepository.findByPk(roleId)
-        await permissions.update(DefaultRolePermissions)
+        permissions.setAttributes(DefaultRolePermissions)
+        await permissions.save()
         return permissions
     }
 
@@ -179,7 +180,9 @@ export class PermissionsService {
     }
 
     async getAllowedToViewTextChannelsIdsInGroup(dto: UserIdAndGroupIdDto): Promise<string[]> {
-        const group: Group = await this.groupsService.getGroupById(dto.groupId, true)
+        const group: Group = await this.groupsService.getGroupById(dto.groupId,
+            { model: Category, include: [ TextChannel ] }
+        )
         const channels: TextChannel[] = [].concat(...group.categories.map(category => category.channels))
         if (await this.isUserOwner(dto.userId, dto.groupId))
             return channels.map(channel => channel.id)
@@ -202,6 +205,47 @@ export class PermissionsService {
             allowedToViewChannelsIds.push(channel.id)
         }
         return allowedToViewChannelsIds
+    }
+
+    async getIdsOfUsersThatCanViewTextChannel(
+        channelId: string
+    ): Promise<string[]> {
+        const idsOfRolesThatCanViewTextChannel: string[] =
+            await this.getIdsOfRolesThatCanViewTextChannel(channelId)
+        const usersIds: string[] =
+            await this.rolesService.getIdsOfUsersThatHaveAnyOfRoles(idsOfRolesThatCanViewTextChannel)
+        return usersIds
+    }
+
+    private async getIdsOfRolesThatCanViewTextChannel(
+        channelId: string
+    ): Promise<string[]> {
+        const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        if (!channel)
+            throw new NotFoundException({ message: 'Text channel not found' })
+        const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(channelId)
+        const roles: Role[] = await this.rolesService.getRolesByGroupId(
+            groupId, [ RolePermissions, CategoryRolePermissions ]
+        )
+        const rolesThatCanViewTextChannel: Role[] =
+            roles
+                .filter(role => role.textChannelPermissions
+                    .find(row => row.channelId === channelId)
+                    .viewTextChannels === PermissionLevel.ALOWED)
+        const rolesWithNotSpecifiedViewTextChannelPermission: Role[] =
+            roles
+                .filter(role => role.textChannelPermissions
+                    .find(row => row.channelId === channelId)
+                    .viewTextChannels === PermissionLevel.NOT_ALOWED)
+        if (!rolesWithNotSpecifiedViewTextChannelPermission)
+            return rolesThatCanViewTextChannel.map(role => role.id)
+        return [
+            ...rolesThatCanViewTextChannel
+                .map(role => role.id),
+            ...rolesWithNotSpecifiedViewTextChannelPermission
+                .filter(role => role.permissions.viewTextChannels === ForcedPermissionLevel.ALOWED)
+                .map(role => role.id)
+        ]
     }
 
 }

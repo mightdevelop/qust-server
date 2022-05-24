@@ -10,8 +10,6 @@ import { DeleteRoleDto } from './dto/delete-role.dto'
 import { UpdateRoleDto } from './dto/update-role.dto'
 import { RoleUser } from './models/role-user.model'
 import { Role } from './models/roles.model'
-import { TextChannelRolePermissions } from 'src/text-channels/models/text-channel-role-permissions.model'
-import { CategoryRolePermissions } from 'src/categories/models/category-role-permissions.model'
 
 
 @Injectable()
@@ -29,6 +27,11 @@ export class RolesService {
         return role
     }
 
+    async getRolesByGroupId(groupId: string, include?: Includeable | Includeable[]): Promise<Role[]> {
+        const roles: Role[] = await this.roleRepository.findAll({ where: { groupId }, include })
+        return roles
+    }
+
     async getEveryoneRoleByGroupId(groupId: string): Promise<Role> {
         const everyoneRole: Role =
             await this.roleRepository.findOne({ where: { groupId, name: 'everyone' } })
@@ -38,11 +41,11 @@ export class RolesService {
     async getUserRolesByGroupId(
         userId: string,
         groupId: string,
-        include: Includeable | Includeable[]
+        include?: Includeable | Includeable[]
     ): Promise<Role[]> {
         if (!await this.groupsService.isUserGroupParticipant(userId, groupId)) return []
         const groupRoles: Role[] = await this.roleRepository.findAll(
-            { where: { groupId }, include: RolePermissions }
+            { where: { groupId }, include }
         )
         const roleUserRows: RoleUser[] = await this.roleUserRepository.findAll({ where: {
             [Op.or]: groupRoles.map(role => ({
@@ -60,6 +63,13 @@ export class RolesService {
             userRoles.push(everyone)
         }
         return userRoles
+    }
+
+    async getIdsOfUsersThatHaveAnyOfRoles(rolesIds: string[]): Promise<string[]> {
+        const usersIds: string[] =
+            (await this.roleUserRepository.findAll({ where: { [Op.or]: { roleId: rolesIds } } }))
+                .map(row => row.userId)
+        return usersIds
     }
 
     async createRole(dto: CreateRoleDto): Promise<Role> {
@@ -82,8 +92,9 @@ export class RolesService {
     }
 
     async updateRole({ role, color, name }: UpdateRoleDto): Promise<Role> {
-        const updatedRole: Role = await role.update({ color, name })
-        return updatedRole
+        role.setAttributes({ color, name })
+        role.save()
+        return role
     }
 
     async deleteRole({ role }: DeleteRoleDto): Promise<Role> {

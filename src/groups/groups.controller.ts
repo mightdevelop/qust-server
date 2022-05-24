@@ -2,11 +2,13 @@ import { Body, Controller, Delete, Get, NotFoundException, Param, Post, UseGuard
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
-import { RequiredPermissions } from 'src/permissions/decorators/required-permissions.decorator'
+import { Category } from 'src/categories/models/categories.model'
+import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
 import { Role } from 'src/roles/models/roles.model'
 import { RolesService } from 'src/roles/roles.service'
+import { TextChannel } from 'src/text-channels/models/text-channels.model'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import { GroupsService } from './groups.service'
@@ -22,6 +24,18 @@ export class GroupsController {
         private usersService: UsersService,
         private rolesService: RolesService,
     ) {}
+
+    @Get('/:groupId')
+    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
+    async getGroupById(
+        @Param('groupId') groupId: string,
+        @Body() { full }: { full?: boolean }
+    ): Promise<Group> {
+        const group: Group = await this.groupsService.getGroupById(groupId,
+            full ? [ { model: Category, include: [ TextChannel ] }, { all: true } ] : undefined
+        )
+        return group
+    }
 
     @Get('/:groupId/users')
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
@@ -45,7 +59,7 @@ export class GroupsController {
     }
 
     @Post('/:groupId/users/:userId/roles/:roleId')
-    @RequiredPermissions([ RolePermissionsEnum.manageRoles ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.manageRoles ])
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async addRoleToUser(
         @Param('userId') userId: string,
@@ -59,7 +73,7 @@ export class GroupsController {
     }
 
     @Delete('/:groupId/users/:userId/roles/:roleId')
-    @RequiredPermissions([ RolePermissionsEnum.manageRoles ])
+    @RequiredGroupPermissions([ RolePermissionsEnum.manageRoles ])
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async removeRoleFromUser(
         @Param('userId') userId: string,

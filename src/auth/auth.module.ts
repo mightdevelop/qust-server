@@ -10,6 +10,7 @@ import { AuthService } from './auth.service'
 import 'dotenv/config'
 import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy'
 import { create } from 'cache-manager-redis-store'
+import { SocketIoJwtAuthStrategy } from './strategies/socketio-jwt-auth.strategy'
 
 
 @Module({
@@ -17,12 +18,13 @@ import { create } from 'cache-manager-redis-store'
     providers: [
         AuthService,
         JwtAuthStrategy,
-        JwtRefreshStrategy
+        JwtRefreshStrategy,
+        SocketIoJwtAuthStrategy
     ],
     imports: [
         CacheModule.registerAsync({
             useFactory: () => ({
-                store: create({ database: 0 }),
+                store: create({ db: 0 }),
                 host: process.env.REDIS_HOST,
                 port: +process.env.REDIS_PORT,
                 ttl: 2592000 // 30 days refresh token

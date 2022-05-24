@@ -15,14 +15,13 @@ import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { ChatMessageService } from 'src/messages/chat-message.service'
 import { Message } from 'src/messages/models/messages.model'
-import { generateAddUsersMessageContent } from 'src/messages/utils/messages-text-content'
+import { generateAddUsersMessageContent } from 'src/messages/utils/generate-messages-text-content'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import StandartBots from 'src/utils/standart-bots-const'
 import { ChatsService } from './chats.service'
 import { AddUsersToChatDto } from './dto/add-users-to-chat.dto'
 import { CreateChatDto } from './dto/create-chat.dto'
-import { UpdateChatDto } from './dto/update-chat.dto'
 import { Chat } from './models/chats.model'
 
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/chats' })
@@ -42,7 +41,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     async handleConnection(@ConnectedSocket() socket: Socket) {
         const { id } = this.jwtService.decode(
-            socket.handshake.headers.authorization.split(' ')[1]
+            socket.handshake.query['access_token'].toString()
         ) as TokenPayload
         this.users.push({ id, socket })
         socket.emit('200', socket.id)
@@ -129,13 +128,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @UseGuards(SocketIoJwtAuthGuard)
     async updateChat(
         @ConnectedSocket() socket: Socket,
-        @MessageBody() dto: UpdateChatDto
+        @MessageBody() dto: { chatId: string, name: string }
     ): Promise<void> {
         if (!socket.rooms.has('chat:' + dto.chatId)) {
             socket.emit('400', 'You are not connected to chat')
             return
         }
-        const chat: Chat = await this.chatsService.updateChat(dto)
+        const chat: Chat = await this.chatsService.getChatById(dto.chatId)
+        await this.chatsService.updateChat({ chat, name: dto.name })
         socket.emit('200', 'chat updated:' + chat)
     }
 

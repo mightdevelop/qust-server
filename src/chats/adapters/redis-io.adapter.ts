@@ -12,7 +12,7 @@ export class RedisIoAdapter extends IoAdapter {
             url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
         })
         const subClient = pubClient.duplicate()
-
+        await Promise.all([ pubClient.connect(), subClient.connect() ])
         this.adapterConstructor = createAdapter(pubClient, subClient)
     }
 

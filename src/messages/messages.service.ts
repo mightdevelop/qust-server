@@ -42,7 +42,10 @@ export class MessagesService {
     }
 
     async updateMessage({ message, text }: UpdateMessageDto): Promise<Message> {
-        if (message.edited === false) await message.update({ edited: true })
+        if (message.edited === false) {
+            message.edited = true
+            await message.save()
+        }
         message.content.text = text
         await message.content.save()
         return message

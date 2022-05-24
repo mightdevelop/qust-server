@@ -68,13 +68,9 @@ export class ChatsService {
         return chat
     }
 
-    async updateChat(dto: UpdateChatDto): Promise<Chat> {
-        const chat: Chat = await this.chatRepository.findOne({
-            where: { id: dto.chatId, chatType: ChatType.chat }
-        })
-        if (!chat)
-            throw new NotFoundException({ message: 'Chat not found' })
-        await chat.update(dto)
+    async updateChat({ chat, name }: UpdateChatDto): Promise<Chat> {
+        chat.name = name
+        await chat.save()
         return chat
     }
 

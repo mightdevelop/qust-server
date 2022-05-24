@@ -7,7 +7,7 @@ import { ChatsService } from './chats.service'
 import { CreateChatDto } from './dto/create-chat.dto'
 import { AddUsersToChatDto } from './dto/add-users-to-chat.dto'
 import { Chat } from './models/chats.model'
-import { generateAddUsersMessageContent } from 'src/messages/utils/messages-text-content'
+import { generateAddUsersMessageContent } from 'src/messages/utils/generate-messages-text-content'
 import StandartBots from 'src/utils/standart-bots-const'
 import { User } from 'src/users/models/users.model'
 import { Message } from 'src/messages/models/messages.model'
@@ -51,8 +51,11 @@ export class ChatsController {
     ): Promise<Chat> {
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
-        const chat: Chat = await this.chatsService.updateChat({ name, chatId })
-        return chat
+        const chat: Chat = await this.chatsService.getChatById(chatId)
+        if (!chat)
+            throw new NotFoundException({ message: 'Chat not found' })
+        const updatedChat: Chat = await this.chatsService.updateChat({ name, chat })
+        return updatedChat
     }
 
     @Post('/:chatId')

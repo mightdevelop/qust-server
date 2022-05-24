@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, forwardRef, Inject } from '@
 import { Reflector } from '@nestjs/core'
 import { Request } from 'src/auth/types/request-response'
 import { GroupsService } from 'src/groups/groups.service'
-import { PERMISSIONS_KEY } from '../decorators/required-permissions.decorator'
+import { TEXTCHANNEL_PERMISSIONS_KEY } from '../decorators/required-text-channel-permissions.decorator'
 import { PermissionsService } from '../permissions.service'
 import { RolePermissionsEnum } from '../types/permissions/role-permissions.enum'
 
@@ -17,7 +17,7 @@ export class GroupPermissionsGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const requiredPermissions = this.reflector.getAllAndOverride<RolePermissionsEnum[]>(
-            PERMISSIONS_KEY,
+            TEXTCHANNEL_PERMISSIONS_KEY,
             [
                 context.getHandler(),
                 context.getClass(),

@@ -11,6 +11,7 @@ import { DeleteGroupDto } from './dto/delete-group.dto'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InternalGroupsDeletedEvent } from './events/internal-groups-deleted.event'
 import { UsersService } from 'src/users/users.service'
+import { UserIdAndGroupIdDto } from 'src/permissions/dto/user-id-and-group-id.dto'
 
 
 @Injectable()
@@ -33,7 +34,7 @@ export class GroupsService {
         return (await this.groupUserRepository.findAll({ where: { userId } })).map(row => row.groupId)
     }
 
-    async isUserGroupParticipant(userId: string, groupId: string): Promise<boolean> {
+    async isUserGroupParticipant({ userId, groupId }: UserIdAndGroupIdDto): Promise<boolean> {
         return !!await this.groupUserRepository.findOne({ where: { userId, groupId } })
     }
 

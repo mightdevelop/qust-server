@@ -1,7 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { Includeable, Op } from 'sequelize'
-import { GroupsService } from 'src/groups/groups.service'
 import { RolePermissions } from 'src/permissions/models/role-permissions.model'
 import { PermissionsService } from 'src/permissions/permissions.service'
 import { RoleIdAndUserIdDto } from './dto/roleid-and-userid.dto'
@@ -17,7 +16,6 @@ export class RolesService {
 
     constructor(
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
-        @Inject(forwardRef(() => GroupsService)) private groupsService: GroupsService,
         @InjectModel(Role) private roleRepository: typeof Role,
         @InjectModel(RoleUser) private roleUserRepository: typeof RoleUser,
     ) {}
@@ -43,7 +41,7 @@ export class RolesService {
         groupId: string,
         include?: Includeable | Includeable[]
     ): Promise<Role[]> {
-        if (!await this.groupsService.isUserGroupParticipant(userId, groupId)) return []
+        if (!await this.permissionsService.isUserGroupParticipant({ userId, groupId })) return []
         const groupRoles: Role[] = await this.roleRepository.findAll(
             { where: { groupId }, include }
         )

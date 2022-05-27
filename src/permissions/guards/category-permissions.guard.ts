@@ -1,14 +1,12 @@
-import { Injectable, CanActivate, ExecutionContext, forwardRef, Inject } from '@nestjs/common'
+import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common'
 import { Request } from 'src/auth/types/request-response'
-import { TextChannelsService } from 'src/text-channels/text-channels.service'
 import { PermissionsService } from '../permissions.service'
 
 @Injectable()
 export class CategoryPermissionsGuard implements CanActivate {
 
     constructor(
-        @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
-        @Inject(forwardRef(() => TextChannelsService)) private textChannelsService: TextChannelsService,
+        @Inject(PermissionsService) private permissionsService: PermissionsService,
     ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -17,8 +15,7 @@ export class CategoryPermissionsGuard implements CanActivate {
             userId: req.user.id,
             categoryId:
                 req.body.categoryId ||
-                req.params.categoryId ||
-                (await this.textChannelsService.getTextChannelById(req.params.channelId)).categoryId
+                req.params.categoryId
         })
     }
 }

@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common'
+import { forwardRef, Global, Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { RolePermissions } from './models/role-permissions.model'
 import { PermissionsService } from './permissions.service'
@@ -7,8 +7,11 @@ import { RolesModule } from 'src/roles/roles.module'
 import { TextChannelsModule } from 'src/text-channels/text-channels.module'
 import { CategoriesModule } from 'src/categories/categories.module'
 
+@Global()
 @Module({
-    providers: [ PermissionsService ],
+    providers: [
+        PermissionsService,
+    ],
     imports: [
         SequelizeModule.forFeature([ RolePermissions ]),
         forwardRef(() => GroupsModule),

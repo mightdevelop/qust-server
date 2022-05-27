@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
 import { CategoriesService } from 'src/categories/categories.service'
 import { Category } from 'src/categories/models/categories.model'
-import { GroupsService } from 'src/groups/groups.service'
 import { Message } from 'src/messages/models/messages.model'
 import { PermissionsService } from 'src/permissions/permissions.service'
 import { User } from 'src/users/models/users.model'
@@ -23,8 +22,7 @@ export class TextChannelsService {
     constructor(
         private categoriesService: CategoriesService,
         private eventEmitter: EventEmitter2,
-        private groupsService: GroupsService,
-        private permissionsService: PermissionsService,
+        @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
         private usersService: UsersService,
         @InjectModel(TextChannel) private channelRepository: typeof TextChannel,
     ) {}
@@ -43,14 +41,7 @@ export class TextChannelsService {
     }
 
     async getAllowedToViewTextChannelsIdsByUserId(userId: string): Promise<string[]> {
-        const groupIds: string[] = await this.groupsService.getGroupsIdsByUserId(userId)
-        const allowedToViewTextChannelsIds: string[] = []
-        for (const groupId of groupIds) {
-            const channeldIds: string[] =
-                await this.permissionsService.getAllowedToViewTextChannelsIdsInGroup({ userId, groupId })
-            allowedToViewTextChannelsIds.push(...channeldIds)
-        }
-        return allowedToViewTextChannelsIds
+        return await this.permissionsService.getAllowedToViewTextChannelsIdsByUserId(userId)
     }
 
     async getUsersThatCanViewTextChannel(channelId: string): Promise<User[]> {

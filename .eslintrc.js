@@ -49,7 +49,8 @@ module.exports = {
       'no-trailing-spaces': [
           'error'
       ],
-      'no-constant-condition': 0
+      'no-constant-condition': 0,
+      '@typescript-eslint/no-empty-function': 0
   }
 }
 

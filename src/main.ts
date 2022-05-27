@@ -2,7 +2,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import 'dotenv/config'
 import { AppModule } from './app.module'
-import { RedisIoAdapter } from './chats/adapters/redis-io.adapter'
+import { RedisIoAdapter } from './socketio/adapters/redis-io.adapter'
 
 
 async function start() {

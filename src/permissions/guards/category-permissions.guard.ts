@@ -1,5 +1,4 @@
 import { Injectable, CanActivate, ExecutionContext, forwardRef, Inject } from '@nestjs/common'
-import { Reflector } from '@nestjs/core'
 import { Request } from 'src/auth/types/request-response'
 import { TextChannelsService } from 'src/text-channels/text-channels.service'
 import { PermissionsService } from '../permissions.service'
@@ -8,7 +7,6 @@ import { PermissionsService } from '../permissions.service'
 export class CategoryPermissionsGuard implements CanActivate {
 
     constructor(
-        private reflector: Reflector,
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
         @Inject(forwardRef(() => TextChannelsService)) private textChannelsService: TextChannelsService,
     ) {}

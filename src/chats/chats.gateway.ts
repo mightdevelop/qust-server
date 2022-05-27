@@ -1,4 +1,5 @@
 import { UseGuards } from '@nestjs/common'
+import { OnEvent } from '@nestjs/event-emitter'
 import { JwtService } from '@nestjs/jwt'
 import {
     ConnectedSocket,
@@ -14,14 +15,19 @@ import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { ChatMessageService } from 'src/messages/chat-message.service'
+import { InternalChatsMessageSentEvent } from 'src/messages/events/internal-chats.message-sent.event'
 import { Message } from 'src/messages/models/messages.model'
 import { generateAddUsersMessageContent } from 'src/messages/utils/generate-messages-text-content'
+import { SocketIoService } from 'src/socketio/socketio.service'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import StandartBots from 'src/utils/standart-bots-const'
 import { ChatsService } from './chats.service'
 import { AddUsersToChatDto } from './dto/add-users-to-chat.dto'
 import { CreateChatDto } from './dto/create-chat.dto'
+import { InternalChatCreatedEvent } from './events/internal-chat-created.event'
+import { InternalChatDeletedEvent } from './events/internal-chat-deleted.event'
+import { InternalChatUpdatedEvent } from './events/internal-chat-updated.event'
 import { Chat } from './models/chats.model'
 
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/chats' })
@@ -31,10 +37,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         private chatsService: ChatsService,
         private usersService: UsersService,
         private jwtService: JwtService,
+        private socketIoService: SocketIoService,
         private chatMessageService: ChatMessageService
     ) {}
-
-    private users: { id: string, socket: Socket }[] = []
 
     @WebSocketServer()
         server: Server
@@ -43,11 +48,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const { id } = this.jwtService.decode(
             socket.handshake.query['access_token'].toString()
         ) as TokenPayload
-        this.users.push({ id, socket })
+        await this.socketIoService.pushSocket({ userId: id, socket })
         socket.emit('200', socket.id)
     }
     async handleDisconnect(@ConnectedSocket() socket: Socket) {
-        this.users.filter(user => user.socket.id !== socket.id)
+        await this.socketIoService.popSocket(socket)
     }
 
     @SubscribeMessage('connect-to-chat-rooms')
@@ -91,11 +96,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             username: user.username,
             ...data
         })
-        this.server.to('chat:' + data.chatId).emit('chat-message', {
-            username: user.username,
-            text: data.text
-        })
-        socket.emit('200', 'message sent:', message)
+        socket.emit('200', message)
     }
 
     @SubscribeMessage('create-chat')
@@ -108,20 +109,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const chat: Chat = await this.chatsService.createChat({
             ...dto, chattersIds: [ ...dto.chattersIds, user.id ]
         })
-        const chatters: User[] = await this.usersService.getChattersByChatId(chat.id)
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
             username: StandartBots.CHAT_BOT.username,
             chatId: chat.id,
-            text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
+            text: generateAddUsersMessageContent(user.username, chat.chatters.map(c => c.username))
         })
-        const socketsOfChatters = this.users
-            .filter(user => chatters.some(chatter => chatter.id === user.id))
-            .map(user => user.socket)
-        socketsOfChatters.forEach(socket => socket.join('chat:' + chat.id))
-
-        socket.emit('200', 'chat created:' + chat)
-        this.server.to(socketsOfChatters.map(socket => socket.id)).emit('chat-created:' + chat)
+        socket.emit('200', chat)
     }
 
     @SubscribeMessage('update-chat')
@@ -136,7 +130,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         const chat: Chat = await this.chatsService.getChatById(dto.chatId)
         await this.chatsService.updateChat({ chat, name: dto.name })
-        socket.emit('200', 'chat updated:' + chat)
+        socket.emit('200', chat)
     }
 
     @SubscribeMessage('add-users-to-chat')
@@ -158,7 +152,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             chatId: dto.chatId,
             text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         })
-        socket.emit('200', 'users added to chat:' + chatters.map(chatter => chatter.id))
+        socket.emit('200', chatters.map(chatter => chatter.id))
     }
 
     @SubscribeMessage('leave-from-chat')
@@ -177,6 +171,45 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (chatters.length === 0)
             await this.chatsService.deleteChat(chat)
         socket.emit('200', 'left the chat:' + chatId)
+    }
+
+    @OnEvent('internal-chats.message-sent')
+    async sendMessageFromChatToSockets(event: InternalChatsMessageSentEvent): Promise<void>  {
+        this.server
+            .to('chat:' + event.chatId)
+            .emit('chat-message', event.message)
+    }
+
+    @OnEvent('internal-chats.created')
+    async connectSocketsToNewChat({ chat }: InternalChatCreatedEvent): Promise<void>  {
+        const socketsOfChatters = (await this.socketIoService.getConnectedSockets())
+            .filter(user => chat.chatters.some(chatter => chatter.id === user.id))
+            .map(user => user.socket)
+        socketsOfChatters.forEach(socket => socket.join('chat:' + chat.id))
+        this.server
+            .to(socketsOfChatters.map(socket => socket.id))
+            .emit('chat-created', chat)
+    }
+
+    @OnEvent('internal-chats.updated')
+    async showToSocketsUpdatedChat({ chat }: InternalChatUpdatedEvent): Promise<void>  {
+        const socketsOfChatters = (await this.socketIoService.getConnectedSockets())
+            .filter(user => chat.chatters.some(chatter => chatter.id === user.id))
+            .map(user => user.socket)
+        this.server
+            .to(socketsOfChatters.map(socket => socket.id))
+            .emit('chat-updated', chat)
+    }
+
+    @OnEvent('internal-chats.deleted')
+    async hideFromSocketsDeletedChat({ chat }: InternalChatDeletedEvent): Promise<void>  {
+        const socketsOfChatters = (await this.socketIoService.getConnectedSockets())
+            .filter(user => chat.chatters.some(chatter => chatter.id === user.id))
+            .map(user => user.socket)
+        socketsOfChatters.forEach(socket => socket.leave('chat:' + chat.id))
+        this.server
+            .to(socketsOfChatters.map(socket => socket.id))
+            .emit('chat-deleted', chat.id)
     }
 
 }

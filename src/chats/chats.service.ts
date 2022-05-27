@@ -10,12 +10,20 @@ import { ChatType } from './types/chat-type'
 import { Message } from 'src/messages/models/messages.model'
 import { Op } from 'sequelize'
 import { LeaveFromChatDto } from './dto/leave-from-chat.dto'
+import { User } from 'src/users/models/users.model'
+import { UsersService } from 'src/users/users.service'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { InternalChatCreatedEvent } from './events/internal-chat-created.event'
+import { InternalChatUpdatedEvent } from './events/internal-chat-updated.event'
+import { InternalChatDeletedEvent } from './events/internal-chat-deleted.event'
 
 
 @Injectable()
 export class ChatsService {
 
     constructor(
+        private usersService: UsersService,
+        private eventEmitter: EventEmitter2,
         @InjectModel(Chat) private chatRepository: typeof Chat,
         @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
     ) {}
@@ -57,25 +65,35 @@ export class ChatsService {
         const chat: Chat = await this.chatRepository.create({
             name: dto.name, chatType: ChatType.chat
         })
-        const arrayToCreateChatUserRows: {
-            chatId: string,
-            userId: string
-        }[] = dto.chattersIds.map(chatterId => ({
+        await this.chatUserRepository.bulkCreate(dto.chattersIds.map(chatterId => ({
             chatId: chat.id,
             userId: chatterId
-        }))
-        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserRows, { validate: true })
+        })), { validate: true })
+        const chatters: User[] = await this.usersService.getChattersByChatId(chat.id)
+        chat.chatters = chatters
+        this.eventEmitter.emit(
+            'internal-chats.created',
+            new InternalChatCreatedEvent({ chat })
+        )
         return chat
     }
 
     async updateChat({ chat, name }: UpdateChatDto): Promise<Chat> {
         chat.name = name
         await chat.save()
+        this.eventEmitter.emit(
+            'internal-chats.updated',
+            new InternalChatUpdatedEvent({ chat })
+        )
         return chat
     }
 
     async deleteChat(chat: Chat): Promise<Chat> {
-        chat.destroy()
+        await chat.destroy()
+        this.eventEmitter.emit(
+            'internal-chats.deleted',
+            new InternalChatDeletedEvent({ chat })
+        )
         return chat
     }
 
@@ -96,14 +114,10 @@ export class ChatsService {
         })
         if (!chat)
             throw new NotFoundException({ message: 'Chat not found' })
-        const arrayToCreateChatUserRows: {
-            chatId: string,
-            userId: string
-        }[] = dto.chattersIds.map(chatterId => ({
+        await this.chatUserRepository.bulkCreate(dto.chattersIds.map(chatterId => ({
             chatId: chat.id,
             userId: chatterId
-        }))
-        await this.chatUserRepository.bulkCreate(arrayToCreateChatUserRows, { validate: true })
+        })), { validate: true })
         return chat
     }
 

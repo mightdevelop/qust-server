@@ -1,4 +1,4 @@
-import { ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { CategoriesService } from 'src/categories/categories.service'
 import { Category } from 'src/categories/models/categories.model'
@@ -59,7 +59,7 @@ export class PermissionsService {
             dto.userId, dto.groupId, [ RolePermissions ]
         )
         if (!roles.length)
-            throw new ForbiddenException({ message: 'You are not a group participant' })
+            return false
         const userGroupPermissions =
             await this.getPermissionsByRolesArrayInGroup({ roles, groupId: dto.groupId })
         const isAllPermissionAllowed = !!dto.requiredPermissions
@@ -75,7 +75,8 @@ export class PermissionsService {
     }> {
         const permissions: [RolePermissionsEnum, ForcedPermissionLevel][] =
             [].concat(...
-            dto.roles.map(role => role.permissions)
+            dto.roles
+                .map(role => role.permissions)
                 .map(permissionsRow => Object
                     .entries(RolePermissionsEnum)
                     .map(p => [ p[0], permissionsRow.getDataValue(p[0] as keyof RolePermissions) ])
@@ -99,11 +100,10 @@ export class PermissionsService {
             dto.userId, groupId, [ RolePermissions, TextChannelRolePermissions ]
         )
         if (!roles.length)
-            throw new ForbiddenException({ message: 'You are not a group participant' })
+            return false
         const userTextChannelPermissions =
             await this.getPermissionsByRolesArrayInTextChannel({ roles, channelId: dto.channelId })
         dto.requiredPermissions.push(RoleTextChannelPermissionsEnum.viewTextChannels)
-
         const isSomePermissionNotAllowed = !!dto.requiredPermissions
             .filter(p => userTextChannelPermissions.notAllowed.includes(p)).length
         if (isSomePermissionNotAllowed) return false
@@ -118,7 +118,6 @@ export class PermissionsService {
             userGroupPermissions.notAllowed as unknown as RoleTextChannelPermissionsEnum[]
         const isAllPermissionAllowed = !!notSpecifiedPermissions
             .filter(p => !groupPermsNotAllowed.includes(p)).length
-
         return isAllPermissionAllowed
     }
 
@@ -133,11 +132,19 @@ export class PermissionsService {
             [].concat(...
             roles
                 .map(role => role.textChannelPermissions.find(row => row.channelId === channelId))
+                .filter(permissionsRow => permissionsRow)
                 .map(permissionsRow => Object
                     .entries(TextChannelRolePermissions)
                     .map(p => [ p[0], permissionsRow
-                        .getDataValue(p[0] as keyof TextChannelRolePermissions) ])
-                ))
+                        .getDataValue(p[0] as keyof TextChannelRolePermissions) ])))
+
+        if (permissions.length === 0) {
+            return {
+                allowed: [],
+                notSpecified: [],
+                notAllowed: Object.keys(RoleTextChannelPermissionsEnum) as RoleTextChannelPermissionsEnum[]
+            }
+        }
 
         const allowed: [RoleTextChannelPermissionsEnum, PermissionLevel][] = [ ...new Set(permissions
             .filter(p => p[1] === PermissionLevel.ALOWED)) ]
@@ -195,7 +202,7 @@ export class PermissionsService {
         for (const channel of channels) {
             const viewChannelPermissions: PermissionLevel[] =
                 roles.map(role => role.textChannelPermissions
-                    .find(row => row.channelId === channel.id).viewTextChannels)
+                    .find(row => row.channelId === channel.id)?.viewTextChannels)
 
             if (
                 viewChannelPermissions.every(p => p === PermissionLevel.NOT_ALOWED)

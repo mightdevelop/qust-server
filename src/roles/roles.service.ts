@@ -58,7 +58,7 @@ export class RolesService {
         })
         if (!userRoles.find(r => r.name === 'everyone')) {
             const everyone: Role = await this.roleRepository.findOne(
-                { where: { name: 'everyone' }, include: RolePermissions }
+                { where: { name: 'everyone' }, include }
             )
             userRoles.push(everyone)
         }

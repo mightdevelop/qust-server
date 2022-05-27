@@ -8,6 +8,7 @@ import { MessageContent } from './models/message-content.model'
 import { Message } from './models/messages.model'
 import { TextChannelMessage } from './models/text-channel-message.model'
 import { TextChannelMessageService } from './text-channel-message.service'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 
 
 @Module({
@@ -19,6 +20,15 @@ import { TextChannelMessageService } from './text-channel-message.service'
     ],
     imports: [
         SequelizeModule.forFeature([ Message, MessageContent, ChatMessage, TextChannelMessage ]),
+        EventEmitterModule.forRoot({
+            wildcard: false,
+            delimiter: '.',
+            newListener: false,
+            removeListener: false,
+            maxListeners: 10,
+            verboseMemoryLeak: false,
+            ignoreErrors: false,
+        })
     ],
     exports: [ ChatMessageService, TextChannelMessageService ],
 })

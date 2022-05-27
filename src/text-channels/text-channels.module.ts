@@ -11,6 +11,7 @@ import { GroupsModule } from 'src/groups/groups.module'
 import { UsersModule } from 'src/users/users.module'
 import { TextChannelsGateway } from './text-channels.gateway'
 import { JwtModule } from '@nestjs/jwt'
+import { SocketIoModule } from 'src/socketio/socketio.module'
 
 @Module({
     controllers: [ TextChannelsController ],
@@ -24,6 +25,7 @@ import { JwtModule } from '@nestjs/jwt'
         UsersModule,
         JwtModule.register({}),
         MessagesModule,
+        SocketIoModule,
     ],
     exports: [ TextChannelsService ]
 })

@@ -7,12 +7,18 @@ import { Group } from './models/groups.model'
 import { AddUserToGroupDto } from './dto/add-user-to-group.dto'
 import { GroupUser } from './models/group-user.model'
 import { Includeable } from 'sequelize/types'
+import { DeleteGroupDto } from './dto/delete-group.dto'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { InternalGroupsDeletedEvent } from './events/internal-groups-deleted.event'
+import { UsersService } from 'src/users/users.service'
 
 
 @Injectable()
 export class GroupsService {
 
     constructor(
+        private eventEmitter: EventEmitter2,
+        private usersService: UsersService,
         private layoutsService: LayoutsService,
         @InjectModel(Group) private groupRepository: typeof Group,
         @InjectModel(GroupUser) private groupUserRepository: typeof GroupUser,
@@ -31,6 +37,11 @@ export class GroupsService {
         return !!await this.groupUserRepository.findOne({ where: { userId, groupId } })
     }
 
+    async addUserToGroup(dto: AddUserToGroupDto): Promise<GroupUser> {
+        const groupUser: GroupUser = await this.groupUserRepository.create(dto)
+        return groupUser
+    }
+
     async createGroup(dto: CreateGroupDto): Promise<Group> {
         const group: Group = await this.groupRepository.create(dto)
         await this.layoutsService.createRolesCategoriesAndTextChannelsByLayout({
@@ -40,11 +51,15 @@ export class GroupsService {
         return group
     }
 
-    // async deleteGroup
-
-    async addUserToGroup(dto: AddUserToGroupDto): Promise<GroupUser> {
-        const groupUser: GroupUser = await this.groupUserRepository.create(dto)
-        return groupUser
+    async deleteGroup({ group }: DeleteGroupDto): Promise<Group> {
+        await group.destroy()
+        const usersIds: string[] = (await this.usersService.getUsersByGroupId(group.id))
+            .map(user => user.id)
+        this.eventEmitter.emit(
+            'internal-groups.deleted',
+            new InternalGroupsDeletedEvent({ groupId: group.id, usersIds })
+        )
+        return group
     }
 
 }

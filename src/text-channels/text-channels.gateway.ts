@@ -1,3 +1,4 @@
+
 import { UseGuards } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { JwtService } from '@nestjs/jwt'
@@ -30,6 +31,7 @@ import { InternalTextChannelsUpdatedEvent } from './events/internal-text-channel
 import { TextChannel } from './models/text-channels.model'
 import { TextChannelsService } from './text-channels.service'
 
+
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/text-channels' })
 export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
@@ -47,11 +49,11 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
         const { id } = this.jwtService.decode(
             socket.handshake.query['access_token'].toString()
         ) as TokenPayload
-        await this.socketIoService.pushSocket({ userId: id, socket })
+        await this.socketIoService.pushClient({ userId: id, socketId: socket.id })
         socket.emit('200', socket.id)
     }
     async handleDisconnect(@ConnectedSocket() socket: Socket) {
-        await this.socketIoService.popSocket(socket)
+        await this.socketIoService.removeClient(socket.id)
     }
 
     @SubscribeMessage('connect-to-text-channel-rooms')
@@ -108,11 +110,16 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
         @MessageBody() dto: CreateTextChannelDto
     ): Promise<void> {
         const channel: TextChannel = await this.textChannelsService.createTextChannel(dto)
+        if (!channel) {
+            socket.emit('404', 'Text channel not found')
+            return
+        }
         const channelUsers: User[] =
             await this.textChannelsService.getUsersThatCanViewTextChannel(user.id)
-        const socketsOfTextChannelUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => channelUsers.some(channelUser => channelUser.id === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfTextChannelUsers = (await this.socketIoService.getClients())
+            .filter(client => channelUsers.some(channelUser => channelUser.id === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         socketsOfTextChannelUsers.forEach(socket => socket.join('text-channel:' + channel.id))
 
         socket.emit('200', channel)
@@ -129,6 +136,10 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
             return
         }
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        if (!channel) {
+            socket.emit('404', 'Text channel not found')
+            return
+        }
         await this.textChannelsService.updateTextChannel({ name, channel })
         socket.emit('200', channel)
     }
@@ -144,6 +155,10 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
             return
         }
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        if (!channel) {
+            socket.emit('404', 'Text channel not found')
+            return
+        }
         await this.textChannelsService.updateTextChannel({ name, channel })
         socket.emit('200', channel)
     }
@@ -157,9 +172,10 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
 
     @OnEvent('internal-text-channels.created')
     async connectSocketsToNewTextChannel(event: InternalTextChannelsCreatedEvent): Promise<void>  {
-        const socketsOfChannelUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => event.usersIds.some(userId => userId === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfChannelUsers = (await this.socketIoService.getClients())
+            .filter(client => event.usersIds.some(userId => userId === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         socketsOfChannelUsers.forEach(socket => socket.join('text-channel:' + event.channel.id))
         this.server
             .to(socketsOfChannelUsers.map(socket => socket.id))
@@ -168,9 +184,10 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
 
     @OnEvent('internal-text-channels.updated')
     async showToSocketsUpdatedTextChannel(event: InternalTextChannelsUpdatedEvent): Promise<void>  {
-        const socketsOfChannelUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => event.usersIds.some(userId => userId === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfChannelUsers = (await this.socketIoService.getClients())
+            .filter(client => event.usersIds.some(userId => userId === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         this.server
             .to(socketsOfChannelUsers.map(socket => socket.id))
             .emit('text-channel-updated', event.channel)
@@ -178,9 +195,10 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
 
     @OnEvent('internal-text-channels.deleted')
     async hideFromSocketsDeletedTextChannel(event: InternalTextChannelsDeletedEvent): Promise<void>  {
-        const socketsOfChannelUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => event.usersIds.some(userId => userId === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfChannelUsers = (await this.socketIoService.getClients())
+            .filter(client => event.usersIds.some(userId => userId === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         socketsOfChannelUsers.forEach(socket => socket.leave('text-channel:' + event.channelId))
         this.server
             .to(socketsOfChannelUsers.map(socket => socket.id))

@@ -1,30 +1,50 @@
 import { Injectable } from '@nestjs/common'
-import { InjectModel } from '@nestjs/sequelize'
-import { Socket } from 'socket.io'
-import { ConnectedSocket } from './models/connected-socket.model'
+import { IsString, IsUUID } from 'class-validator'
+import { RemoteSocket } from 'socket.io'
 
 
 @Injectable()
 export class SocketIoService {
 
-    constructor(
-        @InjectModel(ConnectedSocket) private socketRepository: typeof ConnectedSocket
-    ) {}
+    private clients: { userId: string, socketId: string }[] = []
 
-    async getConnectedSockets(): Promise<ConnectedSocket[]> {
-        return await this.socketRepository.findAll()
+    async getClients(): Promise<UserIdAndSocketId[]> {
+        return this.clients
     }
 
-    async getUserIdBySocket(socket: Socket): Promise<string> {
-        return (await this.socketRepository.findOne({ where: { socket } })).userId
+    async getClientsByUsersIds(usersIds: string[]) {
+        return this.clients.filter(client => usersIds.some(userId => userId === client.userId))
     }
 
-    async pushSocket(dto: { userId: string, socket: Socket }): Promise<void> {
-        await this.socketRepository.create(dto)
+    async getClientsBySocketsIds(socketsIds: string[]): Promise<UserIdAndSocketId[]> {
+        return this.clients.filter(client => socketsIds.some(socketId => socketId === client.socketId))
     }
 
-    async popSocket(socket: Socket): Promise<void> {
-        await this.socketRepository.destroy({ where: { socket } })
+    async getSocketsByUsersIds(
+        sockets: RemoteSocket<any, any>[],
+        socketsIds: string[]
+    ): Promise<RemoteSocket<any, any>[]> {
+        return this.clients
+            .filter(client => socketsIds.some(socketId => socketId === client.socketId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
     }
+
+    async pushClient(client: UserIdAndSocketId): Promise<void> {
+        this.clients.push(client)
+    }
+
+    async removeClient(socketId: string): Promise<void> {
+        this.clients.filter(client => client.socketId = socketId)
+    }
+
+}
+
+class UserIdAndSocketId {
+
+    @IsUUID()
+        userId: string
+
+    @IsString()
+        socketId: string
 
 }

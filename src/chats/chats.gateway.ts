@@ -48,11 +48,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const { id } = this.jwtService.decode(
             socket.handshake.query['access_token'].toString()
         ) as TokenPayload
-        await this.socketIoService.pushSocket({ userId: id, socket })
+        await this.socketIoService.pushClient({ userId: id, socketId: socket.id })
         socket.emit('200', socket.id)
     }
     async handleDisconnect(@ConnectedSocket() socket: Socket) {
-        await this.socketIoService.popSocket(socket)
+        await this.socketIoService.removeClient(socket.id)
     }
 
     @SubscribeMessage('connect-to-chat-rooms')
@@ -182,9 +182,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @OnEvent('internal-chats.created')
     async connectSocketsToNewChat({ chat }: InternalChatCreatedEvent): Promise<void>  {
-        const socketsOfChatters = (await this.socketIoService.getConnectedSockets())
-            .filter(user => chat.chatters.some(chatter => chatter.id === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfChatters = (await this.socketIoService.getClients())
+            .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         socketsOfChatters.forEach(socket => socket.join('chat:' + chat.id))
         this.server
             .to(socketsOfChatters.map(socket => socket.id))
@@ -193,9 +194,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @OnEvent('internal-chats.updated')
     async showToSocketsUpdatedChat({ chat }: InternalChatUpdatedEvent): Promise<void>  {
-        const socketsOfChatters = (await this.socketIoService.getConnectedSockets())
-            .filter(user => chat.chatters.some(chatter => chatter.id === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfChatters = (await this.socketIoService.getClients())
+            .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         this.server
             .to(socketsOfChatters.map(socket => socket.id))
             .emit('chat-updated', chat)
@@ -203,9 +205,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @OnEvent('internal-chats.deleted')
     async hideFromSocketsDeletedChat({ chat }: InternalChatDeletedEvent): Promise<void>  {
-        const socketsOfChatters = (await this.socketIoService.getConnectedSockets())
-            .filter(user => chat.chatters.some(chatter => chatter.id === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfChatters = (await this.socketIoService.getClients())
+            .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         socketsOfChatters.forEach(socket => socket.leave('chat:' + chat.id))
         this.server
             .to(socketsOfChatters.map(socket => socket.id))

@@ -20,8 +20,8 @@ export class RolesService {
         @InjectModel(RoleUser) private roleUserRepository: typeof RoleUser,
     ) {}
 
-    async getRoleById(roleId: string): Promise<Role> {
-        const role: Role = await this.roleRepository.findByPk(roleId)
+    async getRoleById(roleId: string, include?: Includeable | Includeable[]): Promise<Role> {
+        const role: Role = await this.roleRepository.findByPk(roleId, { include })
         return role
     }
 
@@ -89,9 +89,12 @@ export class RolesService {
         return roleUserRow
     }
 
-    async updateRole({ role, color, name }: UpdateRoleDto): Promise<Role> {
-        role.setAttributes({ color, name })
-        role.save()
+    async updateRole({ role, color, name, permissions }: UpdateRoleDto): Promise<Role> {
+        if (color) role.color = color
+        if (name) role.name = name
+        if (permissions) await role.permissions.update(permissions)
+        await role.save()
+        console.log(role)
         return role
     }
 

@@ -26,7 +26,7 @@ export class GroupPermissionsGuard implements CanActivate {
         const bool = await this.permissionsService.doesUserHavePermissionsInGroup({
             userId: req.user.id,
             groupId: req.body.groupId || req.params.groupId,
-            requiredPermissions
+            requiredPermissions: requiredPermissions || []
         })
         return bool
     }

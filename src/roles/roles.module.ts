@@ -1,20 +1,23 @@
-import { forwardRef, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { RolesController } from './roles.controller'
 import { RolesService } from './roles.service'
 import { Role } from './models/roles.model'
 import { RoleUser } from './models/role-user.model'
-import { PermissionsModule } from 'src/permissions/permissions.module'
+import { JwtModule } from '@nestjs/jwt'
+import { SocketIoModule } from 'src/socketio/socketio.module'
+import { RolesGateway } from './roles.gateway'
 
 @Module({
     controllers: [ RolesController ],
-    providers: [ RolesService ],
+    providers: [ RolesService, RolesGateway ],
     imports: [
         SequelizeModule.forFeature([
             Role,
             RoleUser,
         ]),
-        forwardRef(() => PermissionsModule),
+        JwtModule.register({}),
+        SocketIoModule
     ],
     exports: [ RolesService ]
 })

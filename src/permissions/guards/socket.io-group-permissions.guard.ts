@@ -25,7 +25,7 @@ export class SocketIoGroupPermissionsGuard implements CanActivate {
         const bool = await this.permissionsService.doesUserHavePermissionsInGroup({
             userId: req.user.id,
             groupId: context.switchToWs().getData().groupId,
-            requiredPermissions
+            requiredPermissions: requiredPermissions || []
         })
         return bool
     }

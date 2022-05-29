@@ -39,11 +39,11 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
         const { id } = this.jwtService.decode(
             socket.handshake.query['access_token'].toString()
         ) as TokenPayload
-        await this.socketIoService.pushSocket({ userId: id, socket })
+        await this.socketIoService.pushClient({ userId: id, socketId: socket.id })
         socket.emit('200', socket.id)
     }
     async handleDisconnect(@ConnectedSocket() socket: Socket) {
-        await this.socketIoService.popSocket(socket)
+        await this.socketIoService.removeClient(socket.id)
     }
 
     @SubscribeMessage('create-category')
@@ -54,9 +54,10 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
     ): Promise<void> {
         const category: Category = await this.categoriesService.createCategory(dto)
         const groupUsers: User[] = await this.usersService.getUsersByGroupId(dto.groupId)
-        const socketsOfGroupUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => groupUsers.some(groupUser => groupUser.id === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfGroupUsers = (await this.socketIoService.getClients())
+            .filter(client => groupUsers.some(groupUser => groupUser.id === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         socketsOfGroupUsers.forEach(socket => socket.join('group:' + category.groupId))
 
         socket.emit('200', category)
@@ -86,9 +87,10 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
 
     @OnEvent('internal-categories.created')
     async showToSocketsNewCategory(event: InternalCategoriesCreatedEvent): Promise<void>  {
-        const socketsOfGroupUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => event.usersIds.some(userId => userId === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfGroupUsers = (await this.socketIoService.getClients())
+            .filter(client => event.usersIds.some(userId => userId === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         this.server
             .to(socketsOfGroupUsers.map(socket => socket.id))
             .emit('category-created', event.category)
@@ -96,9 +98,10 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
 
     @OnEvent('internal-categories.updated')
     async showToSocketsUpdatedCategory(event: InternalCategoriesUpdatedEvent): Promise<void>  {
-        const socketsOfGroupUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => event.usersIds.some(userId => userId === user.id))
-            .map(user => user.socket)
+        const socketsOfGroupUsers = (await this.socketIoService.getSocketsByUsersIds(
+            (await this.server.fetchSockets()),
+            event.usersIds
+        ))
         this.server
             .to(socketsOfGroupUsers.map(socket => socket.id))
             .emit('category-updated', event.category)
@@ -106,9 +109,10 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
 
     @OnEvent('internal-categories.deleted')
     async hideFromSocketsDeletedCategory(event: InternalCategoriesDeletedEvent): Promise<void>  {
-        const socketsOfGroupUsers = (await this.socketIoService.getConnectedSockets())
-            .filter(user => event.usersIds.some(userId => userId === user.id))
-            .map(user => user.socket)
+        const sockets = await this.server.fetchSockets()
+        const socketsOfGroupUsers = (await this.socketIoService.getClients())
+            .filter(client => event.usersIds.some(userId => userId === client.userId))
+            .map(client => sockets.find(socket => socket.id === client.socketId))
         this.server
             .to(socketsOfGroupUsers.map(socket => socket.id))
             .emit('category-deleted', event.categoryId)

@@ -10,7 +10,7 @@ export class GroupLayout {
 
 export class RoleLayout {
     name: string
-    permissions?: Partial<RolePermissionsListClass>
+    permissions?: RolePermissionsListClass
 }
 
 export class CategoryLayout {

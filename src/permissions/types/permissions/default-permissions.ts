@@ -1,7 +1,7 @@
 import { RolePermissionsListClass } from './role-permissions-list.class'
 import { ForcedPermissionLevel } from './permission-level'
 
-export const DefaultRolePermissions: RolePermissionsListClass = {
+export const DefaultRolePermissions: Required<RolePermissionsListClass> = {
     manageGroup: ForcedPermissionLevel.NOT_ALOWED,
     manageCategoriesAndChannels: ForcedPermissionLevel.NOT_ALOWED,
     manageRoles: ForcedPermissionLevel.NOT_ALOWED,

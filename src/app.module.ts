@@ -30,7 +30,6 @@ import { PermissionsModule } from './permissions/permissions.module'
 import { RolesModule } from './roles/roles.module'
 import { InvitesModule } from './invites/invites.module'
 import { TextChannelMessage } from './messages/models/text-channel-message.model'
-import { ConnectedSocket } from './socketio/models/connected-socket.model'
 
 
 @Module({
@@ -63,7 +62,6 @@ import { ConnectedSocket } from './socketio/models/connected-socket.model'
                 TextChannelMessage,
                 Category,
                 CategoryRolePermissions,
-                ConnectedSocket,
             ],
             autoLoadModels: true,
             retryAttempts: 0

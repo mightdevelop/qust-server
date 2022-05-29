@@ -3,6 +3,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { TextChannelPermissionsGuard } from 'src/permissions/guards/text-channel-permissions.guard'
+import { RolePermissionsListClass } from 'src/permissions/types/permissions/role-permissions-list.class'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
 import { CreateRoleDto } from './dto/create-role.dto'
 import { Role } from './models/roles.model'
@@ -34,6 +35,7 @@ export class RolesController {
         @Body() dto: {
             name?: string
             color?: string
+            permissions?: RolePermissionsListClass
         },
     ): Promise<Role> {
         const role: Role = await this.rolesService.getRoleById(roleId)

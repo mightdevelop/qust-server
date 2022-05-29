@@ -4,9 +4,9 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { Request } from 'express'
 import { UsersService } from 'src/users/users.service'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
-import { refreshConfig } from 'src/jwt-config'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { User } from 'src/users/models/users.model'
+import 'dotenv/config'
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -18,7 +18,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromBodyField('refresh_token'),
-            secretOrKey: refreshConfig.secret,
+            secretOrKey: process.env.JWT_REFRESH_TOKEN_SECRET,
             passReqToCallback: true,
         })
     }

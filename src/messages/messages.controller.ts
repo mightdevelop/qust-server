@@ -2,11 +2,8 @@ import { Body, Controller, Delete, ForbiddenException, NotFoundException, Param,
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
-import { ChatMessageService } from './chat-message.service'
 import { MessagesService } from './messages.service'
-import { ChatMessage } from './models/chat-message.model'
 import { Message } from './models/messages.model'
-import { TextChannelMessageService } from './text-channel-message.service'
 
 
 @Controller('/messages')
@@ -14,8 +11,6 @@ export class MessagesController {
 
     constructor(
         private messagesService: MessagesService,
-        private chatMessageService: ChatMessageService,
-        private textChannelMessagesService: TextChannelMessageService,
     ) {}
 
     @Put('/:messageId')

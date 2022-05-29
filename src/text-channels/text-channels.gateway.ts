@@ -16,6 +16,7 @@ import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { InternalTextChannelssMessageSentEvent } from 'src/messages/events/internal-text-channels.message-sent.event'
+import { MessageContent } from 'src/messages/models/message-content.model'
 import { Message } from 'src/messages/models/messages.model'
 import { TextChannelMessageService } from 'src/messages/text-channel-message.service'
 import { SocketIoRequiredTextChannelPermissions } from 'src/permissions/decorators/socketio-required-text-channel-permissions.decorator'
@@ -72,13 +73,15 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     @UseGuards(SocketIoJwtAuthGuard)
     async getMessagesFromTextChannel(
         @ConnectedSocket() socket: Socket,
-        @MessageBody() { channelId }: { channelId: string }
+        @MessageBody() { channelId, offset }: { channelId: string, offset: number }
     ): Promise<void> {
         if (!socket.rooms.has('text-channel:' + channelId)) {
             socket.emit('400', 'You are not connected to text channel')
             return
         }
-        const messages: Message[] = await this.textChannelsService.getMessagesFromTextChannel(channelId)
+        const messages: Message[] = await this.textChannelMessageService.getMessagesFromTextChannel(
+            channelId, MessageContent, 30, offset
+        )
         socket.emit('200', messages)
     }
 

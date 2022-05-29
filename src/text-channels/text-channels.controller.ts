@@ -1,5 +1,9 @@
 import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
+import { UserFromRequest } from 'src/auth/types/request-response'
+import { Message } from 'src/messages/models/messages.model'
+import { TextChannelMessageService } from 'src/messages/text-channel-message.service'
 import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
@@ -14,6 +18,7 @@ export class TextChannelsController {
 
     constructor(
         private textChannelsService: TextChannelsService,
+        private textChannelMessageService: TextChannelMessageService,
     ) {}
 
     @Post('/')
@@ -26,7 +31,7 @@ export class TextChannelsController {
         return channel
     }
 
-    @Put('/:channelId')
+    @Put('/:textChannelIdId')
     @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
     async updateTextChannel(
         @Param('channelId') channelId: string,
@@ -40,7 +45,7 @@ export class TextChannelsController {
         return updatedChannel
     }
 
-    @Delete('/:channelId')
+    @Delete('/:textChannelIdId')
     @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
     async deleteTextChannel(
         @Param('channelId') channelId: string
@@ -50,6 +55,24 @@ export class TextChannelsController {
             throw new NotFoundException({ message: 'Text channel not found' })
         await this.textChannelsService.deleteTextChannel({ channel })
         return channel
+    }
+
+    @Post('/:textChannelId/messages')
+    @UseGuards(JwtAuthGuard)
+    async sendMessageToTextChannel(
+        @Param('textChannelId') channelId: string,
+        @CurrentUser() user: UserFromRequest,
+        @Body() { text }: { text: string }
+    ): Promise<Message> {
+        if (!await this.textChannelsService.getTextChannelById(channelId))
+            throw new NotFoundException({ message: 'Text channel not found' })
+        const message: Message = await this.textChannelMessageService.sendMessageToTextChannel({
+            userId: user.id,
+            username: user.username,
+            channelId,
+            text
+        })
+        return message
     }
 
 }

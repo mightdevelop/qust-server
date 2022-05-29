@@ -16,6 +16,7 @@ import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { ChatMessageService } from 'src/messages/chat-message.service'
 import { InternalChatsMessageSentEvent } from 'src/messages/events/internal-chats.message-sent.event'
+import { MessageContent } from 'src/messages/models/message-content.model'
 import { Message } from 'src/messages/models/messages.model'
 import { generateAddUsersMessageContent } from 'src/messages/utils/generate-messages-text-content'
 import { SocketIoService } from 'src/socketio/socketio.service'
@@ -70,13 +71,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @UseGuards(SocketIoJwtAuthGuard)
     async getMessagesFromChat(
         @ConnectedSocket() socket: Socket,
-        @MessageBody() { chatId }: { chatId: string }
+        @MessageBody() { chatId, offset }: { chatId: string, offset: number }
     ): Promise<void> {
         if (!socket.rooms.has('chat:' + chatId)) {
             socket.emit('400', 'You are not connected to chat')
             return
         }
-        const messages: Message[] = await this.chatsService.getMessagesFromChat(chatId)
+        const messages: Message[] =
+            await this.chatMessageService.getMessagesFromChat(chatId, MessageContent, 30, offset)
         socket.emit('200', messages)
     }
 

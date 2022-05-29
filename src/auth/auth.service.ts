@@ -7,8 +7,8 @@ import { User } from 'src/users/models/users.model'
 import { ValidateUserDto } from './dto/validate-user.dto'
 import { Tokens } from './types/tokens'
 import { TokenPayload } from './types/tokenPayload'
-import { accessConfig, refreshConfig } from 'src/jwt-config'
 import { Cache } from 'cache-manager'
+import 'dotenv/config'
 
 
 @Injectable()
@@ -52,15 +52,15 @@ export class AuthService {
                 username,
                 isAdmin,
                 iat,
-                exp: iat + accessConfig.signOptions.expiresIn
-            }, { secret: accessConfig.secret }),
+                exp: iat + +process.env.JWT_ACCESS_TOKEN_EXPIRESIN
+            }, { secret: process.env.JWT_ACCESS_TOKEN_SECRET }),
             refreshToken: this.jwtService.sign({
                 id,
                 username,
                 isAdmin,
                 iat,
-                exp: iat + refreshConfig.signOptions.expiresIn
-            }, { secret: refreshConfig.secret }),
+                exp: iat + +process.env.JWT_REFRESH_TOKEN_EXPIRESIN
+            }, { secret: process.env.JWT_REFRESH_TOKEN_SECRET }),
         }
         if (tokens) {
             await this.store.set(`${user.id}`, tokens.refreshToken)

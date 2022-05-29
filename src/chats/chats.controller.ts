@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
@@ -12,6 +12,7 @@ import StandartBots from 'src/utils/standart-bots-const'
 import { User } from 'src/users/models/users.model'
 import { Message } from 'src/messages/models/messages.model'
 import { UsersService } from 'src/users/users.service'
+import { MessageContent } from 'src/messages/models/message-content.model'
 
 
 @Controller('/chats')
@@ -118,11 +119,13 @@ export class ChatsController {
     @UseGuards(JwtAuthGuard)
     async getMessagesFromChat(
         @Param('chatId') chatId: string,
-        @CurrentUser() user: UserFromRequest
+        @CurrentUser() user: UserFromRequest,
+        @Query('offset') offset?: number,
     ): Promise<Message[]> {
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
-        const messages: Message[] = await this.chatsService.getMessagesFromChat(chatId)
+        const messages: Message[] =
+            await this.chatMessageService.getMessagesFromChat(chatId, MessageContent, 30, offset)
         return messages
     }
 

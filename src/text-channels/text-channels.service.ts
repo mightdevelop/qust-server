@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
 import { CategoriesService } from 'src/categories/categories.service'
 import { Category } from 'src/categories/models/categories.model'
-import { Message } from 'src/messages/models/messages.model'
 import { PermissionsService } from 'src/permissions/permissions.service'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
@@ -49,11 +48,6 @@ export class TextChannelsService {
             await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(channelId)
         const users: User[] = await this.usersService.getUsersByIdsArray(usersIds)
         return users
-    }
-
-    async getMessagesFromTextChannel(channelId: string): Promise<Message[]> {
-        const channel: TextChannel = await this.channelRepository.findByPk(channelId, { include: Message })
-        return channel.messages
     }
 
     async createTextChannel(dto: CreateTextChannelDto): Promise<TextChannel> {

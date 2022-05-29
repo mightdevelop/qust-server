@@ -35,7 +35,7 @@ import { TextChannelMessage } from './messages/models/text-channel-message.model
 @Module({
     imports: [
         ConfigModule.forRoot({
-            envFilePath: `@${process.env.NODE_ENV}.env`,
+            envFilePath: [ `@${process.env.NODE_ENV}.env`, '@.env' ]
         }),
         SequelizeModule.forRoot({
             dialect: 'postgres',

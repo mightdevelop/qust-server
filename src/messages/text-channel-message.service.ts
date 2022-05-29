@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
+import { Includeable } from 'sequelize/types'
 import { SendTextChannelMessageDto } from './dto/send-text-channel-message.dto'
 import { InternalTextChannelssMessageSentEvent } from './events/internal-text-channels.message-sent.event'
 import { MessagesService } from './messages.service'
@@ -21,6 +22,20 @@ export class TextChannelMessageService {
         const row: TextChannelMessage =
             await this.textChannelMessageRepository.findOne({ where: { messageId } })
         return row
+    }
+
+    async getMessagesFromTextChannel(
+        channelId: string,
+        include?: Includeable | Includeable[],
+        limit?: number,
+        offset?: number,
+    ): Promise<Message[]> {
+        const messagesIds: string[] =
+            (await this.textChannelMessageRepository.findAll({ where: { channelId } }))
+                .map(row => row.messageId)
+        const messages: Message[] =
+            await this.messageService.getMessagesByIds(messagesIds, include, limit, offset)
+        return messages
     }
 
     async sendMessageToTextChannel(dto: SendTextChannelMessageDto): Promise<Message> {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
-import { Op } from 'sequelize'
+import { Includeable, Op } from 'sequelize'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { DeleteMessageDto } from './dto/delete-message.dto'
 import { UpdateMessageDto } from './dto/update-message.dto'
@@ -21,9 +21,14 @@ export class MessagesService {
         return message
     }
 
-    async getMessagesByIds(messagesIds: { id: string }[]): Promise<Message[]> {
+    async getMessagesByIds(
+        messagesIds: string[],
+        include?: Includeable | Includeable[],
+        limit?: number,
+        offset?: number,
+    ): Promise<Message[]> {
         const messages: Message[] = await this.messageRepository.findAll({
-            where: { [Op.or]: messagesIds }, include: MessageContent
+            where: { [Op.or]: messagesIds.map(id => ({ id })) }, include, limit, offset
         })
         return messages
     }

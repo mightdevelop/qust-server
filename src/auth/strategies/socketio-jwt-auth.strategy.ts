@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { accessConfig } from 'src/jwt-config'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { UsersService } from 'src/users/users.service'
+import 'dotenv/config'
 
 @Injectable()
 export class SocketIoJwtAuthStrategy extends PassportStrategy(Strategy, 'socket.io-jwt') {
@@ -14,7 +14,7 @@ export class SocketIoJwtAuthStrategy extends PassportStrategy(Strategy, 'socket.
         super({
             jwtFromRequest: ExtractJwt.fromUrlQueryParameter('access_token'),
             ignoreExpiration: false,
-            secretOrKey: accessConfig.secret,
+            secretOrKey: process.env.JWT_ACCESS_TOKEN_SECRET,
         })
     }
     async validate(payload: TokenPayload): Promise<UserFromRequest> {

@@ -20,8 +20,8 @@ export class UsersService {
         @InjectModel(GroupUser) private groupUserRepository: typeof GroupUser,
     ) {}
 
-    async getAllUsers(): Promise<User[]> {
-        const users: User[] = await this.userRepository.findAll()
+    async getUsers(limit?: number, offset?: number): Promise<User[]> {
+        const users: User[] = await this.userRepository.findAll({ limit, offset })
         return users
     }
 
@@ -63,27 +63,31 @@ export class UsersService {
     }
 
     async getFriendsByUserId(
-        userId: string
+        userId: string,
+        limit?: number,
+        offset?: number,
     ): Promise<User[]> {
         const userFriendRows: Friend[] = await this.userFriendsRepository.findAll(
             { where: { userId, status: FriendRequestStatus.CONFIRM } }
         )
         const friendsIds: { id: string }[] = userFriendRows.map(row => ({ id: row.userId }))
         const friends: User[] = await this.userRepository.findAll({
-            where: { [Op.or]: friendsIds }
+            where: { [Op.or]: friendsIds }, limit, offset
         })
         return friends
     }
 
     async getUsersByGroupId(
-        groupId: string
+        groupId: string,
+        limit?: number,
+        offset?: number,
     ): Promise<User[]> {
         const userGroupRows: GroupUser[] = await this.groupUserRepository.findAll(
             { where: { groupId } }
         )
         const usersIds: { id: string }[] = userGroupRows.map(row => ({ id: row.userId }))
         const users: User[] = await this.userRepository.findAll({
-            where: { [Op.or]: usersIds }
+            where: { [Op.or]: usersIds }, limit, offset
         })
         return users
     }

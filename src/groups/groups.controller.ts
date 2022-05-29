@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
@@ -40,9 +40,10 @@ export class GroupsController {
     @Get('/:groupId/users')
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async getUsersByGroupId(
-        @Param('groupId') groupId: string
+        @Param('groupId') groupId: string,
+        @Query('offset') offset: number
     ): Promise<User[]> {
-        const users: User[] = await this.usersService.getUsersByGroupId(groupId)
+        const users: User[] = await this.usersService.getUsersByGroupId(groupId, 30, offset)
         return users
     }
 

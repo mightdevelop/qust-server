@@ -8,6 +8,7 @@ import {
     Param,
     Post,
     Put,
+    Query,
     UseGuards,
 } from '@nestjs/common'
 import { isAdmin } from 'src/auth/decorators/isAdmin.decorator'
@@ -29,11 +30,11 @@ export class UsersController {
         private usersService: UsersService,
     ) {}
 
-    @Get('/')
-    async getAllUsers(): Promise<UserToResponse[]> {
-        const users: User[] = await this.usersService.getAllUsers()
-        return await usersToResponse(users)
-    }
+    // @Get('/')
+    // async getUsers(): Promise<UserToResponse[]> {
+    //     const users: User[] = await this.usersService.getUsers()
+    //     return await usersToResponse(users)
+    // }
 
     @Get('/:userId')
     async getUserById(
@@ -48,11 +49,12 @@ export class UsersController {
     @Get('/:userId/friends')
     async getFriendsByUserId(
         @Param('userId') userId: string,
+        @Query('offset') offset: number,
     ): Promise<UserToResponse[]> {
         const user = await this.usersService.getUserById(userId)
         if (!user)
             throw new NotFoundException({ message: 'User not found' })
-        const friends: User[] = await this.usersService.getFriendsByUserId(userId)
+        const friends: User[] = await this.usersService.getFriendsByUserId(userId, 30, offset)
         return await usersToResponse(friends)
     }
 

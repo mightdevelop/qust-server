@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { FriendsService } from './friends.service'
@@ -21,10 +21,11 @@ export class FriendsController {
 
     @Get('/')
     @UseGuards(JwtAuthGuard)
-    async getAllMyFriends(
-        @CurrentUser() user: UserFromRequest
+    async getMyFriends(
+        @CurrentUser() user: UserFromRequest,
+        @Query('offset') offset: number,
     ): Promise<User[]> {
-        const friends: User[] = await this.usersService.getFriendsByUserId(user.id)
+        const friends: User[] = await this.usersService.getFriendsByUserId(user.id, 30, offset)
         return friends
     }
 

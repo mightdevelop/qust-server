@@ -30,6 +30,9 @@ import { PermissionsModule } from './permissions/permissions.module'
 import { RolesModule } from './roles/roles.module'
 import { InvitesModule } from './invites/invites.module'
 import { TextChannelMessage } from './messages/models/text-channel-message.model'
+import { BannedUser } from './group-blacklists/models/banned-users.model'
+import { GroupBlacklist } from './group-blacklists/models/group-blacklists.model'
+import { GroupBlacklistsModule } from './group-blacklists/group-blacklists.module'
 
 
 @Module({
@@ -62,6 +65,8 @@ import { TextChannelMessage } from './messages/models/text-channel-message.model
                 TextChannelMessage,
                 Category,
                 CategoryRolePermissions,
+                GroupBlacklist,
+                BannedUser,
             ],
             autoLoadModels: true,
             retryAttempts: 0
@@ -77,6 +82,7 @@ import { TextChannelMessage } from './messages/models/text-channel-message.model
         forwardRef(() => CategoriesModule),
         forwardRef(() => TextChannelsModule),
         forwardRef(() => InvitesModule),
+        forwardRef(() => GroupBlacklistsModule),
     ]
 })
 export class AppModule {}

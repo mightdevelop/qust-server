@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { nanoid } from 'nanoid'
 import { Op } from 'sequelize'
@@ -10,7 +10,7 @@ import { Invite } from './models/invites.model'
 export class InvitesService {
 
     constructor(
-        @InjectModel(Invite) private inviteRepository: typeof Invite
+        @InjectModel(Invite) private inviteRepository: typeof Invite,
     ) {}
 
     async getInviteById(inviteId: string): Promise<Invite> {
@@ -32,10 +32,7 @@ export class InvitesService {
         return invite
     }
 
-    async useInvite(inviteId: string): Promise<Invite> {
-        const invite: Invite = await this.inviteRepository.findByPk(inviteId)
-        if (!invite)
-            throw new NotFoundException({ message: 'Invite not found' })
+    async useInvite(invite: Invite): Promise<Invite> {
         if (invite.remainingUsages === 1) {
             await invite.destroy()
             return invite

@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { Category } from 'src/categories/models/categories.model'
+import { GroupBlacklist } from 'src/group-blacklists/models/group-blacklists.model'
 import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
@@ -32,7 +33,11 @@ export class GroupsController {
         @Body() { full }: { full?: boolean }
     ): Promise<Group> {
         const group: Group = await this.groupsService.getGroupById(groupId,
-            full ? [ { model: Category, include: [ TextChannel ] }, { all: true } ] : undefined
+            full ? [
+                { model: Category, include: [ TextChannel ] },
+                { model: GroupBlacklist, include: [ User ] },
+                { all: true }
+            ] : undefined
         )
         return group
     }
@@ -98,6 +103,21 @@ export class GroupsController {
             ownerId: user.id,
         })
         await this.groupsService.addUserToGroup({ userId: user.id, groupId: group.id })
+        return group
+    }
+
+    @Delete('/:groupId')
+    @UseGuards(JwtAuthGuard)
+    async deleteGroup(
+        @CurrentUser() user: UserFromRequest,
+        @Param('groupId') groupId: string,
+    ): Promise<Group> {
+        const group: Group = await this.groupsService.getGroupById(groupId)
+        if (!group)
+            throw new NotFoundException({ message: 'Group not found' })
+        if (group.ownerId !== user.id)
+            throw new ForbiddenException({ message: 'You have no permissions' })
+        await this.groupsService.deleteGroup({ group })
         return group
     }
 

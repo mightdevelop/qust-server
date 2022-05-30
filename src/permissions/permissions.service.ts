@@ -47,23 +47,22 @@ export class PermissionsService {
         return permissions
     }
 
-    private async isUserOwner(userId: string, groupId: string) {
-        const group: Group = await this.groupsService.getGroupById(groupId)
-        return group.ownerId === userId
-    }
-
     async isUserGroupParticipant(dto: UserIdAndGroupIdDto): Promise<boolean> {
         return await this.groupsService.isUserGroupParticipant(dto)
     }
 
     async doesUserHavePermissionsInGroup(dto: UserPermissionsInGroupDto): Promise<boolean> {
-        const isOwner: boolean = await this.isUserOwner(dto.userId, dto.groupId)
-        if (isOwner) return true
+        const group: Group = await this.groupsService.getGroupById(dto.groupId)
+        if (!group)
+            throw new NotFoundException({ message: 'Group not found' })
+        if (group.ownerId === dto.userId) return true
         const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
             dto.userId, dto.groupId, [ RolePermissions ]
         )
         if (!roles.length)
             return false
+        if (!dto.requiredPermissions.length)
+            return true
         const userGroupPermissions =
             await this.getPermissionsByRolesArrayInGroup({ roles, groupId: dto.groupId })
         const isAllPermissionAllowed = !!dto.requiredPermissions
@@ -99,7 +98,10 @@ export class PermissionsService {
 
     async doesUserHavePermissionsInTextChannel(dto: UserPermissionsInTextChannelDto): Promise<boolean> {
         const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(dto.channelId)
-        if (await this.isUserOwner(dto.userId, groupId)) return true
+        const group: Group = await this.groupsService.getGroupById(groupId)
+        if (!group)
+            throw new NotFoundException({ message: 'Group not found' })
+        if (group.ownerId === dto.userId) return true
         const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
             dto.userId, groupId, [ RolePermissions, TextChannelRolePermissions ]
         )
@@ -173,7 +175,8 @@ export class PermissionsService {
         const category: Category = await this.categoriesService.getCategoryById(categoryId)
         if (!category)
             throw new NotFoundException({ message: 'Category not found' })
-        if (await this.isUserOwner(userId, category.groupId)) return true
+        const group: Group = await this.groupsService.getGroupById(category.groupId)
+        if (group.ownerId === userId) return true
         const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
             userId, category.groupId, [ RolePermissions, CategoryRolePermissions ]
         )
@@ -198,8 +201,7 @@ export class PermissionsService {
                 { model: Category, include: [ TextChannel ] }
             )
             const channels: TextChannel[] = [].concat(...group.categories.map(category => category.channels))
-            if (await this.isUserOwner(userId, groupId))
-                return channels.map(channel => channel.id)
+            if (group.ownerId === userId) return channels.map(channel => channel.id)
             const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
                 userId, groupId, [ RolePermissions, TextChannelRolePermissions ]
             )

@@ -1,4 +1,6 @@
 import { BelongsToMany, Column, DataType, Model, Table } from 'sequelize-typescript'
+import { BannedUser } from 'src/group-blacklists/models/banned-users.model'
+import { GroupBlacklist } from 'src/group-blacklists/models/group-blacklists.model'
 import { GroupUser } from 'src/groups/models/group-user.model'
 import { Group } from 'src/groups/models/groups.model'
 import { RoleUser } from 'src/roles/models/role-user.model'
@@ -19,12 +21,6 @@ export class User extends Model<User> {
     @Column({ type: DataType.STRING, allowNull: false })
         password: string
 
-    @Column({ type: DataType.BOOLEAN, defaultValue: false })
-        banned: boolean
-
-    @Column({ type: DataType.STRING, allowNull: true })
-        banReason: string
-
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
         isAdmin: boolean
 
@@ -36,6 +32,9 @@ export class User extends Model<User> {
 
     @BelongsToMany(() => Role, () => RoleUser)
         roles: Role[]
+
+    @BelongsToMany(() => GroupBlacklist, () => BannedUser)
+        groupBlacklists: GroupBlacklist
 
 }
 

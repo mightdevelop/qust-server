@@ -16,7 +16,7 @@ export class Category extends Model<Category> {
     @ForeignKey(() => Group)
         groupId: string
 
-    @BelongsTo(() => Group)
+    @BelongsTo(() => Group, { onDelete: 'cascade' })
         group: Group
 
     @HasMany(() => TextChannel)

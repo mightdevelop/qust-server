@@ -1,8 +1,9 @@
-import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript'
+import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript'
 import { User } from 'src/users/models/users.model'
 import { GroupUser } from './group-user.model'
 import { Role } from '../../roles/models/roles.model'
 import { Category } from 'src/categories/models/categories.model'
+import { GroupBlacklist } from 'src/group-blacklists/models/group-blacklists.model'
 
 @Table({ tableName: 'groups' })
 export class Group extends Model<Group> {
@@ -26,8 +27,11 @@ export class Group extends Model<Group> {
     @HasMany(() => Role)
         roles: Role[]
 
-    @HasMany(() => Category)
+    @HasMany(() => Category, { onDelete: 'cascade' })
         categories: Category[]
+
+    @HasOne(() => GroupBlacklist, { onDelete: 'cascade' })
+        blacklist: GroupBlacklist
 
     // @HasMany(() => InviteLink)
     //     inviteLinks: InviteLink[]

@@ -2,6 +2,8 @@ import { BadRequestException, Body, Controller, Get, NotFoundException, Param, P
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
+import { GroupBlacklistsService } from 'src/group-blacklists/group-blacklists.service'
+import { BannedUser } from 'src/group-blacklists/models/banned-users.model'
 import { GroupsService } from 'src/groups/groups.service'
 import { Group } from 'src/groups/models/groups.model'
 import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
@@ -21,6 +23,7 @@ export class InvitesController {
         private invitesService: InvitesService,
         private groupsService: GroupsService,
         private usersService: UsersService,
+        private groupBlacklistsService: GroupBlacklistsService,
     ) {}
 
     @Get('/')
@@ -52,12 +55,18 @@ export class InvitesController {
         @Param('inviteId') inviteId: string,
         @CurrentUser() user: UserFromRequest
     ): Promise<string> {
-        const { groupId }: Invite = await this.invitesService.useInvite(inviteId)
-        const groupUsers: User[] = await this.usersService.getUsersByGroupId(groupId)
+        const invite: Invite = await this.invitesService.getInviteById(inviteId)
+        if (!invite)
+            throw new NotFoundException({ message: 'Invite not found' })
+        const bannedUserRow: BannedUser =
+            await this.groupBlacklistsService.getBannedUserRowByUserId(user.id)
+        if (bannedUserRow)
+            throw new BadRequestException({ message: 'You are banned in this group' })
+        const groupUsers: User[] = await this.usersService.getUsersByGroupId(invite.groupId)
         if (groupUsers.map(u => u.id).includes(user.id))
             throw new BadRequestException({ message: 'You are already a group participant' })
-        await this.groupsService.addUserToGroup({ userId: user.id, groupId })
-        return groupId
+        await this.groupsService.addUserToGroup({ userId: user.id, groupId: invite.groupId })
+        return invite.groupId
     }
 
 }

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { Category } from 'src/categories/models/categories.model'
 import { CategoryRolePermissions } from 'src/categories/models/category-role-permissions.model'
+import { GroupBlacklist } from 'src/group-blacklists/models/group-blacklists.model'
 import { RolePermissions } from 'src/permissions/models/role-permissions.model'
 import { Role } from 'src/roles/models/roles.model'
 import { TextChannelRolePermissions } from 'src/text-channels/models/text-channel-role-permissions.model'
@@ -18,7 +19,8 @@ import { LayoutsService } from './layouts.service'
             TextChannel,
             TextChannelRolePermissions,
             Role,
-            RolePermissions
+            RolePermissions,
+            GroupBlacklist
         ]),
     ],
     exports: [ LayoutsService ]

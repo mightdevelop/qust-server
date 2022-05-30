@@ -4,6 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize'
 import { Invite } from './models/invites.model'
 import { GroupsModule } from 'src/groups/groups.module'
 import { Module } from '@nestjs/common'
+import { GroupBlacklistsModule } from 'src/group-blacklists/group-blacklists.module'
 
 
 @Module({
@@ -12,6 +13,7 @@ import { Module } from '@nestjs/common'
     imports: [
         SequelizeModule.forFeature([ Invite ]),
         GroupsModule,
+        GroupBlacklistsModule,
     ],
     exports: [ InvitesService ]
 })

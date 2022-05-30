@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { StandardGroupLayouts } from 'src/layouts/types/standard-group-layouts'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { LayoutsService } from '../layouts/layouts.service'
 import { Group } from './models/groups.model'
-import { AddUserToGroupDto } from './dto/add-user-to-group.dto'
 import { GroupUser } from './models/group-user.model'
 import { Includeable } from 'sequelize/types'
 import { DeleteGroupDto } from './dto/delete-group.dto'
@@ -38,14 +37,22 @@ export class GroupsService {
         return !!await this.groupUserRepository.findOne({ where: { userId, groupId } })
     }
 
-    async addUserToGroup(dto: AddUserToGroupDto): Promise<GroupUser> {
-        const groupUser: GroupUser = await this.groupUserRepository.create(dto)
-        return groupUser
+    async addUserToGroup(dto: UserIdAndGroupIdDto): Promise<GroupUser> {
+        const groupUserRow: GroupUser = await this.groupUserRepository.create(dto)
+        return groupUserRow
+    }
+
+    async removeUserFromGroup(dto: UserIdAndGroupIdDto): Promise<GroupUser> {
+        const groupUserRow: GroupUser = await this.groupUserRepository.findOne({ where: { ...dto } })
+        if (!groupUserRow)
+            throw new NotFoundException({ message: 'User is not a group participant' })
+        await groupUserRow.destroy()
+        return groupUserRow
     }
 
     async createGroup(dto: CreateGroupDto): Promise<Group> {
         const group: Group = await this.groupRepository.create(dto)
-        await this.layoutsService.createRolesCategoriesAndTextChannelsByLayout({
+        await this.layoutsService.createBlacklistRolesCategoriesAndTextChannelsByLayout({
             groupId: group.id,
             groupLayout: StandardGroupLayouts[dto.layout || 'DEFAULT']
         })

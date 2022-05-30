@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/sequelize'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
+import { UserIdAndFriendIdDto } from './dto/user-id-and-friend-id.dto'
 import { Friend } from './models/friends.model'
 import { FriendRequestStatus } from './types/friend-request-status'
 
@@ -27,10 +28,21 @@ export class FriendsService {
         return userFriendRow
     }
 
-    async friendshipRequest(
-        friendId: string,
+    async getRequestsToUserId(
         userId: string
-    ): Promise<void> {
+    ): Promise<Friend[]> {
+        return await this.userFriendsRepository.findAll({ where: { friendId: userId } })
+    }
+
+    async getRequestsFromUserId(
+        userId: string
+    ): Promise<Friend[]> {
+        return await this.userFriendsRepository.findAll({ where: { userId } })
+    }
+
+    async friendshipRequest(
+        { friendId, userId }: UserIdAndFriendIdDto
+    ): Promise<Friend> {
         if (friendId === userId)
             throw new BadRequestException({ message: 'You can`t request friendship from yourself' })
         const requestRecipient: User = await this.usersService.getUserById(friendId)
@@ -47,32 +59,31 @@ export class FriendsService {
                         : 'Already requested'
                 }
             )
-        await this.userFriendsRepository.create({
+        const request: Friend = await this.userFriendsRepository.create({
             userId,
             friendId,
             status: FriendRequestStatus.REQUEST
         })
-        return
+        return request
     }
 
     async cancelFriendshipRequest(
-        friendId: string,
-        userId: string
-    ): Promise<void> {
+        { friendId, userId }: UserIdAndFriendIdDto
+    ): Promise<Friend> {
         const request: Friend = await this.userFriendsRepository.findOne(
             { where: { userId, friendId, status: FriendRequestStatus.REQUEST } }
         )
         if (!request)
             throw new BadRequestException({ message: 'No request' })
         await request.destroy()
-        return
+        return request
     }
 
     async responseToFriendshipRequest(
         requestedUserId: string,
         respondingUserId: string,
         isConfirm: boolean
-    ): Promise<void> {
+    ): Promise<Friend> {
         const friendRow: Friend = await this.userFriendsRepository.findOne({ where: {
             userId: requestedUserId,
             friendId: respondingUserId,
@@ -85,27 +96,26 @@ export class FriendsService {
             return
         }
         await friendRow.update({ status: FriendRequestStatus.CONFIRM })
-        await this.userFriendsRepository.create({
+        const request: Friend = await this.userFriendsRepository.create({
             userId: respondingUserId,
             friendId: requestedUserId,
             status: FriendRequestStatus.CONFIRM
         })
-        return
+        return request
     }
 
     async removeFriend(
-        friendId: string,
-        userId: string
-    ): Promise<void> {
-        const isFriend = !!await this.userFriendsRepository.findOne( { where: { userId, friendId } })
-        if (!isFriend)
+        { friendId, userId }: UserIdAndFriendIdDto
+    ): Promise<Friend> {
+        const request: Friend = await this.userFriendsRepository.findOne( { where: { userId, friendId } })
+        if (!request)
             throw new BadRequestException({ message: 'User is not a friend' })
         await this.userFriendsRepository.destroy({ where: {
             userId,
             friendId,
             status: FriendRequestStatus.REQUEST
         } })
-        return
+        return request
     }
 
 }

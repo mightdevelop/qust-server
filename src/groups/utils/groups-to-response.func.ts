@@ -10,5 +10,4 @@ export const groupsToResponse = (groups: Group[]): GroupToResponse[] => groups
         users: usersToResponse(group.users),
         roles: group.roles,
         categories: group.categories,
-        blacklist: group.blacklist,
     }))

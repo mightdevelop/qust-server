@@ -2,24 +2,24 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { isArray } from 'class-validator'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { UserToResponse } from '../types/user-to-response.class'
-import { usersToResponse } from '../utils/users-to-response.func'
+import { GroupToResponse } from '../types/group-to-response.class'
+import { groupsToResponse } from '../utils/groups-to-response.func'
 
 export interface Response {
-    user?: UserToResponse
-    users?: UserToResponse[]
+    group?: GroupToResponse
+    groups?: GroupToResponse[]
 }
 
 @Injectable()
-export class UserModelInterceptor<T> implements NestInterceptor<T, Response> {
+export class GroupModelInterceptor<T> implements NestInterceptor<T, Response> {
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<Response>> {
         return next.handle().pipe(map(data => {
             if (isArray(data)) {
-                const users = usersToResponse(data)
-                return { users }
+                const groups = groupsToResponse(data)
+                return { groups }
             }
-            const user = usersToResponse([ data ])[0]
-            return { user }
+            const group = groupsToResponse([ data ])[0]
+            return { group }
         }))
     }
 }

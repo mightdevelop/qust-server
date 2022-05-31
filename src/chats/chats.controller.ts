@@ -36,7 +36,6 @@ export class ChatsController {
         const chatters: User[] = await this.usersService.getChattersByChatId(chat.id)
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
-            username: StandartBots.CHAT_BOT.username,
             chatId: chat.id,
             text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         })
@@ -73,7 +72,6 @@ export class ChatsController {
         const chatters: User[] = await this.usersService.getChattersByChatId(chatId)
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
-            username: StandartBots.CHAT_BOT.username,
             chatId,
             text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         })
@@ -108,7 +106,6 @@ export class ChatsController {
             throw new ForbiddenException({ message: 'You are not a chat participant' })
         const message: Message = await this.chatMessageService.sendMessageToChat({
             userId: user.id,
-            username: user.username,
             chatId,
             text
         })

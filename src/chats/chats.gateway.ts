@@ -95,7 +95,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         const message: Message = await this.chatMessageService.sendMessageToChat({
             userId: user.id,
-            username: user.username,
             ...data
         })
         socket.emit('200', message)
@@ -113,7 +112,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         })
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
-            username: StandartBots.CHAT_BOT.username,
             chatId: chat.id,
             text: generateAddUsersMessageContent(user.username, chat.chatters.map(c => c.username))
         })
@@ -150,7 +148,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const chatters: User[] = await this.usersService.getChattersByChatId(dto.chatId)
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
-            username: StandartBots.CHAT_BOT.username,
             chatId: dto.chatId,
             text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
         })

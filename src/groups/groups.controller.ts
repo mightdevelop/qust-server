@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
@@ -10,9 +10,11 @@ import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-perm
 import { Role } from 'src/roles/models/roles.model'
 import { RolesService } from 'src/roles/roles.service'
 import { TextChannel } from 'src/text-channels/models/text-channels.model'
+import { UserModelInterceptor } from 'src/users/interceptors/users-model.intercaptor'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import { GroupsService } from './groups.service'
+import { GroupModelInterceptor } from './interceptors/groups-model.intercaptor'
 import { Group } from './models/groups.model'
 import { GroupLayoutName } from './types/group-layout-names.enum'
 
@@ -28,6 +30,7 @@ export class GroupsController {
 
     @Get('/:groupId')
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
+    @UseInterceptors(GroupModelInterceptor)
     async getGroupById(
         @Param('groupId') groupId: string,
         @Body() { full }: { full?: boolean }
@@ -44,6 +47,7 @@ export class GroupsController {
 
     @Get('/:groupId/users')
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
+    @UseInterceptors(UserModelInterceptor)
     async getUsersByGroupId(
         @Param('groupId') groupId: string,
         @Query('offset') offset: number
@@ -94,6 +98,7 @@ export class GroupsController {
 
     @Post('/')
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(GroupModelInterceptor)
     async createGroup(
         @Body() body: { name: string, layout?: GroupLayoutName },
         @CurrentUser() user: UserFromRequest
@@ -108,6 +113,7 @@ export class GroupsController {
 
     @Delete('/:groupId')
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(GroupModelInterceptor)
     async deleteGroup(
         @CurrentUser() user: UserFromRequest,
         @Param('groupId') groupId: string,

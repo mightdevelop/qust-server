@@ -15,9 +15,6 @@ export class Message extends Model<Message> {
     @HasOne(() => MessageContent, { onDelete: 'cascade' })
         content: MessageContent
 
-    @Column({ type: DataType.STRING, allowNull: false })
-        username: string
-
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
         edited: boolean
 

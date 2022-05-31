@@ -34,10 +34,7 @@ export class MessagesService {
     }
 
     async createMessage(dto: CreateMessageDto): Promise<Message> {
-        const message: Message = await this.messageRepository.create({
-            userId: dto.userId,
-            username: dto.username,
-        })
+        const message: Message = await this.messageRepository.create({ userId: dto.userId })
         const content: MessageContent = await this.messageContentRepository.create({
             text: dto.text,
             messageId: message.id

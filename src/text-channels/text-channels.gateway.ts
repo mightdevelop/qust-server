@@ -26,9 +26,7 @@ import { RoleTextChannelPermissionsEnum } from 'src/permissions/types/permission
 import { SocketIoService } from 'src/socketio/socketio.service'
 import { User } from 'src/users/models/users.model'
 import { CreateTextChannelDto } from './dto/create-text-channel.dto'
-import { InternalTextChannelsCreatedEvent } from './events/internal-text-channels-created.event'
-import { InternalTextChannelsDeletedEvent } from './events/internal-text-channels-deleted.event'
-import { InternalTextChannelsUpdatedEvent } from './events/internal-text-channels-updated.event'
+import { InternalTextChannelsCudEvent } from './events/internal-text-channels.CUD.event'
 import { TextChannel } from './models/text-channels.model'
 import { TextChannelsService } from './text-channels.service'
 
@@ -131,8 +129,9 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     @SubscribeMessage('update-text-channel')
     @UseGuards(SocketIoJwtAuthGuard, SocketIoCategoryPermissionsGuard)
     async updateTextChannel(
+        @SocketIoCurrentUser() user: UserFromRequest,
         @ConnectedSocket() socket: Socket,
-        @MessageBody() { name, channelId }: { name: string, channelId: string}
+        @MessageBody() { name, channelId, groupId }: { name: string, channelId: string, groupId: string }
     ): Promise<void> {
         if (!socket.rooms.has('text-channel:' + channelId)) {
             socket.emit('400', 'You are not connected to text channel')
@@ -143,15 +142,16 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
             socket.emit('404', 'Text channel not found')
             return
         }
-        await this.textChannelsService.updateTextChannel({ name, channel })
+        await this.textChannelsService.updateTextChannel({ userId: user.id, name, channel, groupId })
         socket.emit('200', channel)
     }
 
     @SubscribeMessage('delete-text-channel')
     @UseGuards(SocketIoJwtAuthGuard, SocketIoCategoryPermissionsGuard)
     async deleteTextChannel(
+        @SocketIoCurrentUser() user: UserFromRequest,
         @ConnectedSocket() socket: Socket,
-        @MessageBody() { name, channelId }: { name: string, channelId: string}
+        @MessageBody() { channelId, groupId }: { channelId: string, groupId: string }
     ): Promise<void> {
         if (!socket.rooms.has('text-channel:' + channelId)) {
             socket.emit('400', 'You are not connected to text channel')
@@ -162,7 +162,7 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
             socket.emit('404', 'Text channel not found')
             return
         }
-        await this.textChannelsService.updateTextChannel({ name, channel })
+        await this.textChannelsService.deleteTextChannel({ userId: user.id, channel, groupId })
         socket.emit('200', channel)
     }
 
@@ -174,7 +174,7 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     }
 
     @OnEvent('internal-text-channels.created')
-    async connectSocketsToNewTextChannel(event: InternalTextChannelsCreatedEvent): Promise<void>  {
+    async connectSocketsToNewTextChannel(event: InternalTextChannelsCudEvent): Promise<void>  {
         const sockets = await this.server.fetchSockets()
         const socketsOfChannelUsers = (await this.socketIoService.getClients())
             .filter(client => event.usersIds.some(userId => userId === client.userId))
@@ -186,7 +186,7 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     }
 
     @OnEvent('internal-text-channels.updated')
-    async showToSocketsUpdatedTextChannel(event: InternalTextChannelsUpdatedEvent): Promise<void>  {
+    async showToSocketsUpdatedTextChannel(event: InternalTextChannelsCudEvent): Promise<void>  {
         const sockets = await this.server.fetchSockets()
         const socketsOfChannelUsers = (await this.socketIoService.getClients())
             .filter(client => event.usersIds.some(userId => userId === client.userId))
@@ -197,15 +197,15 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     }
 
     @OnEvent('internal-text-channels.deleted')
-    async hideFromSocketsDeletedTextChannel(event: InternalTextChannelsDeletedEvent): Promise<void>  {
+    async hideFromSocketsDeletedTextChannel(event: InternalTextChannelsCudEvent): Promise<void>  {
         const sockets = await this.server.fetchSockets()
         const socketsOfChannelUsers = (await this.socketIoService.getClients())
             .filter(client => event.usersIds.some(userId => userId === client.userId))
             .map(client => sockets.find(socket => socket.id === client.socketId))
-        socketsOfChannelUsers.forEach(socket => socket.leave('text-channel:' + event.channelId))
+        socketsOfChannelUsers.forEach(socket => socket.leave('text-channel:' + event.channel.id))
         this.server
             .to(socketsOfChannelUsers.map(socket => socket.id))
-            .emit('text-channel-deleted', event.channelId)
+            .emit('text-channel-deleted', event.channel)
     }
 
 }

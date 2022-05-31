@@ -8,4 +8,7 @@ export class CreateCategoryDto {
     @IsUUID()
         groupId: string
 
+    @IsUUID()
+        userId: string
+
 }

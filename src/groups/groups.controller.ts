@@ -10,11 +10,11 @@ import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-perm
 import { Role } from 'src/roles/models/roles.model'
 import { RolesService } from 'src/roles/roles.service'
 import { TextChannel } from 'src/text-channels/models/text-channels.model'
-import { UserModelInterceptor } from 'src/users/interceptors/users-model.intercaptor'
+import { UserModelInterceptor } from 'src/users/interceptors/users-model.interceptor'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import { GroupsService } from './groups.service'
-import { GroupModelInterceptor } from './interceptors/groups-model.intercaptor'
+import { GroupModelInterceptor } from './interceptors/groups-model.interceptor'
 import { Group } from './models/groups.model'
 import { GroupLayoutName } from './types/group-layout-names.enum'
 

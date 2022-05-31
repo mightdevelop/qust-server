@@ -1,0 +1,1 @@
+export type CreateUpdateDelete = 'create' | 'update' | 'delete'

@@ -33,6 +33,9 @@ import { TextChannelMessage } from './messages/models/text-channel-message.model
 import { BannedUser } from './group-blacklists/models/banned-users.model'
 import { GroupBlacklist } from './group-blacklists/models/group-blacklists.model'
 import { GroupBlacklistsModule } from './group-blacklists/group-blacklists.module'
+import { LoggedAction } from './group-audit-logs/models/logged-action.model'
+import { GroupAuditLog } from './group-audit-logs/models/group-audit-logs.model'
+import { GroupAuditLogsModule } from './group-audit-logs/group-audit-logs.module'
 
 
 @Module({
@@ -67,6 +70,8 @@ import { GroupBlacklistsModule } from './group-blacklists/group-blacklists.modul
                 CategoryRolePermissions,
                 GroupBlacklist,
                 BannedUser,
+                GroupAuditLog,
+                LoggedAction,
             ],
             autoLoadModels: true,
             retryAttempts: 0
@@ -83,6 +88,7 @@ import { GroupBlacklistsModule } from './group-blacklists/group-blacklists.modul
         forwardRef(() => TextChannelsModule),
         forwardRef(() => InvitesModule),
         forwardRef(() => GroupBlacklistsModule),
+        forwardRef(() => GroupAuditLogsModule),
     ]
 })
 export class AppModule {}

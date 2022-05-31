@@ -7,7 +7,7 @@ export const groupsToResponse = (groups: Group[]): GroupToResponse[] => groups
         id: group.id,
         ownerId: group.ownerId,
         name: group.name,
-        users: usersToResponse(group.users),
+        users: group.users? usersToResponse(group.users) : undefined,
         roles: group.roles,
         categories: group.categories,
     }))

@@ -8,7 +8,6 @@ import { RequiredGroupPermissions } from 'src/permissions/decorators/required-gr
 import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
-import { CreateTextChannelDto } from './dto/create-text-channel.dto'
 import { TextChannel } from './models/text-channels.model'
 import { TextChannelsService } from './text-channels.service'
 
@@ -25,35 +24,40 @@ export class TextChannelsController {
     @RequiredGroupPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
     @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async createTextChannel(
-        @Body() dto: CreateTextChannelDto
+        @CurrentUser() user: UserFromRequest,
+        @Body() dto: { name: string, categoryId: string, groupId: string }
     ): Promise<TextChannel> {
-        const channel: TextChannel = await this.textChannelsService.createTextChannel(dto)
+        const channel: TextChannel =
+            await this.textChannelsService.createTextChannel({ ...dto, userId: user.id })
         return channel
     }
 
     @Put('/:textChannelIdId')
     @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
     async updateTextChannel(
+        @CurrentUser() user: UserFromRequest,
         @Param('channelId') channelId: string,
-        @Body() { name }: { name: string }
+        @Body() { name, groupId }: { name: string, groupId: string }
     ): Promise<TextChannel> {
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
         const updatedChannel: TextChannel =
-            await this.textChannelsService.updateTextChannel({ name, channel })
+            await this.textChannelsService.updateTextChannel({ userId: user.id, name, channel, groupId })
         return updatedChannel
     }
 
     @Delete('/:textChannelIdId')
     @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
     async deleteTextChannel(
-        @Param('channelId') channelId: string
+        @CurrentUser() user: UserFromRequest,
+        @Param('channelId') channelId: string,
+        @Body() { groupId }: { groupId: string }
     ): Promise<TextChannel> {
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
-        await this.textChannelsService.deleteTextChannel({ channel })
+        await this.textChannelsService.deleteTextChannel({ userId: user.id, channel, groupId })
         return channel
     }
 

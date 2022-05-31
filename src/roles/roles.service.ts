@@ -94,7 +94,6 @@ export class RolesService {
         if (name) role.name = name
         if (permissions) await role.permissions.update(permissions)
         await role.save()
-        console.log(role)
         return role
     }
 

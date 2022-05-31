@@ -1,17 +1,14 @@
 import { IsString, IsUUID } from 'class-validator'
 
-export class CreateTextChannelDto {
-
-    @IsString()
-        name: string
-
-    @IsUUID()
-        categoryId: string
+export class AddActionToAuditLogDto {
 
     @IsUUID()
         userId: string
 
     @IsUUID()
         groupId: string
+
+    @IsString()
+        body: string
 
 }

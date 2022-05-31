@@ -5,9 +5,7 @@ import { UsersService } from 'src/users/users.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { DeleteCategoryDto } from './dto/delete-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
-import { InternalCategoriesCreatedEvent } from './events/internal-categories-created.event'
-import { InternalCategoriesDeletedEvent } from './events/internal-categories-deleted.event'
-import { InternalCategoriesUpdatedEvent } from './events/internal-categories-updated.event'
+import { InternalCategoriesCudEvent } from './events/internal-categories.CUD.event'
 import { Category } from './models/categories.model'
 
 
@@ -31,32 +29,46 @@ export class CategoriesService {
             .map(user => user.id)
         this.eventEmitter.emit(
             'internal-categories.created',
-            new InternalCategoriesCreatedEvent({ category, usersIds })
+            new InternalCategoriesCudEvent({
+                category,
+                usersIds,
+                userIdWhoTriggered: dto.userId,
+                action: 'create' })
         )
         return category
     }
 
-    async updateCategory({ category, name }: UpdateCategoryDto): Promise<Category> {
+    async updateCategory({ category, name, userId }: UpdateCategoryDto): Promise<Category> {
         category.name = name
         await category.save()
         const usersIds: string[] = (await this.usersService.getUsersByGroupId(category.id))
             .map(user => user.id)
         this.eventEmitter.emit(
             'internal-categories.updated',
-            new InternalCategoriesUpdatedEvent({ category, usersIds })
+            new InternalCategoriesCudEvent({
+                category,
+                usersIds,
+                userIdWhoTriggered: userId,
+                action: 'update' })
         )
         return category
     }
 
-    async deleteCategory({ category }: DeleteCategoryDto): Promise<Category> {
-        await category.destroy()
-        const usersIds: string[] = (await this.usersService.getUsersByGroupId(category.id))
+    async deleteCategory(dto: DeleteCategoryDto): Promise<Category> {
+        await dto.category.destroy()
+        const groupUsersIds: string[] = (await this.usersService.getUsersByGroupId(dto.category.id))
             .map(user => user.id)
         this.eventEmitter.emit(
             'internal-categories.deleted',
-            new InternalCategoriesDeletedEvent({ categoryId: category.id, usersIds })
+            new InternalCategoriesCudEvent({
+                category: dto.category,
+                usersIds: groupUsersIds,
+                userIdWhoTriggered:
+                dto.userId,
+                action: 'delete'
+            })
         )
-        return category
+        return dto.category
     }
 
 }

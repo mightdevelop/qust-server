@@ -243,18 +243,18 @@ export class PermissionsService {
             throw new NotFoundException({ message: 'Text channel not found' })
         const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(channelId)
         const roles: Role[] = await this.rolesService.getRolesByGroupId(
-            groupId, [ RolePermissions, CategoryRolePermissions ]
+            groupId, [ RolePermissions, TextChannelRolePermissions ]
         )
         const rolesThatCanViewTextChannel: Role[] =
             roles
                 .filter(role => role.textChannelPermissions
                     .find(row => row.channelId === channelId)
-                    .viewTextChannels === PermissionLevel.ALOWED)
+                    ?.viewTextChannels === PermissionLevel.ALOWED)
         const rolesWithNotSpecifiedViewTextChannelPermission: Role[] =
             roles
                 .filter(role => role.textChannelPermissions
                     .find(row => row.channelId === channelId)
-                    .viewTextChannels === PermissionLevel.NOT_ALOWED)
+                    ?.viewTextChannels === PermissionLevel.NOT_ALOWED)
         if (!rolesWithNotSpecifiedViewTextChannelPermission)
             return rolesThatCanViewTextChannel.map(role => role.id)
         return [

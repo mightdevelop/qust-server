@@ -20,11 +20,10 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { UserModelInterceptor } from './interceptors/users-model.intercaptor'
+import { UserModelInterceptor } from './interceptors/users-model.interceptor'
 
 
 @Controller('/users')
-@UseInterceptors(UserModelInterceptor)
 export class UsersController {
 
     constructor(
@@ -77,6 +76,7 @@ export class UsersController {
 
     @Put('/:userId')
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(UserModelInterceptor)
     async updateUser(
         @Param('userId') userId: string,
         @Body() dto: UpdateUserDto,

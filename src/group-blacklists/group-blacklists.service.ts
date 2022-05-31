@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/sequelize'
 import { BanUserInGroupDto } from './dto/ban-user-in-group.dto'
 import { BannedUser } from './models/banned-users.model'
@@ -24,8 +24,6 @@ export class GroupBlacklistsService {
         blacklistId: string,
     ): Promise<GroupBlacklist> {
         const blacklist: GroupBlacklist = await this.blacklistRepository.findByPk(blacklistId)
-        if (!blacklist)
-            throw new NotFoundException({ message: 'Blacklist not found' })
         return blacklist
     }
 
@@ -51,12 +49,6 @@ export class GroupBlacklistsService {
     ): Promise<BannedUser> {
         await bannedUserRow.destroy()
         return bannedUserRow
-    }
-
-    async createGroupBlacklist(
-        groupId: string
-    ): Promise<GroupBlacklist> {
-        return await this.blacklistRepository.create({ groupId })
     }
 
 }

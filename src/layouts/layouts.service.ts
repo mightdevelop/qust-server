@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize'
 import { CreateCategoriesAndRolesByLayoutsDto } from 'src/categories/dto/create-categories-and-roles-layout.dto'
 import { Category } from 'src/categories/models/categories.model'
 import { CategoryRolePermissions } from 'src/categories/models/category-role-permissions.model'
+import { GroupAuditLog } from 'src/group-audit-logs/models/group-audit-logs.model'
 import { GroupBlacklist } from 'src/group-blacklists/models/group-blacklists.model'
 import { RolePermissions } from 'src/permissions/models/role-permissions.model'
 import { Role } from 'src/roles/models/roles.model'
@@ -16,6 +17,7 @@ export class LayoutsService {
 
     constructor(
         @InjectModel(GroupBlacklist) private blacklistRepository: typeof GroupBlacklist,
+        @InjectModel(GroupAuditLog) private auditLogRepository: typeof GroupAuditLog,
         @InjectModel(Role) private roleRepository: typeof Role,
         @InjectModel(RolePermissions) private rolePermissionsRepository: typeof RolePermissions,
         @InjectModel(Category) private categoryRepository: typeof Category,
@@ -30,11 +32,16 @@ export class LayoutsService {
         return await this.blacklistRepository.create({ groupId })
     }
 
+    private async createGroupAuditLog(groupId: string): Promise<GroupAuditLog> {
+        return await this.auditLogRepository.create({ groupId })
+    }
+
     async createBlacklistRolesCategoriesAndTextChannelsByLayout(
         { groupId, groupLayout }: CreateCategoriesAndRolesByLayoutsDto
     ): Promise<void> {
 
         await this.createGroupBlacklist(groupId)
+        await this.createGroupAuditLog(groupId)
 
         if (!groupLayout.roleLayouts)
             groupLayout.roleLayouts = [ { name: 'everyone' } ]

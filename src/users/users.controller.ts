@@ -10,6 +10,7 @@ import {
     Put,
     Query,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common'
 import { isAdmin } from 'src/auth/decorators/isAdmin.decorator'
 import { UsersService } from './users.service'
@@ -19,43 +20,49 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
-import { usersToResponse } from './utils/users-to-UserToResponse-array'
-import { UserToResponse } from './types/user-to-response.class'
+import { UserModelInterceptor } from './interceptors/users-model.intercaptor'
 
 
 @Controller('/users')
+@UseInterceptors(UserModelInterceptor)
 export class UsersController {
 
     constructor(
         private usersService: UsersService,
     ) {}
 
-    // @Get('/')
-    // async getUsers(): Promise<UserToResponse[]> {
-    //     const users: User[] = await this.usersService.getUsers()
-    //     return await usersToResponse(users)
-    // }
+    @Get('/')
+    @isAdmin()
+    @UseGuards(JwtAuthGuard, AdminGuard)
+    async getUsers(): Promise<User[]> {
+        const users: User[] = await this.usersService.getUsers()
+        return users
+    }
 
     @Get('/:userId')
+    @isAdmin()
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async getUserById(
         @Param('userId') userId: string,
-    ): Promise<UserToResponse> {
+    ): Promise<User> {
         const user: User = await this.usersService.getUserById(userId)
         if (!user)
             throw new NotFoundException({ message: 'User not found' })
-        return await usersToResponse([ user ])[0]
+        return user
     }
 
     @Get('/:userId/friends')
+    @isAdmin()
+    @UseGuards(JwtAuthGuard, AdminGuard)
     async getFriendsByUserId(
         @Param('userId') userId: string,
         @Query('offset') offset: number,
-    ): Promise<UserToResponse[]> {
+    ): Promise<User[]> {
         const user = await this.usersService.getUserById(userId)
         if (!user)
             throw new NotFoundException({ message: 'User not found' })
         const friends: User[] = await this.usersService.getFriendsByUserId(userId, 30, offset)
-        return await usersToResponse(friends)
+        return friends
     }
 
     @Post('/')
@@ -63,9 +70,9 @@ export class UsersController {
     @UseGuards(JwtAuthGuard, AdminGuard)
     async createUser(
         @Body() dto: CreateUserDto,
-    ): Promise<UserToResponse> {
+    ): Promise<User> {
         const user: User = await this.usersService.createUser(dto)
-        return await usersToResponse([ user ])[0]
+        return user
     }
 
     @Put('/:userId')
@@ -74,7 +81,7 @@ export class UsersController {
         @Param('userId') userId: string,
         @Body() dto: UpdateUserDto,
         @CurrentUser() { id, isAdmin },
-    ): Promise<UserToResponse> {
+    ): Promise<User> {
         if (!userId)
             userId = id
         const user: User = await this.usersService.getUserById(userId)
@@ -85,7 +92,7 @@ export class UsersController {
             throw new ForbiddenException({ message: 'You have no access' })
         }
         const updatedUser: User = await this.usersService.updateUser(userId, dto)
-        return await usersToResponse([ updatedUser ])[0]
+        return updatedUser
     }
 
     @Delete('/:userId')
@@ -93,9 +100,9 @@ export class UsersController {
     @UseGuards(JwtAuthGuard, AdminGuard)
     async deleteUser(
         @Param('userId') userId: string,
-    ): Promise<UserToResponse> {
+    ): Promise<User> {
         const user: User = await this.usersService.deleteUser(userId)
-        return await usersToResponse([ user ])[0]
+        return user
     }
 
 }

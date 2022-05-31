@@ -1,5 +1,5 @@
-import { Body, Controller, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
-import { UserFromRequest, Response } from './types/request-response'
+import { Body, Controller, Post, UnauthorizedException, UseGuards } from '@nestjs/common'
+import { UserFromRequest } from './types/request-response'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { AuthService } from './auth.service'
 import { ValidateUserDto } from './dto/validate-user.dto'
@@ -21,19 +21,17 @@ export class AuthController {
     @Post('/registration')
     async registration(
         @Body() dto: CreateUserDto,
-        @Res() res: Response
-    ): Promise<Response> {
+    ): Promise<Tokens> {
         const tokens: Tokens = await this.authService.registration(dto)
-        return res.send(tokens).status(200)
+        return tokens
     }
 
     @Post('/login')
     async login(
         @Body() dto: ValidateUserDto,
-        @Res() res: Response
-    ): Promise<Response> {
+    ): Promise<Tokens> {
         const tokens: Tokens = await this.authService.login(dto)
-        return res.send(tokens).status(200)
+        return tokens
     }
 
     @Post('/refresh')

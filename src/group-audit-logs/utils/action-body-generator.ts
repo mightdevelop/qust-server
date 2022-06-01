@@ -18,4 +18,13 @@ export class ActionBodyGenerator {
         return [ userId, action + 'd', 'text channel', channelName ].join(' ')
     }
 
+
+    async generateRoleCudActionBody(
+        userId: string,
+        roleName: string,
+        action: CreateUpdateDelete
+    ): Promise<string> {
+        return [ userId, action + 'd', 'role', roleName ].join(' ')
+    }
+
 }

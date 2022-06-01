@@ -17,8 +17,7 @@ export class UpdateRoleDto {
         color?: string
 
     @IsUUID()
-    @IsOptional()
-        groupId?: number
+        userId: string
 
     @Type(() => RolePermissionsListClass)
     @IsOptional()

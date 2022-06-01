@@ -12,4 +12,7 @@ export class CreateRoleDto {
     @IsUUID()
         groupId: string
 
+    @IsUUID()
+        userId: string
+
 }

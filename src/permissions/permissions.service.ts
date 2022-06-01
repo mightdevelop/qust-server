@@ -200,7 +200,8 @@ export class PermissionsService {
             const group: Group = await this.groupsService.getGroupById(groupId,
                 { model: Category, include: [ TextChannel ] }
             )
-            const channels: TextChannel[] = [].concat(...group.categories.map(category => category.channels))
+            const channels: TextChannel[] =
+                [].concat(...group.categories.map(category => category.channels))
             if (group.ownerId === userId) return channels.map(channel => channel.id)
             const roles: Role[] = await this.rolesService.getUserRolesByGroupId(
                 userId, groupId, [ RolePermissions, TextChannelRolePermissions ]

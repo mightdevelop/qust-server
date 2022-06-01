@@ -9,12 +9,17 @@ import { DeleteRoleDto } from './dto/delete-role.dto'
 import { UpdateRoleDto } from './dto/update-role.dto'
 import { RoleUser } from './models/role-user.model'
 import { Role } from './models/roles.model'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { InternalRolesCudEvent } from './events/internal-roles.CUD.event'
+import { UsersService } from 'src/users/users.service'
 
 
 @Injectable()
 export class RolesService {
 
     constructor(
+        private eventEmitter: EventEmitter2,
+        private usersService: UsersService,
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
         @InjectModel(Role) private roleRepository: typeof Role,
         @InjectModel(RoleUser) private roleUserRepository: typeof RoleUser,
@@ -70,14 +75,6 @@ export class RolesService {
         return usersIds
     }
 
-    async createRole(dto: CreateRoleDto): Promise<Role> {
-        const role: Role = await this.roleRepository.create(dto)
-        const permissions: RolePermissions =
-            await this.permissionsService.createDefaultRolePermissions(role.id)
-        role.permissions = permissions
-        return role
-    }
-
     async addRoleToUser(dto: RoleIdAndUserIdDto): Promise<RoleUser> {
         const roleUserRow: RoleUser = await this.roleUserRepository.create(dto)
         return roleUserRow
@@ -89,16 +86,51 @@ export class RolesService {
         return roleUserRow
     }
 
-    async updateRole({ role, color, name, permissions }: UpdateRoleDto): Promise<Role> {
+    async createRole(dto: CreateRoleDto): Promise<Role> {
+        const role: Role = await this.roleRepository.create(dto)
+        const permissions: RolePermissions =
+            await this.permissionsService.createDefaultRolePermissions(role.id)
+        role.permissions = permissions
+        this.eventEmitter.emit(
+            'internal-roles.created',
+            new InternalRolesCudEvent({
+                userIdWhoTriggered: dto.userId,
+                role,
+                usersIds: (await this.usersService.getUsersByGroupId(dto.groupId)).map(user => user.id),
+                action: 'create'
+            })
+        )
+        return role
+    }
+
+    async updateRole({ role, color, name, permissions, userId }: UpdateRoleDto): Promise<Role> {
         if (color) role.color = color
         if (name) role.name = name
         if (permissions) await role.permissions.update(permissions)
         await role.save()
+        this.eventEmitter.emit(
+            'internal-roles.updated',
+            new InternalRolesCudEvent({
+                userIdWhoTriggered: userId,
+                role,
+                usersIds: (await this.usersService.getUsersByGroupId(role.groupId)).map(user => user.id),
+                action: 'update'
+            })
+        )
         return role
     }
 
-    async deleteRole({ role }: DeleteRoleDto): Promise<Role> {
+    async deleteRole({ role, userId }: DeleteRoleDto): Promise<Role> {
         await role.destroy()
+        this.eventEmitter.emit(
+            'internal-roles.deleted',
+            new InternalRolesCudEvent({
+                userIdWhoTriggered: userId,
+                role,
+                usersIds: (await this.usersService.getUsersByGroupId(role.groupId)).map(user => user.id),
+                action: 'delete'
+            })
+        )
         return role
     }
 

@@ -23,6 +23,7 @@ import { SocketIoRequiredTextChannelPermissions } from 'src/permissions/decorato
 import { SocketIoCategoryPermissionsGuard } from 'src/permissions/guards/socket.io-category-permissions.guard'
 import { SocketIoTextChannelPermissionsGuard } from 'src/permissions/guards/socket.io-text-channel-permissions.guard'
 import { RoleTextChannelPermissionsEnum } from 'src/permissions/types/permissions/role-text-channel-permissions.enum'
+import { InternalRolesCudEvent } from 'src/roles/events/internal-roles.CUD.event'
 import { SocketIoService } from 'src/socketio/socketio.service'
 import { User } from 'src/users/models/users.model'
 import { CreateTextChannelDto } from './dto/create-text-channel.dto'
@@ -206,6 +207,31 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
         this.server
             .to(socketsOfChannelUsers.map(socket => socket.id))
             .emit('text-channel-deleted', event.channel)
+    }
+
+    @OnEvent('internal-roles.created')
+    @OnEvent('internal-roles.updated')
+    @OnEvent('internal-roles.deleted')
+    @OnEvent('internal-roles.added')
+    @OnEvent('internal-roles.removed')
+    async showToSocketsTextChannelsAfterUpdateRoles(event: InternalRolesCudEvent): Promise<void> {
+        const sockets = await this.server.fetchSockets()
+        const clients = await this.socketIoService.getClients()
+        const clientsWithChannelsIds = await Promise.all(clients
+            .filter(client => event.usersIds.some(userId => userId === client.userId))
+            .map(async client => ({
+                client,
+                textChannelsIds: await this.textChannelsService.getAllowedToViewTextChannelsIdsByUserId(
+                    client.userId
+                )
+            }))
+        )
+        clientsWithChannelsIds.forEach(clientWithChannels => {
+            const socket = sockets
+                .find(socket => socket.id === clientWithChannels.client.socketId)
+            socket.rooms.clear()
+            socket.join(clientWithChannels.textChannelsIds.map(channelId => 'text-channel:' + channelId))
+        })
     }
 
 }

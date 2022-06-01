@@ -10,7 +10,9 @@ import {
     WebSocketServer,
 } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
+import { SocketIoCurrentUser } from 'src/auth/decorators/socket.io-current-user.decorator'
 import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
+import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { SocketIoGroupPermissionsGuard } from 'src/permissions/guards/socket.io-group-permissions.guard'
@@ -21,9 +23,7 @@ import { SocketIoService } from 'src/socketio/socketio.service'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import { CreateRoleDto } from './dto/create-role.dto'
-import { InternalRolesCreatedEvent } from './events/internal-roles-created.event'
-import { InternalRolesDeletedEvent } from './events/internal-roles-deleted.event'
-import { InternalRolesUpdatedEvent } from './events/internal-roles-updated.event'
+import { InternalRolesCudEvent } from './events/internal-roles.CUD.event'
 import { Role } from './models/roles.model'
 import { RolesService } from './roles.service'
 
@@ -73,6 +73,7 @@ export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @RequiredGroupPermissions([ RolePermissionsEnum.manageRoles ])
     @UseGuards(SocketIoJwtAuthGuard, SocketIoGroupPermissionsGuard)
     async updateRole(
+        @SocketIoCurrentUser() user: UserFromRequest,
         @ConnectedSocket() socket: Socket,
         @MessageBody() { name, color, roleId, permissions }: {
             name?: string
@@ -86,7 +87,7 @@ export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
             socket.emit('404', 'Role not found')
             return
         }
-        await this.rolesService.updateRole({ name, color, role, permissions })
+        await this.rolesService.updateRole({ name, color, role, permissions, userId: user.id })
         socket.emit('200', role)
     }
 
@@ -94,20 +95,21 @@ export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @RequiredGroupPermissions([ RolePermissionsEnum.manageRoles ])
     @UseGuards(SocketIoJwtAuthGuard, SocketIoGroupPermissionsGuard)
     async deleteRole(
+        @SocketIoCurrentUser() user: UserFromRequest,
         @ConnectedSocket() socket: Socket,
-        @MessageBody() { roleId }: { roleId: string}
+        @MessageBody() { roleId }: { roleId: string }
     ): Promise<void> {
         const role: Role = await this.rolesService.getRoleById(roleId)
         if (!role) {
             socket.emit('404', 'Role not found')
             return
         }
-        await this.rolesService.deleteRole({ role })
+        await this.rolesService.deleteRole({ role, userId: user.id })
         socket.emit('200', role)
     }
 
     @OnEvent('internal-roles.created')
-    async showToSocketsNewRole(event: InternalRolesCreatedEvent): Promise<void>  {
+    async showToSocketsNewRole(event: InternalRolesCudEvent): Promise<void>  {
         const sockets = await this.server.fetchSockets()
         const socketsOfGroupUsers = (await this.socketIoService.getClients())
             .filter(client => event.usersIds.some(userId => userId === client.userId))
@@ -118,7 +120,7 @@ export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-roles.updated')
-    async showToSocketsUpdatedRole(event: InternalRolesUpdatedEvent): Promise<void>  {
+    async showToSocketsUpdatedRole(event: InternalRolesCudEvent): Promise<void>  {
         const sockets = await this.server.fetchSockets()
         const socketsOfGroupUsers = (await this.socketIoService.getClients())
             .filter(client => event.usersIds.some(userId => userId === client.userId))
@@ -129,14 +131,14 @@ export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-roles.deleted')
-    async hideFromSocketsDeletedRole(event: InternalRolesDeletedEvent): Promise<void>  {
+    async hideFromSocketsDeletedRole(event: InternalRolesCudEvent): Promise<void>  {
         const sockets = await this.server.fetchSockets()
         const socketsOfGroupUsers = (await this.socketIoService.getClients())
             .filter(client => event.usersIds.some(userId => userId === client.userId))
             .map(client => sockets.find(socket => socket.id === client.socketId))
         this.server
             .to(socketsOfGroupUsers.map(socket => socket.id))
-            .emit('role-deleted', event.roleId)
+            .emit('role-deleted', event.role)
     }
 
 }

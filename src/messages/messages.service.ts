@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
 import { Includeable, Op } from 'sequelize'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { DeleteMessageDto } from './dto/delete-message.dto'
 import { UpdateMessageDto } from './dto/update-message.dto'
+import { InternalMessagesCudEvent } from './events/internal-messages.CUD.event'
 import { MessageContent } from './models/message-content.model'
 import { Message } from './models/messages.model'
 
@@ -12,6 +14,7 @@ import { Message } from './models/messages.model'
 export class MessagesService {
 
     constructor(
+        private eventEmitter: EventEmitter2,
         @InjectModel(Message) private messageRepository: typeof Message,
         @InjectModel(MessageContent) private messageContentRepository: typeof MessageContent,
     ) {}
@@ -50,11 +53,25 @@ export class MessagesService {
         }
         message.content.text = text
         await message.content.save()
+        this.eventEmitter.emit(
+            'internal-messages.updated',
+            new InternalMessagesCudEvent({
+                message,
+                action: 'update'
+            })
+        )
         return message
     }
 
     async deleteMessage({ message }: DeleteMessageDto): Promise<Message> {
         await message.destroy()
+        this.eventEmitter.emit(
+            'internal-messages.deleted',
+            new InternalMessagesCudEvent({
+                message,
+                action: 'delete'
+            })
+        )
         return message
     }
 

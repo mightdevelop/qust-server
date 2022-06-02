@@ -15,7 +15,7 @@ import { SocketIoCurrentUser } from 'src/auth/decorators/socket.io-current-user.
 import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
-import { InternalTextChannelssMessageSentEvent } from 'src/messages/events/internal-text-channels.message-sent.event'
+import { InternalTextChannelsMessageSentEvent } from 'src/messages/events/internal-text-channels.message-sent.event'
 import { MessageContent } from 'src/messages/models/message-content.model'
 import { Message } from 'src/messages/models/messages.model'
 import { TextChannelMessageService } from 'src/messages/text-channel-message.service'
@@ -90,17 +90,18 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     async sendMessageToTextChannel(
         @ConnectedSocket() socket: Socket,
         @SocketIoCurrentUser() user: UserFromRequest,
-        @MessageBody() data: { channelId: string, text: string }
+        @MessageBody() dto: { channelId: string, text: string }
     ): Promise<void> {
-        if (!socket.rooms.has('text-channel:' + data.channelId)) {
+        if (!socket.rooms.has('text-channel:' + dto.channelId)) {
             socket.emit('400', 'You are not connected to text channel')
             return
         }
-        const message: Message = await this.textChannelMessageService.sendMessageToTextChannel({
-            userId: user.id,
-            username: user.username,
-            ...data
-        })
+        const message: Message = await this.textChannelMessageService.
+            sendMessageToTextChannel({
+                userId: user.id,
+                username: user.username,
+                ...dto
+            })
         socket.emit('200', message)
     }
 
@@ -168,7 +169,7 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     }
 
     @OnEvent('internal-text-channels.message-sent')
-    async sendMessageFromChatToSockets(event: InternalTextChannelssMessageSentEvent): Promise<void> {
+    async sendMessageFromChatToSockets(event: InternalTextChannelsMessageSentEvent): Promise<void> {
         this.server
             .to('text-channel:' + event.channelId)
             .emit('text-channel-message', event.message)

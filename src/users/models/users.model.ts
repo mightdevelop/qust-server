@@ -4,6 +4,7 @@ import { BannedUser } from 'src/group-blacklists/models/banned-users.model'
 import { GroupBlacklist } from 'src/group-blacklists/models/group-blacklists.model'
 import { GroupUser } from 'src/groups/models/group-user.model'
 import { Group } from 'src/groups/models/groups.model'
+import { Mention } from 'src/mentions/models/mentions.model'
 import { RoleUser } from 'src/roles/models/role-user.model'
 import { Role } from 'src/roles/models/roles.model'
 
@@ -30,6 +31,9 @@ export class User extends Model<User> {
 
     @HasMany(() => LoggedAction)
         actions: LoggedAction[]
+
+    @HasMany(() => Mention)
+        mentions: Mention[]
 
     @BelongsToMany(() => Group, () => GroupUser)
         groups: Group[]

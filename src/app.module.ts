@@ -36,6 +36,8 @@ import { GroupBlacklistsModule } from './group-blacklists/group-blacklists.modul
 import { LoggedAction } from './group-audit-logs/models/logged-action.model'
 import { GroupAuditLog } from './group-audit-logs/models/group-audit-logs.model'
 import { GroupAuditLogsModule } from './group-audit-logs/group-audit-logs.module'
+import { Mention } from './mentions/models/mentions.model'
+import { MentionsModule } from './mentions/mentions.module'
 
 
 @Module({
@@ -72,6 +74,7 @@ import { GroupAuditLogsModule } from './group-audit-logs/group-audit-logs.module
                 BannedUser,
                 GroupAuditLog,
                 LoggedAction,
+                Mention,
             ],
             autoLoadModels: true,
             retryAttempts: 0
@@ -89,6 +92,7 @@ import { GroupAuditLogsModule } from './group-audit-logs/group-audit-logs.module
         forwardRef(() => InvitesModule),
         forwardRef(() => GroupBlacklistsModule),
         forwardRef(() => GroupAuditLogsModule),
+        forwardRef(() => MentionsModule),
     ]
 })
 export class AppModule {}

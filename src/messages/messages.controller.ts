@@ -44,12 +44,6 @@ export class MessagesController {
         if (message.userId !== user.id)
             throw new ForbiddenException({ message: 'You have no access' })
         await this.messagesService.deleteMessage({ message })
-        // const messageInChat: ChatMessage = await this.chatMessageService.getChatMessageRow(message.id)
-        // if (messageInChat) {
-        //     await messageInChat.destroy()
-        // } else {
-        //     (await this.textChannelMessagesService.getTextChannelMessageRow(message.id)).destroy()
-        // }
         return message
     }
 

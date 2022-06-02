@@ -54,10 +54,10 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
     ): Promise<void> {
         const category: Category = await this.categoriesService.createCategory(dto)
         const groupUsers: User[] = await this.usersService.getUsersByGroupId(dto.groupId)
-        const sockets = await this.server.fetchSockets()
-        const socketsOfGroupUsers = (await this.socketIoService.getClients())
-            .filter(client => groupUsers.some(groupUser => groupUser.id === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+        const socketsOfGroupUsers = (await this.socketIoService.getSocketsByUsersIds(
+            (await this.server.fetchSockets()),
+            groupUsers.map(user => user.id)
+        ))
         socketsOfGroupUsers.forEach(socket => socket.join('group:' + category.groupId))
 
         socket.emit('200', category)
@@ -89,10 +89,10 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
 
     @OnEvent('internal-categories.created')
     async showToSocketsNewCategory(event: InternalCategoriesCudEvent): Promise<void>  {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfGroupUsers = (await this.socketIoService.getClients())
-            .filter(client => event.usersIds.some(userId => userId === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+        const socketsOfGroupUsers = (await this.socketIoService.getSocketsByUsersIds(
+            (await this.server.fetchSockets()),
+            event.usersIds
+        ))
         this.server
             .to(socketsOfGroupUsers.map(socket => socket.id))
             .emit('category-created', event.category)

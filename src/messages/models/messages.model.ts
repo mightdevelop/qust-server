@@ -1,4 +1,5 @@
-import { Column, DataType, ForeignKey, HasOne, Model, Table } from 'sequelize-typescript'
+import { Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript'
+import { Mention } from 'src/mentions/models/mentions.model'
 import { User } from 'src/users/models/users.model'
 import { MessageContent } from './message-content.model'
 
@@ -17,6 +18,9 @@ export class Message extends Model<Message> {
 
     @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
         edited: boolean
+
+    @HasMany(() => Mention)
+        mentions: Mention[]
 
 }
 

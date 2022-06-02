@@ -3,7 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
 import { Includeable } from 'sequelize/types'
 import { SendTextChannelMessageDto } from './dto/send-text-channel-message.dto'
-import { InternalTextChannelssMessageSentEvent } from './events/internal-text-channels.message-sent.event'
+import { InternalTextChannelsMessageSentEvent } from './events/internal-text-channels.message-sent.event'
 import { MessagesService } from './messages.service'
 import { Message } from './models/messages.model'
 import { TextChannelMessage } from './models/text-channel-message.model'
@@ -43,7 +43,10 @@ export class TextChannelMessageService {
         await this.textChannelMessageRepository.create({ messageId: message.id, channelId: dto.channelId })
         this.eventEmitter.emit(
             'internal-text-channels.message-sent',
-            new InternalTextChannelssMessageSentEvent({ message, channelId: dto.channelId })
+            new InternalTextChannelsMessageSentEvent({
+                message,
+                channelId: dto.channelId,
+            })
         )
         return message
     }

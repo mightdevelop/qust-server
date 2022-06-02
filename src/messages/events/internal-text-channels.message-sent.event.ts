@@ -1,10 +1,8 @@
-import { Type } from 'class-transformer'
-import { IsUUID } from 'class-validator'
 import { Message } from '../models/messages.model'
 
-export class InternalTextChannelssMessageSentEvent {
+export class InternalTextChannelsMessageSentEvent {
 
-    constructor({ message, channelId }: InternalTextChannelssMessageSentEventArgs) {
+    constructor({ message, channelId }: InternalTextChannelsMessageSentEventArgs) {
         this.message = message
         this.channelId = channelId
     }
@@ -15,12 +13,10 @@ export class InternalTextChannelssMessageSentEvent {
 
 }
 
-class InternalTextChannelssMessageSentEventArgs {
+class InternalTextChannelsMessageSentEventArgs {
 
-    @Type(() => Message)
-        message: Message
+    message: Message
 
-    @IsUUID()
-        channelId: string
+    channelId: string
 
 }

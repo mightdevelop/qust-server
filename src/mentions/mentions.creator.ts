@@ -11,7 +11,7 @@ import { Mention } from './models/mentions.model'
 
 
 @Injectable()
-export class MessagesListener {
+export class MentionsCreator {
 
     constructor(
         private mentionsService: MentionsService,
@@ -24,24 +24,18 @@ export class MessagesListener {
     async sendMentionsOnTextChannelMessageCreated(
         { message, channelId }: InternalTextChannelsMessageSentEvent
     ): Promise<void> {
-        console.log(1)
-        console.log(1)
-        console.log(1)
-        console.log(1)
-        console.log(1)
-        console.log(1)
         const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(channelId)
         const groupUsersIds = (await this.usersService.getUsersByGroupId(groupId)).map(user => user.id)
         const usersIds: string[] = parseMessageMentions(message.content.text)
-            .filter(userId => groupUsersIds.find(groupUserId => groupUserId === userId))
-        console.log(groupUsersIds)
-        console.log(parseMessageMentions(message.content.text))
-        await this.mentionsService.createMentions({
-            usersIds,
-            groupId,
-            messageId: message.id,
-            textChannelId: channelId
-        })
+            ?.filter(userId => groupUsersIds.find(groupUserId => groupUserId === userId))
+        usersIds
+            ? await this.mentionsService.createMentions({
+                usersIds,
+                groupId,
+                messageId: message.id,
+                textChannelId: channelId
+            })
+            : null
     }
 
     @OnEvent('internal-messages.updated')

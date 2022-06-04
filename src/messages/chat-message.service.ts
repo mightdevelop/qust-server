@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
+import { Op } from 'sequelize'
 import { Includeable } from 'sequelize/types'
+import { MessageIdAndChatIdDto } from './dto/message-id-and-chat-id.dto'
 import { SendChatMessageDto } from './dto/send-chat-message.dto'
 import { InternalChatsMessageSentEvent } from './events/internal-chats.message-sent.event'
 import { MessagesService } from './messages.service'
@@ -13,7 +15,7 @@ import { Message } from './models/messages.model'
 export class ChatMessageService {
 
     constructor(
-        private messageService: MessagesService,
+        @Inject(forwardRef(() => MessagesService)) private messageService: MessagesService,
         private eventEmitter: EventEmitter2,
         @InjectModel(ChatMessage) private chatMessageRepository: typeof ChatMessage,
     ) {}
@@ -36,8 +38,19 @@ export class ChatMessageService {
         return messages
     }
 
+    async getNextMessageInChat(dto: MessageIdAndChatIdDto): Promise<Message> {
+        const chatMessageRow: ChatMessage =
+            await this.chatMessageRepository.findOne({ where: { ...dto } })
+        const nextChatMessageRow: ChatMessage =
+            await this.chatMessageRepository.findOne({ where: {
+                chatId: chatMessageRow.chatId,
+                createdAt: { [Op.gt]: chatMessageRow.createdAt }
+            } })
+        return await this.messageService.getMessageById(nextChatMessageRow.messageId)
+    }
+
     async sendMessageToChat(dto: SendChatMessageDto): Promise<Message> {
-        const message: Message = await this.messageService.createMessage({ ...dto })
+        const message: Message = await this.messageService.createMessage({ ...dto, location: { chatId: dto.chatId } })
         await this.chatMessageRepository.create({ messageId: message.id, chatId: dto.chatId })
         this.eventEmitter.emit(
             'internal-chats.message-sent',

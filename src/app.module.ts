@@ -38,6 +38,8 @@ import { GroupAuditLog } from './group-audit-logs/models/group-audit-logs.model'
 import { GroupAuditLogsModule } from './group-audit-logs/group-audit-logs.module'
 import { Mention } from './mentions/models/mentions.model'
 import { MentionsModule } from './mentions/mentions.module'
+import { UnreadMarksModule } from './unread-marks/unread-marks.module'
+import { UnreadMark } from './unread-marks/models/read-marks.model'
 
 
 @Module({
@@ -75,6 +77,7 @@ import { MentionsModule } from './mentions/mentions.module'
                 GroupAuditLog,
                 LoggedAction,
                 Mention,
+                UnreadMark,
             ],
             autoLoadModels: true,
             retryAttempts: 0
@@ -93,6 +96,7 @@ import { MentionsModule } from './mentions/mentions.module'
         forwardRef(() => GroupBlacklistsModule),
         forwardRef(() => GroupAuditLogsModule),
         forwardRef(() => MentionsModule),
+        forwardRef(() => UnreadMarksModule),
     ]
 })
 export class AppModule {}

@@ -1,5 +1,6 @@
 import { Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from 'sequelize-typescript'
 import { Mention } from 'src/mentions/models/mentions.model'
+import { MessageLocation } from 'src/unread-marks/types/message-location'
 import { User } from 'src/users/models/users.model'
 import { MessageContent } from './message-content.model'
 
@@ -21,6 +22,9 @@ export class Message extends Model<Message> {
 
     @HasMany(() => Mention)
         mentions: Mention[]
+
+    @Column({ type: DataType.JSON, allowNull: false })
+        messageLocation: MessageLocation
 
 }
 

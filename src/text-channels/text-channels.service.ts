@@ -51,7 +51,7 @@ export class TextChannelsService {
     async createTextChannel(dto: CreateTextChannelDto): Promise<TextChannel> {
         const channel: TextChannel = await this.channelRepository.create(dto)
         const usersIds: string[] =
-            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(channel.id)
+            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(channel.id, dto.groupId)
         this.eventEmitter.emit(
             'internal-text-channels.created',
             new InternalTextChannelsCudEvent({
@@ -69,7 +69,7 @@ export class TextChannelsService {
         dto.channel.name = dto.name
         await dto.channel.save()
         const usersIds: string[] =
-            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(dto.channel.id)
+            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(dto.channel.id, dto.groupId)
         this.eventEmitter.emit(
             'internal-text-channels.updated',
             new InternalTextChannelsCudEvent({
@@ -86,7 +86,7 @@ export class TextChannelsService {
     async deleteTextChannel(dto: DeleteTextChannelDto): Promise<TextChannel> {
         await dto.channel.destroy()
         const usersIds: string[] =
-            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(dto.channel.id)
+            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(dto.channel.id, dto.groupId)
         this.eventEmitter.emit(
             'internal-text-channels.deleted',
             new InternalTextChannelsCudEvent({

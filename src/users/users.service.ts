@@ -55,11 +55,15 @@ export class UsersService {
 
     async getChattersByChatId(chatId: string): Promise<User[]> {
         const chatUserRows: ChatUser[] = await this.chatUserRepository.findAll({ where: { chatId } })
-        const chattersIds: { id: string }[] = chatUserRows.map(row => ({ id: row.userId }))
         const chatters: User[] = await this.userRepository.findAll({
-            where: { [Op.or]: chattersIds }
+            where: { [Op.or]: chatUserRows.map(row => ({ id: row.userId })) }
         })
         return chatters
+    }
+
+    async getIdsOfChattersByChatId(chatId: string): Promise<string[]> {
+        const chatUserRows: ChatUser[] = await this.chatUserRepository.findAll({ where: { chatId } })
+        return chatUserRows.map(row => row.userId)
     }
 
     async getFriendsByUserId(
@@ -70,9 +74,8 @@ export class UsersService {
         const userFriendRows: Friend[] = await this.userFriendsRepository.findAll(
             { where: { userId, status: FriendRequestStatus.CONFIRM } }
         )
-        const friendsIds: { id: string }[] = userFriendRows.map(row => ({ id: row.userId }))
         const friends: User[] = await this.userRepository.findAll({
-            where: { [Op.or]: friendsIds }, limit, offset
+            where: { [Op.or]: userFriendRows.map(row => ({ id: row.userId })) }, limit, offset
         })
         return friends
     }
@@ -85,9 +88,8 @@ export class UsersService {
         const userGroupRows: GroupUser[] = await this.groupUserRepository.findAll(
             { where: { groupId } }
         )
-        const usersIds: { id: string }[] = userGroupRows.map(row => ({ id: row.userId }))
         const users: User[] = await this.userRepository.findAll({
-            where: { [Op.or]: usersIds }, limit, offset
+            where: { [Op.or]: userGroupRows.map(row => ({ id: row.userId })) }, limit, offset
         })
         return users
     }

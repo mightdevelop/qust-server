@@ -1,5 +1,6 @@
 import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript'
 import { Category } from 'src/categories/models/categories.model'
+import { Mention } from 'src/mentions/models/mentions.model'
 import { Message } from 'src/messages/models/messages.model'
 import { TextChannelMessage } from 'src/messages/models/text-channel-message.model'
 import { TextChannelRolePermissions } from './text-channel-role-permissions.model'
@@ -25,6 +26,9 @@ export class TextChannel extends Model<TextChannel> {
 
     @BelongsToMany(() => Message, () => TextChannelMessage)
         messages: Message[]
+
+    @HasMany(() => Mention, { onDelete: 'cascade' })
+        mentions: Mention[]
 
 }
 

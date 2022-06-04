@@ -14,7 +14,7 @@ import { Mention } from './models/mentions.model'
 
 
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/mentions' })
-export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MentionsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     constructor(
         private socketIoService: SocketIoService,

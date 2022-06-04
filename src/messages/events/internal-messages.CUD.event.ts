@@ -3,7 +3,7 @@ import { Message } from '../models/messages.model'
 
 export class InternalMessagesCudEvent {
 
-    constructor({ action, message }: InternalMessagesCudEventArgs) {
+    constructor({ message, action }: InternalMessagesCudEventArgs) {
         this.message = message
         this.action = action
     }

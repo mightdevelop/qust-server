@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { MessagesModule } from 'src/messages/messages.module'
 import { TextChannelsController } from './text-channels.controller'
@@ -16,7 +16,7 @@ import { SocketIoModule } from 'src/socketio/socketio.module'
     imports: [
         SequelizeModule.forFeature([ TextChannel, TextChannelRolePermissions ]),
         JwtModule.register({}),
-        MessagesModule,
+        forwardRef(() => MessagesModule),
         CategoriesModule,
         SocketIoModule,
     ],

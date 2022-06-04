@@ -83,7 +83,7 @@ export class MentionsService {
             new InternalMentionsCudEvent({
                 mentions,
                 usersIds,
-                action: 'delete'
+                action: 'create'
             })
         )
         return mentions

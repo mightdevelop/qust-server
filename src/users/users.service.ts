@@ -6,6 +6,7 @@ import { ChatUser } from 'src/chats/models/chat-user.model'
 import { Friend } from 'src/friends/models/friends.model'
 import { FriendRequestStatus } from 'src/friends/types/friend-request-status'
 import { GroupUser } from 'src/groups/models/group-user.model'
+import { UserSettings } from 'src/users-settings/models/user-settings.model'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { InternalUsersCudEvent } from './events/internal-users.CUD.event'
@@ -21,6 +22,7 @@ export class UsersService {
         @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
         @InjectModel(Friend) private userFriendsRepository: typeof Friend,
         @InjectModel(GroupUser) private groupUserRepository: typeof GroupUser,
+        @InjectModel(UserSettings) private settingsRepository: typeof UserSettings,
     ) {}
 
     async getUsers(limit?: number, offset?: number): Promise<User[]> {
@@ -110,6 +112,8 @@ export class UsersService {
         dto: CreateUserDto
     ): Promise<User> {
         const user: User = await this.userRepository.create(dto)
+        const settings: UserSettings = await this.settingsRepository.create({ userId: user.id })
+        user.settings = settings
         this.eventEmitter.emit(
             'internal-users.created',
             new InternalUsersCudEvent({ user, action: 'create' })

@@ -15,6 +15,7 @@ import { SocketIoCurrentUser } from 'src/auth/decorators/socket.io-current-user.
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { SocketIoService } from 'src/socketio/socketio.service'
+import { UserSettingsService } from 'src/users-settings/users-settings.service'
 import { UsersService } from 'src/users/users.service'
 import { InternalUsersCudEvent } from './events/internal-users.CUD.event'
 import { UserStatus } from './types/user-status.enum'
@@ -26,6 +27,7 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private socketIoService: SocketIoService,
         private usersService: UsersService,
+        private userSettingsService: UserSettingsService,
         private jwtService: JwtService,
     ) {}
 
@@ -33,10 +35,11 @@ export class UsersGateway implements OnGatewayConnection, OnGatewayDisconnect {
         server: Server
 
     async handleConnection(@ConnectedSocket() socket: Socket) {
-        const { id, isInvis } = this.jwtService.decode(
+        const { id } = this.jwtService.decode(
             socket.handshake.query['access_token'].toString()
         ) as TokenPayload
         await this.socketIoService.pushClient({ userId: id, socketId: socket.id })
+        const { isInvis } = await this.userSettingsService.getUserSettingsByUserId(id)
         if (!isInvis)
             await this.usersService.updateUser({ userId: id, status: UserStatus.ONLINE })
         socket.emit('200', socket.id)

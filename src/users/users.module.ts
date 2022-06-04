@@ -9,6 +9,8 @@ import { GroupUser } from 'src/groups/models/group-user.model'
 import { UsersGateway } from './users.gateway'
 import { SocketIoModule } from 'src/socketio/socketio.module'
 import { JwtModule } from '@nestjs/jwt'
+import { UserSettingsModule } from 'src/users-settings/users-settings.module'
+import { UserSettings } from 'src/users-settings/models/user-settings.model'
 
 @Global()
 @Module({
@@ -18,8 +20,9 @@ import { JwtModule } from '@nestjs/jwt'
         UsersGateway,
     ],
     imports: [
-        SequelizeModule.forFeature([ User, Friend, ChatUser, GroupUser ]),
+        SequelizeModule.forFeature([ User, Friend, ChatUser, GroupUser, UserSettings ]),
         SocketIoModule,
+        UserSettingsModule,
         JwtModule.register({})
     ],
     exports: [

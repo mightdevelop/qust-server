@@ -40,6 +40,8 @@ import { Mention } from './mentions/models/mentions.model'
 import { MentionsModule } from './mentions/mentions.module'
 import { UnreadMarksModule } from './unread-marks/unread-marks.module'
 import { UnreadMark } from './unread-marks/models/read-marks.model'
+import { UserSettingsModule } from './users-settings/users-settings.module'
+import { UserSettings } from './users-settings/models/user-settings.model'
 
 
 @Module({
@@ -78,6 +80,7 @@ import { UnreadMark } from './unread-marks/models/read-marks.model'
                 LoggedAction,
                 Mention,
                 UnreadMark,
+                UserSettings,
             ],
             autoLoadModels: true,
             retryAttempts: 0
@@ -97,6 +100,7 @@ import { UnreadMark } from './unread-marks/models/read-marks.model'
         forwardRef(() => GroupAuditLogsModule),
         forwardRef(() => MentionsModule),
         forwardRef(() => UnreadMarksModule),
+        forwardRef(() => UserSettingsModule),
     ]
 })
 export class AppModule {}

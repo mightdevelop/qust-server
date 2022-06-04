@@ -1,4 +1,4 @@
-import { BelongsToMany, Column, DataType, HasMany, Model, Table } from 'sequelize-typescript'
+import { BelongsToMany, Column, DataType, HasMany, HasOne, Model, Table } from 'sequelize-typescript'
 import { LoggedAction } from 'src/group-audit-logs/models/logged-action.model'
 import { BannedUser } from 'src/group-blacklists/models/banned-users.model'
 import { GroupBlacklist } from 'src/group-blacklists/models/group-blacklists.model'
@@ -7,6 +7,7 @@ import { Group } from 'src/groups/models/groups.model'
 import { Mention } from 'src/mentions/models/mentions.model'
 import { RoleUser } from 'src/roles/models/role-user.model'
 import { Role } from 'src/roles/models/roles.model'
+import { UserSettings } from 'src/users-settings/models/user-settings.model'
 import { UserStatus } from '../types/user-status.enum'
 
 @Table({ tableName: 'users' })
@@ -32,6 +33,9 @@ export class User extends Model<User> {
 
     @Column({ type: DataType.STRING, allowNull: false, defaultValue: UserStatus.OFFLINE })
         status: UserStatus
+
+    @HasOne(() => UserSettings)
+        settings: UserSettings
 
     @HasMany(() => LoggedAction)
         actions: LoggedAction[]

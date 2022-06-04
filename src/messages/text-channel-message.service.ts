@@ -29,13 +29,13 @@ export class TextChannelMessageService {
     }
 
     async getMessagesFromTextChannel(
-        channelId: string,
+        textChannelId: string,
         include?: Includeable | Includeable[],
         limit?: number,
         offset?: number,
     ): Promise<Message[]> {
         const messagesIds: string[] =
-            (await this.textChannelMessageRepository.findAll({ where: { channelId } }))
+            (await this.textChannelMessageRepository.findAll({ where: { textChannelId } }))
                 .map(row => row.messageId)
         const messages: Message[] =
             await this.messageService.getMessagesByIds(messagesIds, include, limit, offset)
@@ -47,7 +47,7 @@ export class TextChannelMessageService {
             await this.textChannelMessageRepository.findOne({ where: { ...dto } })
         const nextChannelMessageRow: TextChannelMessage =
             await this.textChannelMessageRepository.findOne({ where: {
-                channelId: channelMessageRow.channelId,
+                textChannelId: channelMessageRow.textChannelId,
                 createdAt: { [Op.gt]: channelMessageRow.createdAt }
             } })
         return await this.messageService.getMessageById(nextChannelMessageRow.messageId)
@@ -55,15 +55,15 @@ export class TextChannelMessageService {
 
     async sendMessageToTextChannel(dto: SendTextChannelMessageDto): Promise<Message> {
         const message: Message = await this.messageService.createMessage({ ...dto, location: {
-            textChannelId: dto.channelId,
-            groupId: await this.textChannelsService.getGroupIdByTextChannelId(dto.channelId)
+            textChannelId: dto.textChannelId,
+            groupId: await this.textChannelsService.getGroupIdByTextChannelId(dto.textChannelId)
         } })
-        await this.textChannelMessageRepository.create({ messageId: message.id, channelId: dto.channelId })
+        await this.textChannelMessageRepository.create({ messageId: message.id, textChannelId: dto.textChannelId })
         this.eventEmitter.emit(
             'internal-text-channels.message-sent',
             new InternalTextChannelsMessageSentEvent({
                 message,
-                channelId: dto.channelId,
+                textChannelId: dto.textChannelId,
             })
         )
         return message

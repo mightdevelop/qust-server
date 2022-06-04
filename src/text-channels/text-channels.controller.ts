@@ -36,10 +36,10 @@ export class TextChannelsController {
     @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
     async updateTextChannel(
         @CurrentUser() user: UserFromRequest,
-        @Param('channelId') channelId: string,
+        @Param('textChannelId') textChannelId: string,
         @Body() { name, groupId }: { name: string, groupId: string }
     ): Promise<TextChannel> {
-        const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        const channel: TextChannel = await this.textChannelsService.getTextChannelById(textChannelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
         const updatedChannel: TextChannel =
@@ -51,10 +51,10 @@ export class TextChannelsController {
     @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
     async deleteTextChannel(
         @CurrentUser() user: UserFromRequest,
-        @Param('channelId') channelId: string,
+        @Param('textChannelId') textChannelId: string,
         @Body() { groupId }: { groupId: string }
     ): Promise<TextChannel> {
-        const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        const channel: TextChannel = await this.textChannelsService.getTextChannelById(textChannelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
         await this.textChannelsService.deleteTextChannel({ userId: user.id, channel, groupId })
@@ -64,16 +64,16 @@ export class TextChannelsController {
     @Post('/:textChannelId/messages')
     @UseGuards(JwtAuthGuard)
     async sendMessageToTextChannel(
-        @Param('textChannelId') channelId: string,
+        @Param('textChannelId') textChannelId: string,
         @CurrentUser() user: UserFromRequest,
         @Body() { text }: { text: string }
     ): Promise<Message> {
-        if (!await this.textChannelsService.getTextChannelById(channelId))
+        if (!await this.textChannelsService.getTextChannelById(textChannelId))
             throw new NotFoundException({ message: 'Text channel not found' })
         const message: Message = await this.textChannelMessageService.sendMessageToTextChannel({
             userId: user.id,
             username: user.username,
-            channelId,
+            textChannelId,
             text
         })
         return message

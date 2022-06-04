@@ -14,6 +14,6 @@ export class TextChannelMessage extends Model<TextChannelMessage> {
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => TextChannel)
-        channelId: string
+        textChannelId: string
 
 }

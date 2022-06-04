@@ -25,13 +25,10 @@ export class CategoriesService {
 
     async createCategory(dto: CreateCategoryDto): Promise<Category> {
         const category: Category = await this.categoryRepository.create(dto)
-        const usersIds: string[] = (await this.usersService.getUsersByGroupId(category.id))
-            .map(user => user.id)
         this.eventEmitter.emit(
             'internal-categories.created',
             new InternalCategoriesCudEvent({
                 category,
-                usersIds,
                 userIdWhoTriggered: dto.userId,
                 action: 'create' })
         )
@@ -41,13 +38,10 @@ export class CategoriesService {
     async updateCategory({ category, name, userId }: UpdateCategoryDto): Promise<Category> {
         category.name = name
         await category.save()
-        const usersIds: string[] = (await this.usersService.getUsersByGroupId(category.id))
-            .map(user => user.id)
         this.eventEmitter.emit(
             'internal-categories.updated',
             new InternalCategoriesCudEvent({
                 category,
-                usersIds,
                 userIdWhoTriggered: userId,
                 action: 'update' })
         )
@@ -56,13 +50,10 @@ export class CategoriesService {
 
     async deleteCategory(dto: DeleteCategoryDto): Promise<Category> {
         await dto.category.destroy()
-        const groupUsersIds: string[] = (await this.usersService.getUsersByGroupId(dto.category.id))
-            .map(user => user.id)
         this.eventEmitter.emit(
             'internal-categories.deleted',
             new InternalCategoriesCudEvent({
                 category: dto.category,
-                usersIds: groupUsersIds,
                 userIdWhoTriggered:
                 dto.userId,
                 action: 'delete'

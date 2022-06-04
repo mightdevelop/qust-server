@@ -4,12 +4,11 @@ import { TextChannel } from '../models/text-channels.model'
 export class InternalTextChannelsCudEvent {
 
     constructor(
-        { userIdWhoTriggered, groupId, channel, usersIds, action }: InternalTextChannelsCreatedEventArgs
+        { userIdWhoTriggered, groupId, channel, action }: InternalTextChannelsCreatedEventArgs
     ) {
         this.userIdWhoTriggered = userIdWhoTriggered
         this.groupId = groupId
         this.channel = channel
-        this.usersIds = usersIds
         this.action = action
     }
 
@@ -18,8 +17,6 @@ export class InternalTextChannelsCudEvent {
     groupId: string
 
     channel: TextChannel
-
-    usersIds: string[]
 
     action: CreateUpdateDelete
 
@@ -32,8 +29,6 @@ class InternalTextChannelsCreatedEventArgs {
     groupId: string
 
     channel: TextChannel
-
-    usersIds: string[]
 
     action: CreateUpdateDelete
 

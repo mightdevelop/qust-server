@@ -8,9 +8,10 @@ import { GroupUser } from './models/group-user.model'
 import { Includeable } from 'sequelize/types'
 import { DeleteGroupDto } from './dto/delete-group.dto'
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import { InternalGroupsDeletedEvent } from './events/internal-groups-deleted.event'
+import { InternalGroupsCudEvent } from './events/internal-groups-CUD.event'
 import { UsersService } from 'src/users/users.service'
 import { UserIdAndGroupIdDto } from 'src/permissions/dto/user-id-and-group-id.dto'
+import { UpdateGroupDto } from './dto/update-group.dto'
 
 
 @Injectable()
@@ -59,13 +60,21 @@ export class GroupsService {
         return group
     }
 
+    async updateGroup({ group, name }: UpdateGroupDto): Promise<Group> {
+        group.name = name
+        await group.save()
+        this.eventEmitter.emit(
+            'internal-groups.updated',
+            new InternalGroupsCudEvent({ group, action: 'update' })
+        )
+        return group
+    }
+
     async deleteGroup({ group }: DeleteGroupDto): Promise<Group> {
         await group.destroy()
-        const usersIds: string[] = (await this.usersService.getUsersByGroupId(group.id))
-            .map(user => user.id)
         this.eventEmitter.emit(
             'internal-groups.deleted',
-            new InternalGroupsDeletedEvent({ groupId: group.id, usersIds })
+            new InternalGroupsCudEvent({ group, action: 'delete' })
         )
         return group
     }

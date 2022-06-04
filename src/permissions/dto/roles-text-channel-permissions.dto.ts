@@ -10,6 +10,6 @@ export class PermissionsByRolesInTextChannelDto {
         roles: Role[]
 
     @IsUUID()
-        channelId: string
+        textChannelId: string
 
 }

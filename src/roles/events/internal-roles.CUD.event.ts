@@ -3,10 +3,10 @@ import { Role } from '../models/roles.model'
 
 export class InternalRolesCudEvent {
 
-    constructor({ userIdWhoTriggered, role, usersIds, action }: InternalRolesCudEventArgs) {
+    constructor({ userIdWhoTriggered, role, groupId, action }: InternalRolesCudEventArgs) {
         this.userIdWhoTriggered = userIdWhoTriggered
         this.role = role
-        this.usersIds = usersIds
+        this.groupId = groupId
         this.action = action
     }
 
@@ -14,7 +14,7 @@ export class InternalRolesCudEvent {
 
     role: Role
 
-    usersIds: string[]
+    groupId: string
 
     action: CreateUpdateDelete
 
@@ -26,7 +26,7 @@ class InternalRolesCudEventArgs {
 
     role: Role
 
-    usersIds: string[]
+    groupId: string
 
     action: CreateUpdateDelete
 

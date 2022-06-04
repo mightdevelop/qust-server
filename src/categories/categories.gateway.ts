@@ -88,35 +88,23 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
     }
 
     @OnEvent('internal-categories.created')
-    async showToSocketsNewCategory(event: InternalCategoriesCudEvent): Promise<void>  {
-        const socketsOfGroupUsers = (await this.socketIoService.getSocketsByUsersIds(
-            (await this.server.fetchSockets()),
-            event.usersIds
-        ))
+    async showToSocketsNewCategory(event: InternalCategoriesCudEvent): Promise<void> {
         this.server
-            .to(socketsOfGroupUsers.map(socket => socket.id))
+            .to(event.category.groupId)
             .emit('category-created', event.category)
     }
 
     @OnEvent('internal-categories.updated')
-    async showToSocketsUpdatedCategory(event: InternalCategoriesCudEvent): Promise<void>  {
-        const socketsOfGroupUsers = (await this.socketIoService.getSocketsByUsersIds(
-            (await this.server.fetchSockets()),
-            event.usersIds
-        ))
+    async showToSocketsUpdatedCategory(event: InternalCategoriesCudEvent): Promise<void> {
         this.server
-            .to(socketsOfGroupUsers.map(socket => socket.id))
+            .to(event.category.groupId)
             .emit('category-updated', event.category)
     }
 
     @OnEvent('internal-categories.deleted')
-    async hideFromSocketsDeletedCategory(event: InternalCategoriesCudEvent): Promise<void>  {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfGroupUsers = (await this.socketIoService.getClients())
-            .filter(client => event.usersIds.some(userId => userId === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+    async hideFromSocketsDeletedCategory(event: InternalCategoriesCudEvent): Promise<void> {
         this.server
-            .to(socketsOfGroupUsers.map(socket => socket.id))
+            .to(event.category.groupId)
             .emit('category-deleted', event.category)
     }
 

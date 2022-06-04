@@ -23,7 +23,7 @@ export class SocketIoTextChannelPermissionsGuard implements CanActivate {
         if (!requiredPermissions) return true
         return await this.permissionsService.doesUserHavePermissionsInTextChannel({
             userId: context.switchToWs().getClient().handshake.user.id,
-            channelId: context.switchToWs().getData().channelId,
+            textChannelId: context.switchToWs().getData().textChannelId,
             requiredPermissions
         })
     }

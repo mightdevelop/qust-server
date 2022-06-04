@@ -99,7 +99,7 @@ export class PermissionsService {
     }
 
     async doesUserHavePermissionsInTextChannel(dto: UserPermissionsInTextChannelDto): Promise<boolean> {
-        const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(dto.channelId)
+        const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(dto.textChannelId)
         const group: Group = await this.groupsService.getGroupById(groupId)
         if (!group)
             throw new NotFoundException({ message: 'Group not found' })
@@ -110,7 +110,7 @@ export class PermissionsService {
         if (!roles.length)
             return false
         const userTextChannelPermissions =
-            await this.getPermissionsByRolesArrayInTextChannel({ roles, channelId: dto.channelId })
+            await this.getPermissionsByRolesArrayInTextChannel({ roles, textChannelId: dto.textChannelId })
         dto.requiredPermissions.push(RoleTextChannelPermissionsEnum.viewTextChannels)
         const isSomePermissionNotAllowed = !!dto.requiredPermissions
             .filter(p => userTextChannelPermissions.notAllowed.includes(p)).length
@@ -130,7 +130,7 @@ export class PermissionsService {
     }
 
     private async getPermissionsByRolesArrayInTextChannel(
-        { roles, channelId }: PermissionsByRolesInTextChannelDto
+        { roles, textChannelId }: PermissionsByRolesInTextChannelDto
     ): Promise<{
         allowed: RoleTextChannelPermissionsEnum[]
         notSpecified: RoleTextChannelPermissionsEnum[]
@@ -139,7 +139,7 @@ export class PermissionsService {
         const permissions: [RoleTextChannelPermissionsEnum, PermissionLevel][] =
             [].concat(...
             roles
-                .map(role => role.textChannelPermissions.find(row => row.channelId === channelId))
+                .map(role => role.textChannelPermissions.find(row => row.textChannelId === textChannelId))
                 .filter(permissionsRow => permissionsRow)
                 .map(permissionsRow => Object
                     .entries(TextChannelRolePermissions)
@@ -214,7 +214,7 @@ export class PermissionsService {
             for (const channel of channels) {
                 const viewChannelPermissions: PermissionLevel[] =
                     roles.map(role => role.textChannelPermissions
-                        .find(row => row.channelId === channel.id)?.viewTextChannels)
+                        .find(row => row.textChannelId === channel.id)?.viewTextChannels)
 
                 if (
                     viewChannelPermissions.every(p => p === PermissionLevel.NOT_ALOWED)
@@ -229,39 +229,39 @@ export class PermissionsService {
     }
 
     async getIdsOfUsersThatCanViewTextChannel(
-        channelId: string,
+        textChannelId: string,
         groupId?: string,
     ): Promise<string[]> {
         const rolesThatCanViewTextChannel: Role[] =
-            await this.getRolesThatCanViewTextChannel(channelId)
+            await this.getRolesThatCanViewTextChannel(textChannelId)
         if (rolesThatCanViewTextChannel.find(role => role.name === 'everyone'))
             return (await this.usersService.getUsersByGroupId(groupId)).map(user => user.id)
         const groupUsersIds: string[] = await this.rolesService.getIdsOfUsersThatHaveAnyOfRoles(
             rolesThatCanViewTextChannel.map(role => role.id))
-        if (!groupId) groupId = await this.textChannelsService.getGroupIdByTextChannelId(channelId)
+        if (!groupId) groupId = await this.textChannelsService.getGroupIdByTextChannelId(textChannelId)
         const ownerId: string = (await this.groupsService.getGroupById(groupId)).ownerId
         return [ ...groupUsersIds, ownerId ]
     }
 
     private async getRolesThatCanViewTextChannel(
-        channelId: string
+        textChannelId: string
     ): Promise<Role[]> {
-        const channel: TextChannel = await this.textChannelsService.getTextChannelById(channelId)
+        const channel: TextChannel = await this.textChannelsService.getTextChannelById(textChannelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
-        const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(channelId)
+        const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(textChannelId)
         const roles: Role[] = await this.rolesService.getRolesByGroupId(
             groupId, [ RolePermissions, TextChannelRolePermissions ]
         )
         const rolesThatCanViewTextChannel: Role[] =
             roles
                 .filter(role => role.textChannelPermissions
-                    .find(row => row.channelId === channelId)
+                    .find(row => row.textChannelId === textChannelId)
                     ?.viewTextChannels === PermissionLevel.ALOWED)
         const rolesWithNotSpecifiedViewTextChannelPermission: Role[] =
             roles
                 .filter(role => role.textChannelPermissions
-                    .find(row => row.channelId === channelId)
+                    .find(row => row.textChannelId === textChannelId)
                     ?.viewTextChannels === PermissionLevel.NOT_ALOWED)
         if (!rolesWithNotSpecifiedViewTextChannelPermission)
             return rolesThatCanViewTextChannel

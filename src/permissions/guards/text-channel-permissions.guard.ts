@@ -25,7 +25,7 @@ export class TextChannelPermissionsGuard implements CanActivate {
         const req: Request = context.switchToHttp().getRequest()
         return await this.permissionsService.doesUserHavePermissionsInTextChannel({
             userId: req.user.id,
-            channelId: req.params.channelId,
+            textChannelId: req.params.textChannelId,
             requiredPermissions: requiredPermissions || []
         })
     }

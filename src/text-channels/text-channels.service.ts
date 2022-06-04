@@ -24,13 +24,13 @@ export class TextChannelsService {
         @InjectModel(TextChannel) private channelRepository: typeof TextChannel,
     ) {}
 
-    async getTextChannelById(channelId: string): Promise<TextChannel> {
-        const channel: TextChannel = await this.channelRepository.findByPk(channelId)
+    async getTextChannelById(textChannelId: string): Promise<TextChannel> {
+        const channel: TextChannel = await this.channelRepository.findByPk(textChannelId)
         return channel
     }
 
-    async getGroupIdByTextChannelId(channelId: string): Promise<string> {
-        const channel: TextChannel = await this.channelRepository.findByPk(channelId)
+    async getGroupIdByTextChannelId(textChannelId: string): Promise<string> {
+        const channel: TextChannel = await this.channelRepository.findByPk(textChannelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
         const category: Category = await this.categoriesService.getCategoryById(channel.categoryId)
@@ -41,24 +41,20 @@ export class TextChannelsService {
         return await this.permissionsService.getAllowedToViewTextChannelsIdsByUserId(userId)
     }
 
-    async getUsersThatCanViewTextChannel(channelId: string): Promise<User[]> {
+    async getUsersThatCanViewTextChannel(textChannelId: string): Promise<User[]> {
         const usersIds: string[] =
-            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(channelId)
-        const users: User[] = await this.usersService.getUsersByIdsArray(usersIds)
-        return users
+            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(textChannelId)
+        return await this.usersService.getUsersByIdsArray(usersIds)
     }
 
     async createTextChannel(dto: CreateTextChannelDto): Promise<TextChannel> {
         const channel: TextChannel = await this.channelRepository.create(dto)
-        const usersIds: string[] =
-            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(channel.id, dto.groupId)
         this.eventEmitter.emit(
             'internal-text-channels.created',
             new InternalTextChannelsCudEvent({
                 userIdWhoTriggered: dto.userId,
                 groupId: dto.groupId,
                 channel,
-                usersIds,
                 action: 'create'
             })
         )
@@ -68,15 +64,12 @@ export class TextChannelsService {
     async updateTextChannel(dto: UpdateTextChannelDto): Promise<TextChannel> {
         dto.channel.name = dto.name
         await dto.channel.save()
-        const usersIds: string[] =
-            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(dto.channel.id, dto.groupId)
         this.eventEmitter.emit(
             'internal-text-channels.updated',
             new InternalTextChannelsCudEvent({
                 userIdWhoTriggered: dto.userId,
                 groupId: dto.groupId,
                 channel: dto.channel,
-                usersIds,
                 action: 'update'
             })
         )
@@ -85,15 +78,12 @@ export class TextChannelsService {
 
     async deleteTextChannel(dto: DeleteTextChannelDto): Promise<TextChannel> {
         await dto.channel.destroy()
-        const usersIds: string[] =
-            await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(dto.channel.id, dto.groupId)
         this.eventEmitter.emit(
             'internal-text-channels.deleted',
             new InternalTextChannelsCudEvent({
                 userIdWhoTriggered: dto.userId,
                 groupId: dto.groupId,
                 channel: dto.channel,
-                usersIds,
                 action: 'delete'
             })
         )

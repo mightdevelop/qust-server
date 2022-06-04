@@ -11,7 +11,7 @@ export class SendTextChannelMessageDto {
         username: string
 
     @IsUUID()
-        channelId: string
+        textChannelId: string
 
     @IsString()
         text: string

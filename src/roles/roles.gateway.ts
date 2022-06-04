@@ -109,35 +109,23 @@ export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-roles.created')
-    async showToSocketsNewRole(event: InternalRolesCudEvent): Promise<void>  {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfGroupUsers = (await this.socketIoService.getClients())
-            .filter(client => event.usersIds.some(userId => userId === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+    async showToSocketsNewRole(event: InternalRolesCudEvent): Promise<void> {
         this.server
-            .to(socketsOfGroupUsers.map(socket => socket.id))
+            .to(event.groupId)
             .emit('role-created', event.role)
     }
 
     @OnEvent('internal-roles.updated')
-    async showToSocketsUpdatedRole(event: InternalRolesCudEvent): Promise<void>  {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfGroupUsers = (await this.socketIoService.getClients())
-            .filter(client => event.usersIds.some(userId => userId === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+    async showToSocketsUpdatedRole(event: InternalRolesCudEvent): Promise<void> {
         this.server
-            .to(socketsOfGroupUsers.map(socket => socket.id))
+            .to(event.groupId)
             .emit('role-updated', event.role)
     }
 
     @OnEvent('internal-roles.deleted')
-    async hideFromSocketsDeletedRole(event: InternalRolesCudEvent): Promise<void>  {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfGroupUsers = (await this.socketIoService.getClients())
-            .filter(client => event.usersIds.some(userId => userId === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+    async hideFromSocketsDeletedRole(event: InternalRolesCudEvent): Promise<void> {
         this.server
-            .to(socketsOfGroupUsers.map(socket => socket.id))
+            .to(event.groupId)
             .emit('role-deleted', event.role)
     }
 

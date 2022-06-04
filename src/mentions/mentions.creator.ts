@@ -22,9 +22,9 @@ export class MentionsCreator {
 
     @OnEvent('internal-text-channels.message-sent')
     async sendMentionsOnTextChannelMessageCreated(
-        { message, channelId }: InternalTextChannelsMessageSentEvent
+        { message, textChannelId }: InternalTextChannelsMessageSentEvent
     ): Promise<void> {
-        const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(channelId)
+        const groupId: string = await this.textChannelsService.getGroupIdByTextChannelId(textChannelId)
         const groupUsersIds = (await this.usersService.getUsersByGroupId(groupId)).map(user => user.id)
         const usersIds: string[] = parseMessageMentions(message.content.text)
             ?.filter(userId => groupUsersIds.find(groupUserId => groupUserId === userId))
@@ -33,7 +33,7 @@ export class MentionsCreator {
                 usersIds,
                 groupId,
                 messageId: message.id,
-                textChannelId: channelId
+                textChannelId: textChannelId
             })
             : null
     }
@@ -51,13 +51,13 @@ export class MentionsCreator {
                 ?.find(userId => mention.userId === userId)
             )
         if (usersIdToCreateMentions) {
-            const channelId: string =
-                (await this.textChannelMessageService.getTextChannelMessageRow(message.id)).channelId
+            const textChannelId: string =
+                (await this.textChannelMessageService.getTextChannelMessageRow(message.id)).textChannelId
             await this.mentionsService.createMentions({
                 usersIds: usersIdToCreateMentions,
-                groupId: await this.textChannelsService.getGroupIdByTextChannelId(channelId),
+                groupId: await this.textChannelsService.getGroupIdByTextChannelId(textChannelId),
                 messageId: message.id,
-                textChannelId: channelId
+                textChannelId: textChannelId
             })
         }
         if (mentionsToDelete)

@@ -22,11 +22,19 @@ export class SocketIoService {
 
     async getSocketsByUsersIds(
         sockets: RemoteSocket<any, any>[],
-        socketsIds: string[]
+        usersIds: string[]
     ): Promise<RemoteSocket<any, any>[]> {
         return this.clients
-            .filter(client => socketsIds.some(socketId => socketId === client.socketId))
+            .filter(client => usersIds.some(socketId => socketId === client.socketId))
             .map(client => sockets.find(socket => socket.id === client.socketId))
+    }
+
+    async getSocketsIdsByUsersIds(
+        usersIds: string[]
+    ): Promise<string[]> {
+        return this.clients
+            .filter(client => usersIds.some(socketId => socketId === client.socketId))
+            .map(client => client.socketId)
     }
 
     async pushClient(client: UserIdAndSocketId): Promise<void> {

@@ -160,7 +160,7 @@ export class LayoutsService {
                     return categoryLayout.channelLayouts.map((channelLayout, channelIndex) => {
                         return channelLayout.permissionsOfRoles?.map(roleWithPermissions => ({
                             roleId: roles.find(role => role.name === roleWithPermissions.roleName).id,
-                            channelId: channels[channelIndex].id,
+                            textChannelId: channels[channelIndex].id,
                             ...roleWithPermissions.permissions
                         }))
                     })

@@ -16,7 +16,7 @@ import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { SocketIoService } from 'src/socketio/socketio.service'
-import { InternalGroupsDeletedEvent } from './events/internal-groups-deleted.event'
+import { InternalGroupsCudEvent } from './events/internal-groups-CUD.event'
 import { GroupsService } from './groups.service'
 import { Group } from './models/groups.model'
 
@@ -70,15 +70,18 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         socket.emit('200', group)
     }
 
-    @OnEvent('internal-groups.deleted')
-    async hideFromSocketsDeletedGroup(event: InternalGroupsDeletedEvent): Promise<void>  {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfGroupUsers = (await this.socketIoService.getClients())
-            .filter(client => event.usersIds.some(userId => userId === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+    @OnEvent('internal-groups.updated')
+    async showToSocketsUpdatedGroup(event: InternalGroupsCudEvent): Promise<void> {
         this.server
-            .to(socketsOfGroupUsers.map(socket => socket.id))
-            .emit('group-deleted', event.groupId)
+            .to(event.group.id)
+            .emit('group-deleted', event.group.id)
+    }
+
+    @OnEvent('internal-groups.deleted')
+    async hideFromSocketsDeletedGroup(event: InternalGroupsCudEvent): Promise<void> {
+        this.server
+            .to(event.group.id)
+            .emit('group-deleted', event.group.id)
     }
 
 }

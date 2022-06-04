@@ -7,7 +7,7 @@ export class UserPermissionsInTextChannelDto {
         userId: string
 
     @IsUUID()
-        channelId: string
+        textChannelId: string
 
     @IsArray()
         requiredPermissions: RoleTextChannelPermissionsEnum[]

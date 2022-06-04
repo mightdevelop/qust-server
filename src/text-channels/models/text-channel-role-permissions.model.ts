@@ -18,7 +18,7 @@ export class TextChannelRolePermissions extends Model<TextChannelRolePermissions
 
     @Column({ type: DataType.UUID, allowNull: false })
     @ForeignKey(() => TextChannel)
-        channelId: string
+        textChannelId: string
 
     @BelongsTo(() => TextChannel)
         channel: TextChannel

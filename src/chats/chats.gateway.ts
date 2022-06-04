@@ -173,14 +173,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-chats.message-sent')
-    async sendMessageFromChatToSockets(event: InternalChatsMessageSentEvent): Promise<void>  {
+    async sendMessageFromChatToSockets(event: InternalChatsMessageSentEvent): Promise<void> {
         this.server
             .to('chat:' + event.chatId)
             .emit('chat-message', event.message)
     }
 
     @OnEvent('internal-chats.created')
-    async connectSocketsToNewChat({ chat }: InternalChatCreatedEvent): Promise<void>  {
+    async connectSocketsToNewChat({ chat }: InternalChatCreatedEvent): Promise<void> {
         const sockets = await this.server.fetchSockets()
         const socketsOfChatters = (await this.socketIoService.getClients())
             .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
@@ -192,7 +192,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-chats.updated')
-    async showToSocketsUpdatedChat({ chat }: InternalChatUpdatedEvent): Promise<void>  {
+    async showToSocketsUpdatedChat({ chat }: InternalChatUpdatedEvent): Promise<void> {
         const sockets = await this.server.fetchSockets()
         const socketsOfChatters = (await this.socketIoService.getClients())
             .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
@@ -203,7 +203,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-chats.deleted')
-    async hideFromSocketsDeletedChat({ chat }: InternalChatDeletedEvent): Promise<void>  {
+    async hideFromSocketsDeletedChat({ chat }: InternalChatDeletedEvent): Promise<void> {
         const sockets = await this.server.fetchSockets()
         const socketsOfChatters = (await this.socketIoService.getClients())
             .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))

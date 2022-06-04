@@ -80,6 +80,15 @@ export class UsersService {
         return friends
     }
 
+    async getUsersIdsByGroupId(
+        groupId: string,
+    ): Promise<string[]> {
+        const userGroupRows: GroupUser[] = await this.groupUserRepository.findAll(
+            { where: { groupId } }
+        )
+        return userGroupRows.map(user => user.id)
+    }
+
     async getUsersByGroupId(
         groupId: string,
         limit?: number,

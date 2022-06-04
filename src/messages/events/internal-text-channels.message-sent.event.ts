@@ -2,14 +2,14 @@ import { Message } from '../models/messages.model'
 
 export class InternalTextChannelsMessageSentEvent {
 
-    constructor({ message, channelId }: InternalTextChannelsMessageSentEventArgs) {
+    constructor({ message, textChannelId }: InternalTextChannelsMessageSentEventArgs) {
         this.message = message
-        this.channelId = channelId
+        this.textChannelId = textChannelId
     }
 
     message: Message
 
-    channelId: string
+    textChannelId: string
 
 }
 
@@ -17,6 +17,6 @@ class InternalTextChannelsMessageSentEventArgs {
 
     message: Message
 
-    channelId: string
+    textChannelId: string
 
 }

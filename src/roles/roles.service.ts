@@ -96,7 +96,7 @@ export class RolesService {
             new InternalRolesCudEvent({
                 userIdWhoTriggered: dto.userId,
                 role,
-                usersIds: (await this.usersService.getUsersByGroupId(dto.groupId)).map(user => user.id),
+                groupId: role.groupId,
                 action: 'create'
             })
         )
@@ -113,7 +113,7 @@ export class RolesService {
             new InternalRolesCudEvent({
                 userIdWhoTriggered: userId,
                 role,
-                usersIds: (await this.usersService.getUsersByGroupId(role.groupId)).map(user => user.id),
+                groupId: role.groupId,
                 action: 'update'
             })
         )
@@ -127,7 +127,7 @@ export class RolesService {
             new InternalRolesCudEvent({
                 userIdWhoTriggered: userId,
                 role,
-                usersIds: (await this.usersService.getUsersByGroupId(role.groupId)).map(user => user.id),
+                groupId: role.groupId,
                 action: 'delete'
             })
         )

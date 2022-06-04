@@ -15,7 +15,6 @@ import {
 import { isAdmin } from 'src/auth/decorators/isAdmin.decorator'
 import { UsersService } from './users.service'
 import { User } from './models/users.model'
-import { UpdateUserDto } from './dto/update-user.dto'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
@@ -78,7 +77,7 @@ export class UsersController {
     @UseInterceptors(UserModelInterceptor)
     async updateUser(
         @Param('userId') userId: string,
-        @Body() dto: UpdateUserDto,
+        @Body() body: { info: string, username: string },
         @CurrentUser() { id, isAdmin },
     ): Promise<User> {
         if (!userId)
@@ -90,7 +89,7 @@ export class UsersController {
         if (id !== userId && isAdmin) {
             throw new ForbiddenException({ message: 'You have no access' })
         }
-        const updatedUser: User = await this.usersService.updateUser(userId, dto)
+        const updatedUser: User = await this.usersService.updateUser({ userId, ...body })
         return updatedUser
     }
 

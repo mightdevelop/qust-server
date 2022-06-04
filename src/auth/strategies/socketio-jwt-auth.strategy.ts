@@ -18,8 +18,8 @@ export class SocketIoJwtAuthStrategy extends PassportStrategy(Strategy, 'socket.
         })
     }
     async validate(payload: TokenPayload): Promise<UserFromRequest> {
-        const user: UserFromRequest =
+        const { id, username, email, isAdmin }: UserFromRequest =
             await this.usersService.getUserById(payload.id)
-        return user
+        return { id, username, email, isAdmin }
     }
 }

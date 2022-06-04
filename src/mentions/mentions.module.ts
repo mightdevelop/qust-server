@@ -9,7 +9,6 @@ import { MessagesModule } from 'src/messages/messages.module'
 import { MentionsCreator } from './mentions.creator'
 import { MentionsGateway } from './mentions.gateway'
 import { SocketIoModule } from 'src/socketio/socketio.module'
-import { JwtModule } from '@nestjs/jwt'
 
 
 @Module({
@@ -32,7 +31,6 @@ import { JwtModule } from '@nestjs/jwt'
         }),
         TextChannelsModule,
         MessagesModule,
-        JwtModule.register({}),
         SocketIoModule,
     ],
     exports: [ MentionsService ],

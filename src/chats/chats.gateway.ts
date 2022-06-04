@@ -1,11 +1,8 @@
 import { UseGuards } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { JwtService } from '@nestjs/jwt'
 import {
     ConnectedSocket,
-    MessageBody, OnGatewayConnection,
-    OnGatewayDisconnect,
-    SubscribeMessage,
+    MessageBody, SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
 } from '@nestjs/websockets'
@@ -13,7 +10,6 @@ import { Server, Socket } from 'socket.io'
 import { SocketIoCurrentUser } from 'src/auth/decorators/socket.io-current-user.decorator'
 import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
-import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { ChatMessageService } from 'src/messages/chat-message.service'
 import { InternalChatsMessageSentEvent } from 'src/messages/events/internal-chats.message-sent.event'
 import { MessageContent } from 'src/messages/models/message-content.model'
@@ -31,29 +27,17 @@ import { InternalChatUsersCudEvent } from './events/internal-text-channel-users.
 import { Chat } from './models/chats.model'
 
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/chats' })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway {
 
     constructor(
         private chatsService: ChatsService,
         private usersService: UsersService,
-        private jwtService: JwtService,
         private socketIoService: SocketIoService,
         private chatMessageService: ChatMessageService
     ) {}
 
     @WebSocketServer()
         server: Server
-
-    async handleConnection(@ConnectedSocket() socket: Socket) {
-        const { id } = this.jwtService.decode(
-            socket.handshake.query['access_token'].toString()
-        ) as TokenPayload
-        await this.socketIoService.pushClient({ userId: id, socketId: socket.id })
-        socket.emit('200', socket.id)
-    }
-    async handleDisconnect(@ConnectedSocket() socket: Socket) {
-        await this.socketIoService.removeClient(socket.id)
-    }
 
     @SubscribeMessage('connect-to-chat-rooms')
     @UseGuards(SocketIoJwtAuthGuard)

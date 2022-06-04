@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common'
 import { EventEmitterModule } from '@nestjs/event-emitter'
-import { JwtModule } from '@nestjs/jwt'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { MessagesModule } from 'src/messages/messages.module'
 import { SocketIoModule } from 'src/socketio/socketio.module'
@@ -26,7 +25,6 @@ import { Chat } from './models/chats.model'
         }),
         MessagesModule,
         SocketIoModule,
-        JwtModule.register({}),
     ],
     exports: [ ChatsService ]
 })

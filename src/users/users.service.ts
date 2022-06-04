@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
 import { Op } from 'sequelize'
 import { ChatUser } from 'src/chats/models/chat-user.model'
@@ -7,6 +8,7 @@ import { FriendRequestStatus } from 'src/friends/types/friend-request-status'
 import { GroupUser } from 'src/groups/models/group-user.model'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { InternalUsersCudEvent } from './events/internal-users.CUD.event'
 import { User } from './models/users.model'
 
 
@@ -14,6 +16,7 @@ import { User } from './models/users.model'
 export class UsersService {
 
     constructor(
+        private eventEmitter: EventEmitter2,
         @InjectModel(User) private userRepository: typeof User,
         @InjectModel(ChatUser) private chatUserRepository: typeof ChatUser,
         @InjectModel(Friend) private userFriendsRepository: typeof Friend,
@@ -107,24 +110,35 @@ export class UsersService {
         dto: CreateUserDto
     ): Promise<User> {
         const user: User = await this.userRepository.create(dto)
+        this.eventEmitter.emit(
+            'internal-users.created',
+            new InternalUsersCudEvent({ user, action: 'create' })
+        )
         return user
     }
 
     async updateUser(
-        userId: string,
         dto: UpdateUserDto
     ): Promise<User> {
-        const user: User = await this.userRepository.findByPk(userId)
+        const user: User = await this.userRepository.findByPk(dto.userId)
         user.setAttributes(dto)
         await user.save()
+        this.eventEmitter.emit(
+            'internal-users.updated',
+            new InternalUsersCudEvent({ user, action: 'update' })
+        )
         return user
     }
 
     async deleteUser(
-        authorId: string
+        userId: string
     ): Promise<User> {
-        const user: User = await this.userRepository.findByPk(authorId)
-        await this.userRepository.destroy({ where: { id: authorId } })
+        const user: User = await this.userRepository.findByPk(userId)
+        await user.destroy()
+        this.eventEmitter.emit(
+            'internal-users.deleted',
+            new InternalUsersCudEvent({ user, action: 'delete' })
+        )
         return user
     }
 

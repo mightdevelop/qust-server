@@ -1,12 +1,9 @@
 
 import { UseGuards } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { JwtService } from '@nestjs/jwt'
 import {
     ConnectedSocket,
-    MessageBody, OnGatewayConnection,
-    OnGatewayDisconnect,
-    SubscribeMessage,
+    MessageBody, SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
 } from '@nestjs/websockets'
@@ -14,7 +11,6 @@ import { Server, Socket } from 'socket.io'
 import { SocketIoCurrentUser } from 'src/auth/decorators/socket.io-current-user.decorator'
 import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
-import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { InternalTextChannelsMessageSentEvent } from 'src/messages/events/internal-text-channels.message-sent.event'
 import { MessageContent } from 'src/messages/models/message-content.model'
 import { Message } from 'src/messages/models/messages.model'
@@ -34,29 +30,17 @@ import { TextChannelsService } from './text-channels.service'
 
 
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/text-channels' })
-export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class TextChannelsGateway {
 
     constructor(
         private textChannelsService: TextChannelsService,
         private textChannelMessageService: TextChannelMessageService,
         private socketIoService: SocketIoService,
         private usersService: UsersService,
-        private jwtService: JwtService,
     ) {}
 
     @WebSocketServer()
         server: Server
-
-    async handleConnection(@ConnectedSocket() socket: Socket) {
-        const { id } = this.jwtService.decode(
-            socket.handshake.query['access_token'].toString()
-        ) as TokenPayload
-        await this.socketIoService.pushClient({ userId: id, socketId: socket.id })
-        socket.emit('200', socket.id)
-    }
-    async handleDisconnect(@ConnectedSocket() socket: Socket) {
-        await this.socketIoService.removeClient(socket.id)
-    }
 
     @SubscribeMessage('connect-to-text-channel')
     @UseGuards(SocketIoJwtAuthGuard, SocketIoTextChannelPermissionsGuard)

@@ -7,7 +7,6 @@ import { TextChannelRolePermissions } from './models/text-channel-role-permissio
 import { TextChannel } from './models/text-channels.model'
 import { CategoriesModule } from 'src/categories/categories.module'
 import { TextChannelsGateway } from './text-channels.gateway'
-import { JwtModule } from '@nestjs/jwt'
 import { SocketIoModule } from 'src/socketio/socketio.module'
 
 @Module({
@@ -15,7 +14,6 @@ import { SocketIoModule } from 'src/socketio/socketio.module'
     providers: [ TextChannelsService, TextChannelsGateway ],
     imports: [
         SequelizeModule.forFeature([ TextChannel, TextChannelRolePermissions ]),
-        JwtModule.register({}),
         forwardRef(() => MessagesModule),
         CategoriesModule,
         SocketIoModule,

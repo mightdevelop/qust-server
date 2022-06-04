@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 import { SequelizeModule } from '@nestjs/sequelize'
 import { UnreadMarksService } from './unread-marks.service'
 import { UnreadMarksController } from './unread-marks.controller'
-import { JwtModule } from '@nestjs/jwt'
 import { UnreadMark } from './models/read-marks.model'
 import { SocketIoModule } from 'src/socketio/socketio.module'
 import { TextChannelsModule } from 'src/text-channels/text-channels.module'
@@ -17,7 +16,6 @@ import { UnreadMarksCreator } from './unread-marks.creator'
     ],
     imports: [
         SequelizeModule.forFeature([ UnreadMark ]),
-        JwtModule.register({}),
         SocketIoModule,
         TextChannelsModule,
         MessagesModule,

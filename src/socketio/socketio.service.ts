@@ -37,12 +37,18 @@ export class SocketIoService {
             .map(client => client.socketId)
     }
 
-    async pushClient(client: UserIdAndSocketId): Promise<void> {
+    async pushClient(client: UserIdAndSocketId): Promise<UserIdAndSocketId> {
         this.clients.push(client)
+        return client
     }
 
-    async removeClient(socketId: string): Promise<void> {
-        this.clients.filter(client => client.socketId = socketId)
+    async removeClient(socketId: string): Promise<UserIdAndSocketId> {
+        let client: UserIdAndSocketId
+        this.clients.filter(cl => {
+            client = cl
+            return cl.socketId = socketId
+        })
+        return client
     }
 
 }

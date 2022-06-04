@@ -16,7 +16,7 @@ import { SocketIoJwtAuthGuard } from 'src/auth/guards/socket.io-jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { TokenPayload } from 'src/auth/types/tokenPayload'
 import { SocketIoService } from 'src/socketio/socketio.service'
-import { InternalGroupsCudEvent } from './events/internal-groups-CUD.event'
+import { InternalGroupsCudEvent } from './events/internal-groups.CUD.event'
 import { GroupsService } from './groups.service'
 import { Group } from './models/groups.model'
 
@@ -55,6 +55,21 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         socket.emit('200', groupsIds)
     }
 
+    @SubscribeMessage('update-group')
+    @UseGuards(SocketIoJwtAuthGuard)
+    async updateGroup(
+        @ConnectedSocket() socket: Socket,
+        @MessageBody() dto: { groupId: string, name: string }
+    ): Promise<void> {
+        const group: Group = await this.groupsService.getGroupById(dto.groupId)
+        if (!group) {
+            socket.emit('404', 'Group not found')
+            return
+        }
+        await this.groupsService.updateGroup({ group, name: dto.name })
+        socket.emit('200', group)
+    }
+
     @SubscribeMessage('delete-group')
     @UseGuards(SocketIoJwtAuthGuard)
     async deleteGroup(
@@ -71,17 +86,11 @@ export class GroupsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-groups.updated')
-    async showToSocketsUpdatedGroup(event: InternalGroupsCudEvent): Promise<void> {
-        this.server
-            .to(event.group.id)
-            .emit('group-deleted', event.group.id)
-    }
-
     @OnEvent('internal-groups.deleted')
-    async hideFromSocketsDeletedGroup(event: InternalGroupsCudEvent): Promise<void> {
+    async onGroupCudEvents(event: InternalGroupsCudEvent): Promise<void> {
         this.server
-            .to(event.group.id)
-            .emit('group-deleted', event.group.id)
+            .to('group:' + event.group.id)
+            .emit(`group-${event.action}d`, event.group)
     }
 
 }

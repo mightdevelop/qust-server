@@ -27,6 +27,7 @@ import { InternalRolesCudEvent } from 'src/roles/events/internal-roles.CUD.event
 import { SocketIoService } from 'src/socketio/socketio.service'
 import { UsersService } from 'src/users/users.service'
 import { CreateTextChannelDto } from './dto/create-text-channel.dto'
+import { InternalTextChannelUsersCudEvent } from './events/internal-text-channel-users.CUD.event'
 import { InternalTextChannelsCudEvent } from './events/internal-text-channels.CUD.event'
 import { TextChannel } from './models/text-channels.model'
 import { TextChannelsService } from './text-channels.service'
@@ -163,32 +164,27 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
     }
 
     @OnEvent('internal-text-channels.created')
-    async showToSocketsNewTextChannel(event: InternalTextChannelsCudEvent): Promise<void> {
-        this.server
-            .to(event.groupId)
-            .emit('text-channel-created', event.channel)
-    }
-
     @OnEvent('internal-text-channels.updated')
-    async showToSocketsUpdatedTextChannel(event: InternalTextChannelsCudEvent): Promise<void> {
+    @OnEvent('internal-text-channels.deleted')
+    async onTextChannelCudEvents(event: InternalTextChannelsCudEvent): Promise<void> {
         this.server
-            .to(event.groupId)
-            .emit('text-channel-updated', event.channel)
+            .to('group:' + event.groupId)
+            .emit(`text-channel-${event.action}d`, event.channel)
     }
 
-    @OnEvent('internal-text-channels.deleted')
-    async hideFromSocketsDeletedTextChannel(event: InternalTextChannelsCudEvent): Promise<void> {
+    @OnEvent('internal-text-channel-users.created')
+    @OnEvent('internal-text-channel-users.updated')
+    @OnEvent('internal-text-channel-users.deleted')
+    async onTextChannelUsersCudEvents(event: InternalTextChannelUsersCudEvent): Promise<void> {
         this.server
-            .to(event.groupId)
-            .emit('text-channel-deleted', event.channel)
+            .to('text-channel:' + event.textChannelId)
+            .emit(`text-channel-${event.action}d`, event.usersIds)
     }
 
     @OnEvent('internal-roles.created')
     @OnEvent('internal-roles.updated')
     @OnEvent('internal-roles.deleted')
-    @OnEvent('internal-roles.added')
-    @OnEvent('internal-roles.removed')
-    async showToSocketsTextChannelsAfterUpdateRoles(event: InternalRolesCudEvent): Promise<void> {
+    async onRolesCudEvents(event: InternalRolesCudEvent): Promise<void> {
         const sockets = await this.server.fetchSockets()
         const clients = await this.socketIoService.getClients()
         const groupUsersIds: string[] = await this.usersService.getUsersIdsByGroupId(event.groupId)
@@ -206,5 +202,8 @@ export class TextChannelsGateway implements OnGatewayConnection, OnGatewayDiscon
             socket.emit('new-allowed-text-channels', clientWithChannels.textChannelsIds)
         })
     }
+
+    // @OnEvent('internal-roles.added')
+    // @OnEvent('internal-roles.removed')
 
 }

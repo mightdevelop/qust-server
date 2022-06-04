@@ -1,36 +1,19 @@
-import { Type } from 'class-transformer'
-import { IsArray, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator'
 import { Category } from 'src/categories/models/categories.model'
 import { Role } from 'src/roles/models/roles.model'
 import { UserToResponse } from 'src/users/types/user-to-response.class'
 
 export class GroupToResponse {
 
-    @IsUUID()
-        id: string
+    id: string
 
-    @IsUUID()
-        ownerId: string
+    ownerId: string
 
-    @IsString()
-        name: string
+    name: string
 
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => UserToResponse)
-    @IsOptional()
-        users?: UserToResponse[]
+    users?: UserToResponse[]
 
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => Role)
-    @IsOptional()
-        roles?: Role[]
+    roles?: Role[]
 
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => Category)
-    @IsOptional()
-        categories?: Category[]
+    categories?: Category[]
 
 }

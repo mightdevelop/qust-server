@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { FriendsService } from './friends.service'
@@ -6,6 +6,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { User } from 'src/users/models/users.model'
 import { Friend } from './models/friends.model'
 import { UsersService } from 'src/users/users.service'
+import { UserModelInterceptor } from 'src/users/interceptors/users-model.interceptor'
 
 
 @Controller('/friends')
@@ -18,6 +19,7 @@ export class FriendsController {
 
     @Get('/')
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(UserModelInterceptor)
     async getMyFriends(
         @CurrentUser() user: UserFromRequest,
         @Query('offset') offset: number,
@@ -65,11 +67,10 @@ export class FriendsController {
     async responseToFriendshipRequest(
         @Param('requestedUserId') requestedUserId: string,
         @CurrentUser() user: UserFromRequest,
-        @Body() { isConfirm }: {isConfirm: boolean}
+        @Body() { isConfirm }: { isConfirm: boolean }
     ): Promise<Friend> {
         const request: Friend =
             await this.friendsService.responseToFriendshipRequest(requestedUserId, user.id, isConfirm)
-        if (!isConfirm) return request
         return request
     }
 

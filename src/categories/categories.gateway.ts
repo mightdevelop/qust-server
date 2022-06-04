@@ -88,24 +88,12 @@ export class CategoriesGateway implements OnGatewayConnection, OnGatewayDisconne
     }
 
     @OnEvent('internal-categories.created')
+    @OnEvent('internal-categories.updated')
+    @OnEvent('internal-categories.deleted')
     async showToSocketsNewCategory(event: InternalCategoriesCudEvent): Promise<void> {
         this.server
-            .to(event.category.groupId)
-            .emit('category-created', event.category)
-    }
-
-    @OnEvent('internal-categories.updated')
-    async showToSocketsUpdatedCategory(event: InternalCategoriesCudEvent): Promise<void> {
-        this.server
-            .to(event.category.groupId)
-            .emit('category-updated', event.category)
-    }
-
-    @OnEvent('internal-categories.deleted')
-    async hideFromSocketsDeletedCategory(event: InternalCategoriesCudEvent): Promise<void> {
-        this.server
-            .to(event.category.groupId)
-            .emit('category-deleted', event.category)
+            .to('group:' + event.category.groupId)
+            .emit(`category-${event.action}d`, event.category)
     }
 
 }

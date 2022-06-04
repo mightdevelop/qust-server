@@ -26,9 +26,8 @@ import StandartBots from 'src/utils/standart-bots-const'
 import { ChatsService } from './chats.service'
 import { AddUsersToChatDto } from './dto/add-users-to-chat.dto'
 import { CreateChatDto } from './dto/create-chat.dto'
-import { InternalChatCreatedEvent } from './events/internal-chat-created.event'
-import { InternalChatDeletedEvent } from './events/internal-chat-deleted.event'
-import { InternalChatUpdatedEvent } from './events/internal-chat-updated.event'
+import { InternalChatsCudEvent } from './events/internal-chats.CUD.event'
+import { InternalChatUsersCudEvent } from './events/internal-text-channel-users.CUD.event'
 import { Chat } from './models/chats.model'
 
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/chats' })
@@ -180,38 +179,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     @OnEvent('internal-chats.created')
-    async connectSocketsToNewChat({ chat }: InternalChatCreatedEvent): Promise<void> {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfChatters = (await this.socketIoService.getClients())
-            .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
-        socketsOfChatters.forEach(socket => socket.join('chat:' + chat.id))
-        this.server
-            .to(socketsOfChatters.map(socket => socket.id))
-            .emit('chat-created', chat)
-    }
-
     @OnEvent('internal-chats.updated')
-    async showToSocketsUpdatedChat({ chat }: InternalChatUpdatedEvent): Promise<void> {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfChatters = (await this.socketIoService.getClients())
-            .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
+    @OnEvent('internal-chats.deleted')
+    async onChatsCudEvents(event: InternalChatsCudEvent): Promise<void> {
+        const clientsOfChatters = await this.socketIoService.getClientsByUsersIds(
+            event.chat.chatters.map(user => user.id)
+        )
+        const socketsOfChatters = (await this.server.fetchSockets())
+            .filter(socket => clientsOfChatters.find(client => client.socketId === socket.id))
         this.server
-            .to(socketsOfChatters.map(socket => socket.id))
-            .emit('chat-updated', chat)
+            .to('chat:' + event.chat.id)
+            .emit(`chat-${event.action}d`, event.chat.id)
+        switch (event.action) {
+        case 'create':
+            return socketsOfChatters.forEach(socket => socket.join('chat:' + event.chat.id))
+        case 'delete':
+            return socketsOfChatters.forEach(socket => socket.leave('chat:' + event.chat.id))
+        }
     }
 
-    @OnEvent('internal-chats.deleted')
-    async hideFromSocketsDeletedChat({ chat }: InternalChatDeletedEvent): Promise<void> {
-        const sockets = await this.server.fetchSockets()
-        const socketsOfChatters = (await this.socketIoService.getClients())
-            .filter(client => chat.chatters.some(chatter => chatter.id === client.userId))
-            .map(client => sockets.find(socket => socket.id === client.socketId))
-        socketsOfChatters.forEach(socket => socket.leave('chat:' + chat.id))
+    @OnEvent('internal-chat-users.created')
+    @OnEvent('internal-chat-users.updated')
+    @OnEvent('internal-chat-users.deleted')
+    async onChatUsersCudEvents(event: InternalChatUsersCudEvent): Promise<void> {
         this.server
-            .to(socketsOfChatters.map(socket => socket.id))
-            .emit('chat-deleted', chat.id)
+            .to('chat:' + event.chatId)
+            .emit(`chat-${event.action}d`, event.usersIds)
     }
 
 }

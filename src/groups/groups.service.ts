@@ -8,10 +8,10 @@ import { GroupUser } from './models/group-user.model'
 import { Includeable } from 'sequelize/types'
 import { DeleteGroupDto } from './dto/delete-group.dto'
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import { InternalGroupsCudEvent } from './events/internal-groups-CUD.event'
-import { UsersService } from 'src/users/users.service'
+import { InternalGroupsCudEvent } from './events/internal-groups.CUD.event'
 import { UserIdAndGroupIdDto } from 'src/permissions/dto/user-id-and-group-id.dto'
 import { UpdateGroupDto } from './dto/update-group.dto'
+import { InternalGroupUsersCudEvent } from './events/internal-group-users.CUD.event'
 
 
 @Injectable()
@@ -19,15 +19,13 @@ export class GroupsService {
 
     constructor(
         private eventEmitter: EventEmitter2,
-        private usersService: UsersService,
         private layoutsService: LayoutsService,
         @InjectModel(Group) private groupRepository: typeof Group,
         @InjectModel(GroupUser) private groupUserRepository: typeof GroupUser,
     ) {}
 
     async getGroupById(groupId: string, include?: Includeable | Includeable[]): Promise<Group> {
-        const group: Group = await this.groupRepository.findByPk(groupId, { include })
-        return group
+        return await this.groupRepository.findByPk(groupId, { include })
     }
 
     async getGroupsIdsByUserId(userId: string): Promise<string[]> {
@@ -40,6 +38,14 @@ export class GroupsService {
 
     async addUserToGroup(dto: UserIdAndGroupIdDto): Promise<GroupUser> {
         const groupUserRow: GroupUser = await this.groupUserRepository.create(dto)
+        this.eventEmitter.emit(
+            'internal-group-users.created',
+            new InternalGroupUsersCudEvent({
+                groupId: groupUserRow.groupId,
+                usersIds: [ groupUserRow.userId ],
+                action: 'create'
+            })
+        )
         return groupUserRow
     }
 
@@ -48,6 +54,14 @@ export class GroupsService {
         if (!groupUserRow)
             throw new NotFoundException({ message: 'User is not a group participant' })
         await groupUserRow.destroy()
+        this.eventEmitter.emit(
+            'internal-group-users.deleted',
+            new InternalGroupUsersCudEvent({
+                groupId: groupUserRow.groupId,
+                usersIds: [ groupUserRow.userId ],
+                action: 'delete'
+            })
+        )
         return groupUserRow
     }
 
@@ -57,6 +71,13 @@ export class GroupsService {
             groupId: group.id,
             groupLayout: StandardGroupLayouts[dto.layout || 'DEFAULT']
         })
+        this.eventEmitter.emit(
+            'internal-groups.created',
+            new InternalGroupsCudEvent({
+                group,
+                action: 'create'
+            })
+        )
         return group
     }
 
@@ -67,6 +88,13 @@ export class GroupsService {
             'internal-groups.updated',
             new InternalGroupsCudEvent({ group, action: 'update' })
         )
+        this.eventEmitter.emit(
+            'internal-groups.updated',
+            new InternalGroupsCudEvent({
+                group,
+                action: 'update'
+            })
+        )
         return group
     }
 
@@ -75,6 +103,13 @@ export class GroupsService {
         this.eventEmitter.emit(
             'internal-groups.deleted',
             new InternalGroupsCudEvent({ group, action: 'delete' })
+        )
+        this.eventEmitter.emit(
+            'internal-groups.deleted',
+            new InternalGroupsCudEvent({
+                group,
+                action: 'delete'
+            })
         )
         return group
     }

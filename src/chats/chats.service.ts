@@ -12,9 +12,8 @@ import { LeaveFromChatDto } from './dto/leave-from-chat.dto'
 import { User } from 'src/users/models/users.model'
 import { UsersService } from 'src/users/users.service'
 import { EventEmitter2 } from '@nestjs/event-emitter'
-import { InternalChatCreatedEvent } from './events/internal-chat-created.event'
-import { InternalChatUpdatedEvent } from './events/internal-chat-updated.event'
-import { InternalChatDeletedEvent } from './events/internal-chat-deleted.event'
+import { InternalChatsCudEvent } from './events/internal-chats.CUD.event'
+import { InternalChatUsersCudEvent } from './events/internal-text-channel-users.CUD.event'
 
 
 @Injectable()
@@ -67,7 +66,7 @@ export class ChatsService {
         chat.chatters = chatters
         this.eventEmitter.emit(
             'internal-chats.created',
-            new InternalChatCreatedEvent({ chat })
+            new InternalChatsCudEvent({ chat, action: 'create' })
         )
         return chat
     }
@@ -77,7 +76,7 @@ export class ChatsService {
         await chat.save()
         this.eventEmitter.emit(
             'internal-chats.updated',
-            new InternalChatUpdatedEvent({ chat })
+            new InternalChatsCudEvent({ chat, action: 'update' })
         )
         return chat
     }
@@ -86,7 +85,7 @@ export class ChatsService {
         await chat.destroy()
         this.eventEmitter.emit(
             'internal-chats.deleted',
-            new InternalChatDeletedEvent({ chat })
+            new InternalChatsCudEvent({ chat, action: 'delete' })
         )
         return chat
     }
@@ -112,6 +111,14 @@ export class ChatsService {
             chatId: chat.id,
             userId: chatterId
         })), { validate: true })
+        this.eventEmitter.emit(
+            'internal-chat-users.created',
+            new InternalChatUsersCudEvent({
+                chatId: dto.chatId,
+                usersIds: dto.chattersIds,
+                action: 'create'
+            })
+        )
         return chat
     }
 
@@ -122,6 +129,14 @@ export class ChatsService {
         if (!chat)
             throw new NotFoundException({ message: 'Chat not found' })
         await this.chatUserRepository.destroy({ where: { userId } })
+        this.eventEmitter.emit(
+            'internal-chat-users.deleted',
+            new InternalChatUsersCudEvent({
+                chatId,
+                usersIds: [ userId ],
+                action: 'delete'
+            })
+        )
         return chat
     }
 

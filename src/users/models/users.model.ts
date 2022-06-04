@@ -7,6 +7,7 @@ import { Group } from 'src/groups/models/groups.model'
 import { Mention } from 'src/mentions/models/mentions.model'
 import { RoleUser } from 'src/roles/models/role-user.model'
 import { Role } from 'src/roles/models/roles.model'
+import { UserStatus } from '../types/user-status.enum'
 
 @Table({ tableName: 'users' })
 export class User extends Model<User> {
@@ -28,6 +29,9 @@ export class User extends Model<User> {
 
     @Column({ type: DataType.STRING, allowNull: false, defaultValue: '' })
         info: string
+
+    @Column({ type: DataType.STRING, allowNull: false, defaultValue: UserStatus.OFFLINE })
+        status: UserStatus
 
     @HasMany(() => LoggedAction)
         actions: LoggedAction[]

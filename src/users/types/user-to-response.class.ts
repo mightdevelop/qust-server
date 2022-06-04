@@ -1,14 +1,13 @@
-import { IsString, IsUUID } from 'class-validator'
+import { UserStatus } from './user-status.enum'
 
 export class UserToResponse {
 
-    @IsUUID()
-        id: string
+    id: string
 
-    @IsString()
-        username: string
+    username: string
 
-    @IsString()
-        info: string
+    info: string
+
+    status: UserStatus
 
 }

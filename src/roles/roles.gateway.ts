@@ -111,21 +111,21 @@ export class RolesGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @OnEvent('internal-roles.created')
     async showToSocketsNewRole(event: InternalRolesCudEvent): Promise<void> {
         this.server
-            .to(event.groupId)
+            .to('group:' + event.groupId)
             .emit('role-created', event.role)
     }
 
     @OnEvent('internal-roles.updated')
     async showToSocketsUpdatedRole(event: InternalRolesCudEvent): Promise<void> {
         this.server
-            .to(event.groupId)
+            .to('group:' + event.groupId)
             .emit('role-updated', event.role)
     }
 
     @OnEvent('internal-roles.deleted')
     async hideFromSocketsDeletedRole(event: InternalRolesCudEvent): Promise<void> {
         this.server
-            .to(event.groupId)
+            .to('group:' + event.groupId)
             .emit('role-deleted', event.role)
     }
 

@@ -39,8 +39,7 @@ export class UsersController {
     }
 
     @Get('/:userId')
-    @isAdmin()
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(JwtAuthGuard)
     async getUserById(
         @Param('userId') userId: string,
     ): Promise<User> {

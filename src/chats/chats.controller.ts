@@ -33,11 +33,10 @@ export class ChatsController {
         const chat: Chat = await this.chatsService.createChat({
             ...dto, chattersIds: [ ...dto.chattersIds, user.id ]
         })
-        const chatters: User[] = await this.usersService.getChattersByChatId(chat.id)
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
             chatId: chat.id,
-            text: generateAddUsersMessageContent(user.username, chatters.map(chatter => chatter.username))
+            text: generateAddUsersMessageContent(user.id, chat.chatters.map(chatter => chatter.id))
         })
         return chat
     }

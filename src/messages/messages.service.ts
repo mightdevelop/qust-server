@@ -70,6 +70,7 @@ export class MessagesService {
             'internal-messages.created',
             new InternalMessagesCudEvent({
                 message,
+                noMentions: dto.noMentions,
                 action: 'create'
             })
         )

@@ -3,12 +3,15 @@ import { Message } from '../models/messages.model'
 
 export class InternalMessagesCudEvent {
 
-    constructor({ message, action }: InternalMessagesCudEventArgs) {
+    constructor({ message, noMentions, action }: InternalMessagesCudEventArgs) {
         this.message = message
+        this.noMentions = noMentions
         this.action = action
     }
 
     message: Message
+
+    noMentions: boolean
 
     action: CreateUpdateDelete
 
@@ -17,6 +20,8 @@ export class InternalMessagesCudEvent {
 class InternalMessagesCudEventArgs {
 
     message: Message
+
+    noMentions?: boolean
 
     action: CreateUpdateDelete
 

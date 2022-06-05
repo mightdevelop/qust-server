@@ -21,8 +21,9 @@ export class UnreadMarksCreator {
 
     @OnEvent('internal-messages.created')
     async createUnreadMarksOnMessageCreated(
-        { message }: InternalMessagesCudEvent
+        { message, noMentions }: InternalMessagesCudEvent
     ): Promise<void> {
+        if (noMentions) return
         let idsOfUsersThatDontHaveUnreadMarkInLocation: string[]
         if (message.messageLocation.groupId) {
             const channelUsersIds: string[] =

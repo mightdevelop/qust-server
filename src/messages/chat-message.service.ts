@@ -50,7 +50,9 @@ export class ChatMessageService {
     }
 
     async sendMessageToChat(dto: SendChatMessageDto): Promise<Message> {
-        const message: Message = await this.messageService.createMessage({ ...dto, location: { chatId: dto.chatId } })
+        const message: Message = await this.messageService.createMessage(
+            { ...dto, location: { chatId: dto.chatId }, noMentions: true }
+        )
         await this.chatMessageRepository.create({ messageId: message.id, chatId: dto.chatId })
         this.eventEmitter.emit(
             'internal-chats.message-sent',

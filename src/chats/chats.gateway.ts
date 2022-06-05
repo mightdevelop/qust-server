@@ -96,7 +96,7 @@ export class ChatGateway {
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
             chatId: chat.id,
-            text: generateAddUsersMessageContent(user.username, chat.chatters.map(c => c.username))
+            text: generateAddUsersMessageContent(user.id, chat.chatters.map(chatter => chatter.id))
         })
         socket.emit('200', chat)
     }

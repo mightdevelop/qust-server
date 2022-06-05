@@ -68,7 +68,7 @@ export class TextChannelsService {
             'internal-text-channels.updated',
             new InternalTextChannelsCudEvent({
                 userIdWhoTriggered: dto.userId,
-                groupId: dto.groupId,
+                groupId: await this.getGroupIdByTextChannelId(dto.channel.id),
                 channel: dto.channel,
                 action: 'update'
             })
@@ -82,7 +82,7 @@ export class TextChannelsService {
             'internal-text-channels.deleted',
             new InternalTextChannelsCudEvent({
                 userIdWhoTriggered: dto.userId,
-                groupId: dto.groupId,
+                groupId: await this.getGroupIdByTextChannelId(dto.channel.id),
                 channel: dto.channel,
                 action: 'delete'
             })

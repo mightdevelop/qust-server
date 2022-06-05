@@ -37,13 +37,13 @@ export class TextChannelsController {
     async updateTextChannel(
         @CurrentUser() user: UserFromRequest,
         @Param('textChannelId') textChannelId: string,
-        @Body() { name, groupId }: { name: string, groupId: string }
+        @Body() { name }: { name: string }
     ): Promise<TextChannel> {
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(textChannelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
         const updatedChannel: TextChannel =
-            await this.textChannelsService.updateTextChannel({ userId: user.id, name, channel, groupId })
+            await this.textChannelsService.updateTextChannel({ userId: user.id, name, channel })
         return updatedChannel
     }
 
@@ -52,12 +52,11 @@ export class TextChannelsController {
     async deleteTextChannel(
         @CurrentUser() user: UserFromRequest,
         @Param('textChannelId') textChannelId: string,
-        @Body() { groupId }: { groupId: string }
     ): Promise<TextChannel> {
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(textChannelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
-        await this.textChannelsService.deleteTextChannel({ userId: user.id, channel, groupId })
+        await this.textChannelsService.deleteTextChannel({ userId: user.id, channel })
         return channel
     }
 

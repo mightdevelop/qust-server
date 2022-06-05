@@ -105,7 +105,7 @@ export class TextChannelsGateway {
     async updateTextChannel(
         @SocketIoCurrentUser() user: UserFromRequest,
         @ConnectedSocket() socket: Socket,
-        @MessageBody() { name, textChannelId, groupId }: { name: string, textChannelId: string, groupId: string }
+        @MessageBody() { name, textChannelId }: { name: string, textChannelId: string }
     ): Promise<void> {
         if (!socket.rooms.has('text-channel:' + textChannelId)) {
             socket.emit('400', 'You are not connected to text channel')
@@ -116,7 +116,7 @@ export class TextChannelsGateway {
             socket.emit('404', 'Text channel not found')
             return
         }
-        await this.textChannelsService.updateTextChannel({ userId: user.id, name, channel, groupId })
+        await this.textChannelsService.updateTextChannel({ userId: user.id, name, channel })
         socket.emit('200', channel)
     }
 
@@ -125,7 +125,7 @@ export class TextChannelsGateway {
     async deleteTextChannel(
         @SocketIoCurrentUser() user: UserFromRequest,
         @ConnectedSocket() socket: Socket,
-        @MessageBody() { textChannelId, groupId }: { textChannelId: string, groupId: string }
+        @MessageBody() { textChannelId }: { textChannelId: string }
     ): Promise<void> {
         if (!socket.rooms.has('text-channel:' + textChannelId)) {
             socket.emit('400', 'You are not connected to text channel')
@@ -136,7 +136,7 @@ export class TextChannelsGateway {
             socket.emit('404', 'Text channel not found')
             return
         }
-        await this.textChannelsService.deleteTextChannel({ userId: user.id, channel, groupId })
+        await this.textChannelsService.deleteTextChannel({ userId: user.id, channel })
         socket.emit('200', channel)
     }
 

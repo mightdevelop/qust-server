@@ -13,7 +13,4 @@ export class UpdateTextChannelDto {
     @IsUUID()
         userId: string
 
-    @IsUUID()
-        groupId: string
-
 }

@@ -10,7 +10,4 @@ export class DeleteTextChannelDto {
     @IsUUID()
         userId: string
 
-    @IsUUID()
-        groupId: string
-
 }

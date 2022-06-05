@@ -97,7 +97,7 @@ export class ChatsController {
     async sendMessageToChat(
         @Param('chatId') chatId: string,
         @CurrentUser() user: UserFromRequest,
-        @Body() { text }: { text: string }
+        @Body() { text, noMentions }: { text: string, noMentions?: boolean }
     ): Promise<Message> {
         if (!await this.chatsService.getChatById(chatId))
             throw new NotFoundException({ message: 'Chat not found' })
@@ -106,7 +106,8 @@ export class ChatsController {
         const message: Message = await this.chatMessageService.sendMessageToChat({
             userId: user.id,
             chatId,
-            text
+            text,
+            noMentions
         })
         return message
     }

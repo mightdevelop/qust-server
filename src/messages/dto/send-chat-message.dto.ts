@@ -1,4 +1,4 @@
-import { IsUUID, IsString } from 'class-validator'
+import { IsUUID, IsString, IsBoolean, IsOptional } from 'class-validator'
 
 export class SendChatMessageDto {
 
@@ -10,5 +10,9 @@ export class SendChatMessageDto {
 
     @IsString()
         text: string
+
+    @IsBoolean()
+    @IsOptional()
+        noMentions?: boolean
 
 }

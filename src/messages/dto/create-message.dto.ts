@@ -1,4 +1,4 @@
-import { IsUUID, IsString, IsBoolean } from 'class-validator'
+import { IsUUID, IsString, IsBoolean, IsOptional } from 'class-validator'
 import { MessageLocation } from 'src/unread-marks/types/message-location'
 
 export class CreateMessageDto {
@@ -12,6 +12,7 @@ export class CreateMessageDto {
     location: MessageLocation
 
     @IsBoolean()
+    @IsOptional()
         noMentions?: boolean
 
 }

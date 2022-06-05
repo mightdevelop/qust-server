@@ -70,7 +70,7 @@ export class ChatGateway {
     async sendMessageToChat(
         @ConnectedSocket() socket: Socket,
         @SocketIoCurrentUser() user: UserFromRequest,
-        @MessageBody() data: { chatId: string, text: string }
+        @MessageBody() data: { chatId: string, text: string, noMentions?: boolean }
     ): Promise<void> {
         if (!socket.rooms.has('chat:' + data.chatId)) {
             socket.emit('400', 'You are not connected to chat')

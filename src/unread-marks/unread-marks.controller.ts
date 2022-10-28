@@ -53,7 +53,6 @@ export class UnreadMarksController {
     async deleteUnreadMarksByIds(
         @Body() { unreadMarksIds }: { unreadMarksIds: string[] },
     ): Promise<UnreadMark[]> {
-        console.log(unreadMarksIds)
         const unreadMarks: UnreadMark[] = await this.unreadMarksService.getUnreadMarksByIds(unreadMarksIds)
         return await this.unreadMarksService.deleteUnreadMarks({ unreadMarks })
     }

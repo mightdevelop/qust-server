@@ -47,7 +47,7 @@ import { UserSettings } from './users-settings/models/user-settings.model'
 @Module({
     imports: [
         ConfigModule.forRoot({
-            envFilePath: [ `@${process.env.NODE_ENV}.env`, '@.env' ]
+            envFilePath: '@.env'
         }),
         SequelizeModule.forRoot({
             dialect: 'postgres',

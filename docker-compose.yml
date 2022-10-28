@@ -1,0 +1,57 @@
+version: '3.0'
+
+services:
+
+  main:
+    container_name: main
+    build:
+      context: .
+    env_file:
+      - "@.env"
+    volumes:
+      - /app/node_modules
+    ports:
+      - 10009:10009
+      - 9229:9229
+    command: npm run start:dev
+    environment:
+      APP_PORT: 4000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: qust
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  postgres:
+    container_name: postgres
+    image: postgres:14
+    environment:
+      PG_DATA: /var/lib/postgresql/data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: qust
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes: 
+      - cache:/data
+
+volumes:
+  pgdata:
+  cache:
+    driver: local

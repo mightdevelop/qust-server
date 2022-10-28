@@ -19,12 +19,16 @@ import { SocketIoJwtAuthStrategy } from './strategies/socketio-jwt-auth.strategy
     ],
     imports: [
         CacheModule.registerAsync({
-            useFactory: () => ({
-                store: create({ db: 0 }),
-                host: process.env.REDIS_HOST,
-                port: +process.env.REDIS_PORT,
-                ttl: 2592000 // 30 days refresh token
-            }),
+            useFactory: () => {
+                const host = process.env.REDIS_HOST
+                const port = process.env.REDIS_POR
+                return {
+                    store: create({ db: 0, host, port }),
+                    host,
+                    port,
+                    ttl: 2592000 // 30 days refresh token
+                }
+            },
         }),
         JwtModule.register({}),
     ],

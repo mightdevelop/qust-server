@@ -1,6 +1,5 @@
 import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import 'dotenv/config'
 import { AppModule } from './app.module'
 import { RedisIoAdapter } from './socketio/adapters/redis-io.adapter'
 
@@ -13,8 +12,8 @@ async function start() {
         const redisIoAdapter = new RedisIoAdapter(app)
         await redisIoAdapter.connectToRedis()
         app.useWebSocketAdapter(redisIoAdapter)
-
-        await app.listen(process.env.PORT, () => console.log('Server started on PORT ' + process.env.PORT))
+        const PORT = process.env.APP_PORT
+        await app.listen(PORT, () => console.log('Server started on PORT ' + PORT))
     }
     catch (error) {
         console.log(error)

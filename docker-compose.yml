@@ -15,7 +15,7 @@ services:
       - 9229:9229
     command: npm run start:dev
     environment:
-      APP_PORT: 4000
+      APP_PORT: 10009
       REDIS_HOST: redis
       REDIS_PORT: 6379
       POSTGRES_HOST: postgres

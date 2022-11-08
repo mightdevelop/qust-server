@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
@@ -13,8 +13,17 @@ import { User } from 'src/users/models/users.model'
 import { Message } from 'src/messages/models/messages.model'
 import { UsersService } from 'src/users/users.service'
 import { MessageContent } from 'src/messages/models/message-content.model'
+import { NameDto } from 'src/categories/dto/name.dto'
+import { AddUsersToChatBody } from './dto/add-users-to-chat.body'
+import { SendChatMessageBody } from 'src/messages/dto/send-chat-message.body'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { ChatIdDto } from './dto/chat-id.dto'
+import { PartialOffsetDto } from 'src/users/dto/partial-offset.dto'
 
 
+@ApiTags('chats')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('/chats')
 export class ChatsController {
 
@@ -25,13 +34,14 @@ export class ChatsController {
     ) {}
 
     @Post('/')
-    @UseGuards(JwtAuthGuard)
     async createChat(
         @Body() dto: CreateChatDto,
         @CurrentUser() user: UserFromRequest
     ): Promise<Chat> {
         const chat: Chat = await this.chatsService.createChat({
             ...dto, chattersIds: [ ...dto.chattersIds, user.id ]
+        }).catch(error => {
+            throw new BadRequestException({ message: 'Users not found', error })
         })
         await this.chatMessageService.sendMessageToChat({
             userId: StandartBots.CHAT_BOT.id,
@@ -42,10 +52,9 @@ export class ChatsController {
     }
 
     @Put('/:chatId')
-    @UseGuards(JwtAuthGuard)
     async updateChat(
-        @Param('chatId') chatId,
-        @Body() { name }: {name: string},
+        @Param() { chatId }: ChatIdDto,
+        @Body() { name }: NameDto,
         @CurrentUser() user: UserFromRequest
     ): Promise<Chat> {
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
@@ -58,10 +67,9 @@ export class ChatsController {
     }
 
     @Post('/:chatId')
-    @UseGuards(JwtAuthGuard)
     async addUsersToChat(
-        @Param('chatId') chatId: string,
-        @Body() { chattersIds }: { chattersIds: string[] },
+        @Param() { chatId }: ChatIdDto,
+        @Body() { chattersIds }: AddUsersToChatBody,
         @CurrentUser() user: UserFromRequest,
     ): Promise<Chat> {
         const dto: AddUsersToChatDto = { chatId, chattersIds }
@@ -78,9 +86,8 @@ export class ChatsController {
     }
 
     @Delete('/:chatId')
-    @UseGuards(JwtAuthGuard)
     async leaveFromChat(
-        @Param('chatId') chatId,
+        @Param() { chatId }: ChatIdDto,
         @CurrentUser() user: UserFromRequest
     ): Promise<Chat> {
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
@@ -93,11 +100,10 @@ export class ChatsController {
     }
 
     @Post('/:chatId/messages')
-    @UseGuards(JwtAuthGuard)
     async sendMessageToChat(
-        @Param('chatId') chatId: string,
+        @Param() { chatId }: ChatIdDto,
         @CurrentUser() user: UserFromRequest,
-        @Body() { text, noMentions }: { text: string, noMentions?: boolean }
+        @Body() { text, noMentions }: SendChatMessageBody
     ): Promise<Message> {
         if (!await this.chatsService.getChatById(chatId))
             throw new NotFoundException({ message: 'Chat not found' })
@@ -113,16 +119,16 @@ export class ChatsController {
     }
 
     @Get('/:chatId/messages')
-    @UseGuards(JwtAuthGuard)
     async getMessagesFromChat(
-        @Param('chatId') chatId: string,
+        @Param() { chatId }: ChatIdDto,
         @CurrentUser() user: UserFromRequest,
-        @Query('offset') offset?: number,
+        @Query() { offset }: PartialOffsetDto,
     ): Promise<Message[]> {
         if (!await this.chatsService.isUserChatParticipant(user.id, chatId))
             throw new ForbiddenException({ message: 'You are not a chat participant' })
-        const messages: Message[] =
-            await this.chatMessageService.getMessagesFromChat(chatId, MessageContent, 30, offset)
+        const messages: Message[] = await this.chatMessageService.getMessagesFromChat(
+            chatId, MessageContent, 30, offset ? Number(offset) : undefined
+        )
         return messages
     }
 

@@ -10,8 +10,13 @@ import { GroupsService } from 'src/groups/groups.service'
 import { Group } from 'src/groups/models/groups.model'
 import { User } from 'src/users/models/users.model'
 import { LoggedActionModelInterceptor } from './interceptors/logged-actions-model.interceptor'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { GroupIdDto } from 'src/groups/dto/group-id.dto'
 
 
+@ApiTags('group-audit-logs')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard, GroupPermissionsGuard)
 @Controller('/')
 export class GroupAuditLogsController {
 
@@ -22,9 +27,8 @@ export class GroupAuditLogsController {
 
     @Get('/groups/:groupId/audit-log')
     @RequiredGroupPermissions([ RolePermissionsEnum.readAuditLog ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async getGroupAuditLogByGroupId(
-        @Param('groupId') groupId: string,
+        @Param() { groupId }: GroupIdDto,
     ): Promise<GroupAuditLog> {
         const auditLog: GroupAuditLog =
             await this.auditLogsService.getGroupAuditLogByGroupId(groupId)
@@ -35,10 +39,9 @@ export class GroupAuditLogsController {
 
     @Get('/groups/:groupId/audit-log/actions')
     @RequiredGroupPermissions([ RolePermissionsEnum.readAuditLog ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     @UseInterceptors(LoggedActionModelInterceptor)
     async getGroupLoggedActionsByGroupId(
-        @Param('groupId') groupId: string,
+        @Param() { groupId }: GroupIdDto,
     ): Promise<LoggedAction[]> {
         const group: Group =
             await this.groupsService.getGroupById(groupId)

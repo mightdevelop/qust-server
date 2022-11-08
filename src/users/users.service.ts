@@ -8,7 +8,7 @@ import { FriendRequestStatus } from 'src/friends/types/friend-request-status'
 import { GroupUser } from 'src/groups/models/group-user.model'
 import { UserSettings } from 'src/users-settings/models/user-settings.model'
 import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
+import { UserChangesDto } from './dto/user-changes.dto'
 import { InternalUsersCudEvent } from './events/internal-users.CUD.event'
 import { User } from './models/users.model'
 
@@ -122,7 +122,7 @@ export class UsersService {
     }
 
     async updateUser(
-        dto: UpdateUserDto
+        dto: UserChangesDto
     ): Promise<User> {
         const user: User = await this.userRepository.findByPk(dto.userId)
         user.setAttributes(dto)

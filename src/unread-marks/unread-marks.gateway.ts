@@ -8,7 +8,7 @@ import { UserFromRequest } from 'src/auth/types/request-response'
 import { MessagesService } from 'src/messages/messages.service'
 import { SocketIoService } from 'src/socketio/socketio.service'
 import { InternalUnreadMarksCudEvent } from './events/internal-read-marks.CUD.event'
-import { UnreadMark } from './models/read-marks.model'
+import { UnreadMark } from './models/unread-marks.model'
 import { UnreadMarksService } from './unread-marks.service'
 
 @WebSocketGateway(8080, { cors: { origin: '*' }, namespace: '/unread-marks' })

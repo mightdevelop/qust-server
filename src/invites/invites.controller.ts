@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
+import { BadRequestException, Body, Controller, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
@@ -14,8 +15,12 @@ import { UsersService } from 'src/users/users.service'
 import { CreateInviteDto } from './dto/create-invite.dto'
 import { InvitesService } from './invites.service'
 import { Invite } from './models/invites.model'
+import { InviteIdDto } from './dto/invite-id.dto'
 
 
+@ApiTags('invites')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('/invites')
 export class InvitesController {
 
@@ -26,19 +31,9 @@ export class InvitesController {
         private groupBlacklistsService: GroupBlacklistsService,
     ) {}
 
-    @Get('/')
-    @RequiredGroupPermissions([ RolePermissionsEnum.manageGroup ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
-    async getInvitesByGroupId(
-        @Body() { groupId }: { groupId: string }
-    ): Promise<Invite[]> {
-        const invites: Invite[] = await this.invitesService.getInvitesByGroupId(groupId)
-        return invites
-    }
-
     @Post('/')
     @RequiredGroupPermissions([ RolePermissionsEnum.inviteUsers ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
+    @UseGuards(GroupPermissionsGuard)
     async createInvite(
         @Body() dto: CreateInviteDto
     ): Promise<Invite> {
@@ -50,9 +45,8 @@ export class InvitesController {
     }
 
     @Post('/:inviteId')
-    @UseGuards(JwtAuthGuard)
     async useInvite(
-        @Param('inviteId') inviteId: string,
+        @Param() { inviteId }: InviteIdDto,
         @CurrentUser() user: UserFromRequest
     ): Promise<string> {
         const invite: Invite = await this.invitesService.getInviteById(inviteId)

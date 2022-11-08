@@ -17,14 +17,14 @@ export class JwtRefreshStrategy extends PassportStrategy(
         private usersService: UsersService,
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromBodyField('refresh_token'),
+            jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
             secretOrKey: process.env.JWT_REFRESH_TOKEN_SECRET,
             passReqToCallback: true,
         })
     }
 
     async validate(req: Request, payload: TokenPayload): Promise<UserFromRequest> {
-        const refreshToken = req.body.refresh_token
+        const refreshToken = req.body.refreshToken
         if (!refreshToken) {
             throw new BadRequestException({ message: 'Refresh token required' })
         }

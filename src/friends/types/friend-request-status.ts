@@ -1,4 +1,4 @@
 export enum FriendRequestStatus {
-    REQUEST = 'REQUEST',
-    CONFIRM = 'CONFIRM'
+    REQUEST = 0,
+    CONFIRM = 1
 }

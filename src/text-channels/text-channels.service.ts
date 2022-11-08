@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
+import { Includeable } from 'sequelize/types'
 import { CategoriesService } from 'src/categories/categories.service'
 import { Category } from 'src/categories/models/categories.model'
 import { PermissionsService } from 'src/permissions/permissions.service'
@@ -21,16 +22,29 @@ export class TextChannelsService {
         private eventEmitter: EventEmitter2,
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
         private usersService: UsersService,
-        @InjectModel(TextChannel) private channelRepository: typeof TextChannel,
+        @InjectModel(TextChannel) private textChannelRepository: typeof TextChannel,
     ) {}
 
     async getTextChannelById(textChannelId: string): Promise<TextChannel> {
-        const channel: TextChannel = await this.channelRepository.findByPk(textChannelId)
+        const channel: TextChannel = await this.textChannelRepository.findByPk(textChannelId)
         return channel
     }
 
+    async getTextChannelsByCategoryId(
+        userId: string,
+        groupId: string,
+        categoryId: string,
+        include?: Includeable | Includeable[]
+    ): Promise<TextChannel[]> {
+        if (!await this.permissionsService.isUserGroupParticipant({ userId, groupId })) return []
+        const textChannels: TextChannel[] = await this.textChannelRepository.findAll({
+            where: { categoryId }, include
+        })
+        return textChannels
+    }
+
     async getGroupIdByTextChannelId(textChannelId: string): Promise<string> {
-        const channel: TextChannel = await this.channelRepository.findByPk(textChannelId)
+        const channel: TextChannel = await this.textChannelRepository.findByPk(textChannelId)
         if (!channel)
             throw new NotFoundException({ message: 'Text channel not found' })
         const category: Category = await this.categoriesService.getCategoryById(channel.categoryId)
@@ -48,7 +62,7 @@ export class TextChannelsService {
     }
 
     async createTextChannel(dto: CreateTextChannelDto): Promise<TextChannel> {
-        const channel: TextChannel = await this.channelRepository.create(dto)
+        const channel: TextChannel = await this.textChannelRepository.create(dto)
         this.eventEmitter.emit(
             'internal-text-channels.created',
             new InternalTextChannelsCudEvent({

@@ -1,13 +1,18 @@
 import { Body, Controller, Delete, Get, Post, Query, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
 import { MessagesService } from 'src/messages/messages.service'
 import { Message } from 'src/messages/models/messages.model'
-import { UnreadMark } from './models/read-marks.model'
+import { PartialOffsetDto } from 'src/users/dto/partial-offset.dto'
+import { UnreadMark } from './models/unread-marks.model'
 import { UnreadMarksService } from './unread-marks.service'
 
 
+@ApiTags('unread-marks')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('/unread-marks')
 export class UnreadMarksController {
 
@@ -17,16 +22,16 @@ export class UnreadMarksController {
     ) {}
 
     @Get('/')
-    @UseGuards(JwtAuthGuard)
     async getUnreadMarksByUserId(
         @CurrentUser() user: UserFromRequest,
-        @Query('offset') offset: number,
+        @Query() { offset }: PartialOffsetDto
     ): Promise<UnreadMark[]> {
-        return await this.unreadMarksService.getUnreadMarksByUserId( user.id, Message, 30, offset )
+        return await this.unreadMarksService.getUnreadMarksByUserId(
+            user.id, Message, 30, offset ? Number(offset) : undefined
+        )
     }
 
     @Post('/')
-    @UseGuards(JwtAuthGuard)
     async createUnreadMark(
         @CurrentUser() user: UserFromRequest,
         @Body() { messageId }: { messageId: string },
@@ -49,7 +54,6 @@ export class UnreadMarksController {
     }
 
     @Delete('/')
-    @UseGuards(JwtAuthGuard)
     async deleteUnreadMarksByIds(
         @Body() { unreadMarksIds }: { unreadMarksIds: string[] },
     ): Promise<UnreadMark[]> {

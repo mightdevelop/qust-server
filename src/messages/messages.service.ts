@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectModel } from '@nestjs/sequelize'
 import { Includeable, Op } from 'sequelize'
+import { isMessageLocationTextChannel } from 'src/utils/is-message-location-text-channel.typeguard'
 import { ChatMessageService } from './chat-message.service'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { DeleteMessageDto } from './dto/delete-message.dto'
@@ -44,15 +45,15 @@ export class MessagesService {
     async getNextMessage(
         message: Message,
     ): Promise<Message> {
-        return message.messageLocation.groupId
+        return isMessageLocationTextChannel(message.messageLocation.location)
             ?
-            await this.chatMessageService.getNextMessageInChat({
-                chatId: message.messageLocation.chatId,
+            await this.textChannelMessageService.getNextMessageInTextChannel({
+                textChannelId: message.messageLocation.location.textChannelId,
                 messageId: message.id
             })
             :
-            await this.textChannelMessageService.getNextMessageInTextChannel({
-                textChannelId: message.messageLocation.textChannelId,
+            await this.chatMessageService.getNextMessageInChat({
+                chatId: message.messageLocation.location.chatId,
                 messageId: message.id
             })
     }

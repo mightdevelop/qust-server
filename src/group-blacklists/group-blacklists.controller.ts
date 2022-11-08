@@ -8,8 +8,15 @@ import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-perm
 import { BannedUser } from './models/banned-users.model'
 import { GroupsService } from 'src/groups/groups.service'
 import { Group } from 'src/groups/models/groups.model'
+import { BanUserInGroupBody } from './dto/ban-user-in-group.body'
+import { UserIdDto } from '../users/dto/user-id.dto'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { GroupIdDto } from 'src/groups/dto/group-id.dto'
 
 
+@ApiTags('group-blacklists')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard, GroupPermissionsGuard)
 @Controller('/')
 export class GroupBlacklistsController {
 
@@ -20,9 +27,8 @@ export class GroupBlacklistsController {
 
     @Get('/groups/:groupId/blacklist')
     @RequiredGroupPermissions([ RolePermissionsEnum.banUsers ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async getGroupBlacklistByGroupId(
-        @Param('groupId') groupId: string,
+        @Param() { groupId }: GroupIdDto,
     ): Promise<GroupBlacklist> {
         const blacklist: GroupBlacklist =
             await this.groupBlacklistsService.getGroupBlacklistByGroupId(groupId)
@@ -33,10 +39,9 @@ export class GroupBlacklistsController {
 
     @Post('/groups/:groupId/blacklist')
     @RequiredGroupPermissions([ RolePermissionsEnum.banUsers ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async banUser(
-        @Param('groupId') groupId: string,
-        @Body() dto: { userId: string, banReason?: string },
+        @Param() { groupId }: GroupIdDto,
+        @Body() dto: BanUserInGroupBody,
     ): Promise<BannedUser> {
         const group: Group =
             await this.groupsService.getGroupById(groupId)
@@ -50,10 +55,9 @@ export class GroupBlacklistsController {
 
     @Delete('/groups/:groupId/blacklist')
     @RequiredGroupPermissions([ RolePermissionsEnum.banUsers ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
     async unBanUser(
-        @Param('groupId') groupId: string,
-        @Body() { userId }: { userId: string },
+        @Param() { groupId }: GroupIdDto,
+        @Body() { userId }: UserIdDto,
     ): Promise<BannedUser> {
         const group: Group =
             await this.groupsService.getGroupById(groupId)

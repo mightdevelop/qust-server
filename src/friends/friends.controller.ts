@@ -7,8 +7,17 @@ import { User } from 'src/users/models/users.model'
 import { Friend } from './models/friends.model'
 import { UsersService } from 'src/users/users.service'
 import { UserModelInterceptor } from 'src/users/interceptors/users-model.interceptor'
+import { CancelDto } from './dto/cancel.dto'
+import { IsConfirmDto } from './dto/is-confirm.dto'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { FriendIdDto } from './dto/friend-id.dto'
+import { RequestedUserIdDto } from './dto/requested-user-id.dto'
+import { PartialOffsetDto } from 'src/users/dto/partial-offset.dto'
 
 
+@ApiTags('friends')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('jwt')
 @Controller('/friends')
 export class FriendsController {
 
@@ -18,18 +27,18 @@ export class FriendsController {
     ) {}
 
     @Get('/')
-    @UseGuards(JwtAuthGuard)
     @UseInterceptors(UserModelInterceptor)
     async getMyFriends(
         @CurrentUser() user: UserFromRequest,
-        @Query('offset') offset: number,
+        @Query() { offset }: PartialOffsetDto
     ): Promise<User[]> {
-        const friends: User[] = await this.usersService.getFriendsByUserId(user.id, 30, offset)
+        const friends: User[] = await this.usersService.getFriendsByUserId(
+            user.id, 30, offset ? Number(offset) : undefined
+        )
         return friends
     }
 
     @Get('/requests/fromme')
-    @UseGuards(JwtAuthGuard)
     async getFriendshipRequestsFromMe(
         @CurrentUser() user: UserFromRequest
     ): Promise<Friend[]> {
@@ -38,7 +47,6 @@ export class FriendsController {
     }
 
     @Get('/requests/tome')
-    @UseGuards(JwtAuthGuard)
     async getFriendshipRequestsToMe(
         @CurrentUser() user: UserFromRequest
     ): Promise<Friend[]> {
@@ -47,11 +55,10 @@ export class FriendsController {
     }
 
     @Post('/:friendId')
-    @UseGuards(JwtAuthGuard)
     async friendshipRequest(
-        @Param('friendId') friendId: string,
+        @Param() { friendId }: FriendIdDto,
         @CurrentUser() user: UserFromRequest,
-        @Body() { cancel }: { cancel: boolean }
+        @Body() { cancel }: CancelDto
     ): Promise<Friend> {
         if (cancel) {
             const friendRow: Friend =
@@ -63,11 +70,10 @@ export class FriendsController {
     }
 
     @Put('/:requestedUserId')
-    @UseGuards(JwtAuthGuard)
     async responseToFriendshipRequest(
-        @Param('requestedUserId') requestedUserId: string,
+        @Param() { requestedUserId }: RequestedUserIdDto,
         @CurrentUser() user: UserFromRequest,
-        @Body() { isConfirm }: { isConfirm: boolean }
+        @Body() { isConfirm }: IsConfirmDto
     ): Promise<Friend> {
         const request: Friend =
             await this.friendsService.responseToFriendshipRequest(requestedUserId, user.id, isConfirm)
@@ -75,9 +81,8 @@ export class FriendsController {
     }
 
     @Delete('/:friendId')
-    @UseGuards(JwtAuthGuard)
     async removeFriend(
-        @Param('friendId') friendId: string,
+        @Param() { friendId }: FriendIdDto,
         @CurrentUser() user: UserFromRequest,
     ): Promise<Friend> {
         const userFriendRow: Friend = await this.friendsService.getUserFriendRow(friendId, user.id)

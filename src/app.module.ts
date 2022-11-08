@@ -39,7 +39,7 @@ import { GroupAuditLogsModule } from './group-audit-logs/group-audit-logs.module
 import { Mention } from './mentions/models/mentions.model'
 import { MentionsModule } from './mentions/mentions.module'
 import { UnreadMarksModule } from './unread-marks/unread-marks.module'
-import { UnreadMark } from './unread-marks/models/read-marks.model'
+import { UnreadMark } from './unread-marks/models/unread-marks.model'
 import { UserSettingsModule } from './users-settings/users-settings.module'
 import { UserSettings } from './users-settings/models/user-settings.model'
 

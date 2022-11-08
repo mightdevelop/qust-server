@@ -12,7 +12,7 @@ export class GroupPermissionsGuard implements CanActivate {
     constructor(
         @Inject(Reflector) private reflector: Reflector,
         @Inject(PermissionsService) private permissionsService: PermissionsService
-    ) { }
+    ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const requiredPermissions = this.reflector.getAllAndOverride<RolePermissionsEnum[]>(
@@ -23,9 +23,16 @@ export class GroupPermissionsGuard implements CanActivate {
             ]
         )
         const req: Request = context.switchToHttp().getRequest()
+        let categoryId: string
+        let groupId: string = req.body.groupId || req.params.groupId
+        if (!groupId || groupId === '{groupId}') {
+            groupId = undefined
+            categoryId = req.params.categoryId
+        }
         const bool = await this.permissionsService.doesUserHavePermissionsInGroup({
             userId: req.user.id,
-            groupId: req.body.groupId || req.params.groupId,
+            groupId,
+            categoryId,
             requiredPermissions: requiredPermissions || []
         })
         return bool

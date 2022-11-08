@@ -69,7 +69,7 @@ export class GroupsService {
         const group: Group = await this.groupRepository.create(dto)
         await this.layoutsService.createBlacklistRolesCategoriesAndTextChannelsByLayout({
             groupId: group.id,
-            groupLayout: StandardGroupLayouts[dto.layout || 'DEFAULT']
+            groupLayout: StandardGroupLayouts[dto.layout] || StandardGroupLayouts.DEFAULT
         })
         this.eventEmitter.emit(
             'internal-groups.created',

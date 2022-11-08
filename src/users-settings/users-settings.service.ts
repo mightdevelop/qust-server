@@ -22,12 +22,12 @@ export class UserSettingsService {
     }
 
     async setUserSettings(
-        { userId, config }: UpdateUserSettingsDto
+        { changes, userId }: UpdateUserSettingsDto
     ): Promise<UserSettings> {
         const settings: UserSettings = await this.settingsRepository.findOne({ where: { userId } })
-        if (!config)
-            config = defaultUserSettings
-        settings.setAttributes(config)
+        if (!changes)
+            changes = defaultUserSettings
+        settings.setAttributes(changes)
         await settings.save()
         this.eventEmitter.emit(
             'internal-user-settings.change',

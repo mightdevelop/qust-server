@@ -1,5 +1,13 @@
 export class MessageLocation {
-    groupId?: string
-    textChannelId?: string
-    chatId?: string
+
+    location: MessageTextChannelLocation | MessageChatLocation
+
+}
+
+export class MessageTextChannelLocation {
+    groupId: string
+    textChannelId: string
+}
+export class MessageChatLocation {
+    chatId: string
 }

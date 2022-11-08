@@ -1,17 +1,27 @@
-import { Body, Controller, Delete, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
+import { MessageContent } from 'src/messages/models/message-content.model'
 import { Message } from 'src/messages/models/messages.model'
 import { TextChannelMessageService } from 'src/messages/text-channel-message.service'
 import { RequiredGroupPermissions } from 'src/permissions/decorators/required-group-permissions.decorator'
 import { CategoryPermissionsGuard } from 'src/permissions/guards/category-permissions.guard'
 import { GroupPermissionsGuard } from 'src/permissions/guards/group-permissions.guard'
+import { TextChannelPermissionsGuard } from 'src/permissions/guards/text-channel-permissions.guard'
 import { RolePermissionsEnum } from 'src/permissions/types/permissions/role-permissions.enum'
+import { CreateTextChannelBody } from './dto/create-text-channel.body'
+import { TextChannelIdDto } from './dto/text-channel-id.dto'
+import { TextDto } from './dto/text.dto'
+import { UpdateTextChannelBody } from './dto/update-text-channel.body'
 import { TextChannel } from './models/text-channels.model'
 import { TextChannelsService } from './text-channels.service'
 
 
+@ApiTags('text-channels')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('/text-channels')
 export class TextChannelsController {
 
@@ -20,24 +30,34 @@ export class TextChannelsController {
         private textChannelMessageService: TextChannelMessageService,
     ) {}
 
+    @Get('/:textChannelId/messages')
+    @UseGuards(TextChannelPermissionsGuard)
+    async getMessagesByTextChannelId(
+        @Param() { textChannelId }: TextChannelIdDto,
+    ): Promise<Message[]> {
+        const messages: Message[] =
+            await this.textChannelMessageService.getMessagesFromTextChannel(textChannelId, MessageContent)
+        return messages
+    }
+
     @Post('/')
     @RequiredGroupPermissions([ RolePermissionsEnum.manageCategoriesAndChannels ])
-    @UseGuards(JwtAuthGuard, GroupPermissionsGuard)
+    @UseGuards(GroupPermissionsGuard)
     async createTextChannel(
         @CurrentUser() user: UserFromRequest,
-        @Body() dto: { name: string, categoryId: string, groupId: string }
+        @Body() dto: CreateTextChannelBody
     ): Promise<TextChannel> {
         const channel: TextChannel =
             await this.textChannelsService.createTextChannel({ ...dto, userId: user.id })
         return channel
     }
 
-    @Put('/:textChannelIdId')
-    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    @Put('/:textChannelId')
+    @UseGuards(CategoryPermissionsGuard)
     async updateTextChannel(
         @CurrentUser() user: UserFromRequest,
-        @Param('textChannelId') textChannelId: string,
-        @Body() { name }: { name: string }
+        @Param() { textChannelId }: TextChannelIdDto,
+        @Body() { name }: UpdateTextChannelBody
     ): Promise<TextChannel> {
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(textChannelId)
         if (!channel)
@@ -47,11 +67,11 @@ export class TextChannelsController {
         return updatedChannel
     }
 
-    @Delete('/:textChannelIdId')
-    @UseGuards(JwtAuthGuard, CategoryPermissionsGuard)
+    @Delete('/:textChannelId')
+    @UseGuards(CategoryPermissionsGuard)
     async deleteTextChannel(
         @CurrentUser() user: UserFromRequest,
-        @Param('textChannelId') textChannelId: string,
+        @Param() { textChannelId }: TextChannelIdDto,
     ): Promise<TextChannel> {
         const channel: TextChannel = await this.textChannelsService.getTextChannelById(textChannelId)
         if (!channel)
@@ -61,11 +81,10 @@ export class TextChannelsController {
     }
 
     @Post('/:textChannelId/messages')
-    @UseGuards(JwtAuthGuard)
     async sendMessageToTextChannel(
-        @Param('textChannelId') textChannelId: string,
+        @Param() { textChannelId }: TextChannelIdDto,
         @CurrentUser() user: UserFromRequest,
-        @Body() { text }: { text: string }
+        @Body() { text }: TextDto
     ): Promise<Message> {
         if (!await this.textChannelsService.getTextChannelById(textChannelId))
             throw new NotFoundException({ message: 'Text channel not found' })

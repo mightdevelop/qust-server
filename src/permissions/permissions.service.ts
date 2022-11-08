@@ -54,7 +54,10 @@ export class PermissionsService {
     }
 
     async doesUserHavePermissionsInGroup(dto: UserPermissionsInGroupDto): Promise<boolean> {
-        const group: Group = await this.groupsService.getGroupById(dto.groupId)
+        const groupId: string =
+            dto.groupId ||
+            (await this.categoriesService.getCategoryById(dto.categoryId))?.groupId
+        const group: Group = await this.groupsService.getGroupById(groupId)
         if (!group)
             throw new NotFoundException({ message: 'Group not found' })
         if (group.ownerId === dto.userId) return true

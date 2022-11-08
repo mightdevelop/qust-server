@@ -5,11 +5,13 @@ import { AuthService } from './auth.service'
 import { ValidateUserDto } from './dto/validate-user.dto'
 import { UsersService } from 'src/users/users.service'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
-import { Tokens } from './types/tokens'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { User } from 'src/users/models/users.model'
+import { RefreshTokenDto } from './dto/refresh-token.dto'
+import { TokensDto } from './dto/tokens.dto'
+import { ApiTags } from '@nestjs/swagger'
 
-
+@ApiTags('auth')
 @Controller('/auth')
 export class AuthController {
 
@@ -21,36 +23,38 @@ export class AuthController {
     @Post('/registration')
     async registration(
         @Body() dto: CreateUserDto,
-    ): Promise<Tokens> {
-        const tokens: Tokens = await this.authService.registration(dto)
+    ): Promise<TokensDto> {
+        const tokens: TokensDto = await this.authService.registration(dto)
         return tokens
     }
 
     @Post('/login')
     async login(
         @Body() dto: ValidateUserDto,
-    ): Promise<Tokens> {
-        const tokens: Tokens = await this.authService.login(dto)
+    ): Promise<TokensDto> {
+        const tokens: TokensDto = await this.authService.login(dto)
         return tokens
     }
 
     @Post('/refresh')
     @UseGuards(JwtRefreshGuard)
     async refresh(
-        @Body('refresh_token') refreshToken: string,
+        @Body() { refreshToken }: RefreshTokenDto,
         @CurrentUser() { id }: UserFromRequest
-    ): Promise<Tokens> {
+    ): Promise<TokensDto> {
         const user: User = await this.usersService.getUserById(id)
         const isRefreshTokenMatches: boolean = await this.authService.isRefreshTokenMatches(refreshToken, id)
         if (!isRefreshTokenMatches)
             throw new UnauthorizedException({ message: 'Wrong refresh token' })
-        const tokens: Tokens = await this.authService.generateTokens(user)
+        const tokens: TokensDto = await this.authService.generateTokens(user)
         if (!tokens)
             throw new UnauthorizedException({ message: 'Refresh server error' })
         return tokens
     }
 
     // @Post('/logout')
+    // @ApiBearerAuth('jwt')
+    // @UseGuards(JwtAuthGuard)
     // async logout(
     //     @CurrentUser() { id },
     //     @Res() res: Response

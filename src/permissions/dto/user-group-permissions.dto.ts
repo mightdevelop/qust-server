@@ -1,15 +1,13 @@
-import { IsArray, IsUUID } from 'class-validator'
 import { RolePermissionsEnum } from '../types/permissions/role-permissions.enum'
 
 export class UserPermissionsInGroupDto {
 
-    @IsUUID()
-        userId: string
+    userId: string
 
-    @IsUUID()
-        groupId: string
+    groupId?: string
 
-    @IsArray()
-        requiredPermissions: RolePermissionsEnum[]
+    categoryId?: string
+
+    requiredPermissions: RolePermissionsEnum[]
 
 }

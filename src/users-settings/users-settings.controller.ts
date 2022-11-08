@@ -1,13 +1,17 @@
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserFromRequest } from 'src/auth/types/request-response'
+import { UpdateUserSettingsBody } from './dto/update-user-settings.body'
 import { UserSettings } from './models/user-settings.model'
-import { UserSettingsList } from './types/user-settings-list.class'
 import { UserSettingsService } from './users-settings.service'
 
 
 
+@ApiTags('user-settings')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('/user-settings')
 export class UserSettingsController {
 
@@ -16,7 +20,6 @@ export class UserSettingsController {
     ) {}
 
     @Get('/')
-    @UseGuards(JwtAuthGuard)
     async getMySettings(
         @CurrentUser() user: UserFromRequest,
     ): Promise<UserSettings> {
@@ -24,12 +27,11 @@ export class UserSettingsController {
     }
 
     @Put('/')
-    @UseGuards(JwtAuthGuard)
     async getChangeMySettings(
         @CurrentUser() user: UserFromRequest,
-        @Body() { config }: { config: UserSettingsList }
+        @Body() dto: UpdateUserSettingsBody
     ): Promise<UserSettings> {
-        return await this.settingsService.setUserSettings({ config, userId: user.id })
+        return await this.settingsService.setUserSettings({ ...dto, userId: user.id })
     }
 
 }

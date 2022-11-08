@@ -51,7 +51,7 @@ export class ChatMessageService {
 
     async sendMessageToChat(dto: SendChatMessageDto): Promise<Message> {
         const message: Message = await this.messageService.createMessage(
-            { ...dto, location: { chatId: dto.chatId }, noMentions: dto.noMentions }
+            { ...dto, location: { location: { chatId: dto.chatId } }, noMentions: dto.noMentions }
         )
         await this.chatMessageRepository.create({ messageId: message.id, chatId: dto.chatId })
         this.eventEmitter.emit(

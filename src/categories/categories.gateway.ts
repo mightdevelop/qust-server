@@ -34,9 +34,10 @@ export class CategoriesGateway {
     @UseGuards(SocketIoJwtAuthGuard)
     async createCategory(
         @ConnectedSocket() socket: Socket,
-        @MessageBody() dto: CreateCategoryDto
+        @MessageBody() dto: CreateCategoryDto,
+        @SocketIoCurrentUser() user: UserFromRequest,
     ): Promise<void> {
-        const category: Category = await this.categoriesService.createCategory(dto)
+        const category: Category = await this.categoriesService.createCategory(dto, user.id)
         const groupUsers: User[] = await this.usersService.getUsersByGroupId(dto.groupId)
         const socketsOfGroupUsers = (await this.socketIoService.getSocketsByUsersIds(
             (await this.server.fetchSockets()),
@@ -55,7 +56,7 @@ export class CategoriesGateway {
         @SocketIoCurrentUser() user: UserFromRequest,
     ): Promise<void> {
         const category: Category = await this.categoriesService.getCategoryById(categoryId)
-        await this.categoriesService.updateCategory({ name, category, userId: user.id })
+        await this.categoriesService.updateCategory({ name, category }, user.id)
         socket.emit('200', category)
     }
 
@@ -67,7 +68,7 @@ export class CategoriesGateway {
         @SocketIoCurrentUser() user: UserFromRequest,
     ): Promise<void> {
         const category: Category = await this.categoriesService.getCategoryById(categoryId)
-        await this.categoriesService.deleteCategory({ category, userId: user.id })
+        await this.categoriesService.deleteCategory({ category }, user.id)
         socket.emit('200', category)
     }
 

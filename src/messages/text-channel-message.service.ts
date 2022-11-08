@@ -55,8 +55,10 @@ export class TextChannelMessageService {
 
     async sendMessageToTextChannel(dto: SendTextChannelMessageDto): Promise<Message> {
         const message: Message = await this.messageService.createMessage({ ...dto, location: {
-            textChannelId: dto.textChannelId,
-            groupId: await this.textChannelsService.getGroupIdByTextChannelId(dto.textChannelId)
+            location: {
+                textChannelId: dto.textChannelId,
+                groupId: await this.textChannelsService.getGroupIdByTextChannelId(dto.textChannelId)
+            }
         } })
         await this.textChannelMessageRepository.create({ messageId: message.id, textChannelId: dto.textChannelId })
         this.eventEmitter.emit(

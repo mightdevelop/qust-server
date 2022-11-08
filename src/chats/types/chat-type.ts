@@ -1,4 +1,4 @@
 export enum ChatType {
-    dialogue = 'DIALOGUE',
-    chat = 'CHAT'
+    dialogue = 0,
+    chat = 1
 }

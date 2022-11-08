@@ -24,7 +24,7 @@ export class InvitesModule {
     ) {}
 
     async onModuleInit(): Promise<void> {
-        // setInterval(async () => await this.invitesService.deleteExpiredInvites(), 3600)
+        setInterval(async () => await this.invitesService.deleteExpiredInvites(), 3600)
     }
 
 }

@@ -5,10 +5,10 @@ import { UsersService } from 'src/users/users.service'
 import { CreateUserDto } from 'src/users/dto/create-user.dto'
 import { User } from 'src/users/models/users.model'
 import { ValidateUserDto } from './dto/validate-user.dto'
-import { Tokens } from './types/tokens'
 import { TokenPayload } from './types/tokenPayload'
 import { Cache } from 'cache-manager'
 import 'dotenv/config'
+import { TokensDto } from './dto/tokens.dto'
 
 
 @Injectable()
@@ -20,7 +20,7 @@ export class AuthService {
         private jwtService: JwtService,
     ) {}
 
-    async registration(dto: CreateUserDto): Promise<Tokens> {
+    async registration(dto: CreateUserDto): Promise<TokensDto> {
         const candidate: User = await this.usersService.getUserByEmail(dto.email)
         if (candidate) {
             throw new BadRequestException({ message: 'This email is already used' })
@@ -28,25 +28,25 @@ export class AuthService {
         const hashPassword = hashSync(dto.password, 7)
         const user: User = await this.usersService.createUser({ ...dto, password: hashPassword })
         if (user) {
-            const tokens: Tokens = await this.generateTokens(user)
+            const tokens: TokensDto = await this.generateTokens(user)
             return tokens
         }
         throw new InternalServerErrorException({ message: 'Internal registration server error' })
     }
 
-    async login(dto: ValidateUserDto): Promise<Tokens> {
+    async login(dto: ValidateUserDto): Promise<TokensDto> {
         const user: User = await this.validateUser(dto)
         if (user) {
-            const tokens: Tokens = await this.generateTokens(user)
+            const tokens: TokensDto = await this.generateTokens(user)
             return tokens
         }
         throw new InternalServerErrorException({ message: 'Internal login server error' })
     }
 
-    async generateTokens(user: User): Promise<Tokens> {
+    async generateTokens(user: User): Promise<TokensDto> {
         const { id, username, isAdmin }: TokenPayload = user
         const iat: number = Math.ceil(Date.now() / 1000)
-        const tokens: Tokens = {
+        const tokens: TokensDto = {
             accessToken: this.jwtService.sign({
                 id,
                 username,

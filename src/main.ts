@@ -17,7 +17,17 @@ async function start() {
         const config = new DocumentBuilder()
             .setTitle('API')
             .setVersion('1.0')
-            // .addTag('qust')
+            .addBearerAuth(
+                {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                    name: 'JWT',
+                    description: 'Enter JWT token',
+                    in: 'header',
+                },
+                'jwt'
+            )
             .build()
         const document = SwaggerModule.createDocument(app, config)
         SwaggerModule.setup('api', app, document)

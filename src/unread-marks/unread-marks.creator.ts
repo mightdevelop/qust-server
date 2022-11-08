@@ -5,7 +5,8 @@ import { MessagesService } from 'src/messages/messages.service'
 import { Message } from 'src/messages/models/messages.model'
 import { PermissionsService } from 'src/permissions/permissions.service'
 import { UsersService } from 'src/users/users.service'
-import { UnreadMark } from './models/read-marks.model'
+import { isMessageLocationTextChannel } from 'src/utils/is-message-location-text-channel.typeguard'
+import { UnreadMark } from './models/unread-marks.model'
 import { UnreadMarksService } from './unread-marks.service'
 
 
@@ -25,20 +26,20 @@ export class UnreadMarksCreator {
     ): Promise<void> {
         if (noMentions) return
         let idsOfUsersThatDontHaveUnreadMarkInLocation: string[]
-        if (message.messageLocation.groupId) {
+        if (isMessageLocationTextChannel(message.messageLocation.location)) {
             const channelUsersIds: string[] =
                 await this.permissionsService.getIdsOfUsersThatCanViewTextChannel(
-                    message.messageLocation.textChannelId,
-                    message.messageLocation.groupId
+                    message.messageLocation.location.textChannelId,
+                    message.messageLocation.location.groupId
                 )
             const idsOfUserThatHaveUnreadMarkInChannel =
                 (await this.unreadMarksService.getUnreadMarksByLocations([ message.messageLocation ]))
                     .map(mark => mark.userId)
             idsOfUsersThatDontHaveUnreadMarkInLocation = channelUsersIds
                 .filter(userId => !idsOfUserThatHaveUnreadMarkInChannel.includes(userId))
-        } else if (message.messageLocation.chatId) {
+        } else {
             const chatUsersIds: string[] = await this.usersService.getIdsOfChattersByChatId(
-                message.messageLocation.chatId
+                message.messageLocation.location.chatId
             )
             const idsOfUserThatHaveUnreadMarkInChat =
                 (await this.unreadMarksService.getUnreadMarksByMessageId(message.id))

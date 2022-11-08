@@ -15,7 +15,7 @@ import { SocketIoModule } from 'src/socketio/socketio.module'
     imports: [
         SequelizeModule.forFeature([ TextChannel, TextChannelRolePermissions ]),
         forwardRef(() => MessagesModule),
-        CategoriesModule,
+        forwardRef(() => CategoriesModule),
         SocketIoModule,
     ],
     exports: [ TextChannelsService ]

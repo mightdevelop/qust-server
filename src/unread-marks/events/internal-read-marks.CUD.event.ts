@@ -1,5 +1,5 @@
 import { CreateUpdateDelete } from 'src/utils/create-update-delete.enum'
-import { UnreadMark } from '../models/read-marks.model'
+import { UnreadMark } from '../models/unread-marks.model'
 
 export class InternalUnreadMarksCudEvent {
 

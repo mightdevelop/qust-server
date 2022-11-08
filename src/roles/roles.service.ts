@@ -11,7 +11,6 @@ import { RoleUser } from './models/role-user.model'
 import { Role } from './models/roles.model'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InternalRolesCudEvent } from './events/internal-roles.CUD.event'
-import { UsersService } from 'src/users/users.service'
 
 
 @Injectable()
@@ -19,7 +18,6 @@ export class RolesService {
 
     constructor(
         private eventEmitter: EventEmitter2,
-        private usersService: UsersService,
         @Inject(forwardRef(() => PermissionsService)) private permissionsService: PermissionsService,
         @InjectModel(Role) private roleRepository: typeof Role,
         @InjectModel(RoleUser) private roleUserRepository: typeof RoleUser,

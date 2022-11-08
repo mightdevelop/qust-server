@@ -1,10 +1,8 @@
-import { IsArray, IsUUID, ValidateNested } from 'class-validator'
+import { IsUUID } from 'class-validator'
 
 export class UpdateUnreadMarksDto {
 
-    @IsArray()
-    @ValidateNested({ each: true })
-    @IsUUID()
+    @IsUUID(4, { each: true })
         usersIds: string[]
 
     @IsUUID()

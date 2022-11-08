@@ -20,8 +20,16 @@ import { CreateUserDto } from './dto/create-user.dto'
 import { AdminGuard } from 'src/auth/guards/admin.guard'
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard'
 import { UserModelInterceptor } from './interceptors/users-model.interceptor'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { UserChangesBody } from './dto/user-changes.body'
+import { UserIdDto } from 'src/users/dto/user-id.dto'
+import { PartialUserIdDto } from './dto/partial-user-id.dto'
+import { PartialOffsetDto } from './dto/partial-offset.dto'
 
 
+@ApiTags('users')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('/users')
 export class UsersController {
 
@@ -31,16 +39,15 @@ export class UsersController {
 
     @Get('/')
     @isAdmin()
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     async getUsers(): Promise<User[]> {
         const users: User[] = await this.usersService.getUsers()
         return users
     }
 
     @Get('/:userId')
-    @UseGuards(JwtAuthGuard)
     async getUserById(
-        @Param('userId') userId: string,
+        @Param() { userId }: UserIdDto,
     ): Promise<User> {
         const user: User = await this.usersService.getUserById(userId)
         if (!user)
@@ -50,21 +57,23 @@ export class UsersController {
 
     @Get('/:userId/friends')
     @isAdmin()
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     async getFriendsByUserId(
-        @Param('userId') userId: string,
-        @Query('offset') offset: number,
+        @Param() { userId }: UserIdDto,
+        @Query() { offset }: PartialOffsetDto,
     ): Promise<User[]> {
         const user = await this.usersService.getUserById(userId)
         if (!user)
             throw new NotFoundException({ message: 'User not found' })
-        const friends: User[] = await this.usersService.getFriendsByUserId(userId, 30, offset)
+        const friends: User[] = await this.usersService.getFriendsByUserId(
+            userId, 30, offset ? Number(offset) : undefined
+        )
         return friends
     }
 
     @Post('/')
     @isAdmin()
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     async createUser(
         @Body() dto: CreateUserDto,
     ): Promise<User> {
@@ -72,32 +81,31 @@ export class UsersController {
         return user
     }
 
-    @Put('/:userId')
-    @UseGuards(JwtAuthGuard)
+    @Put('/:userId?')
     @UseInterceptors(UserModelInterceptor)
     async updateUser(
-        @Param('userId') userId: string,
-        @Body() body: { info: string, username: string },
+        @Param() { userId }: PartialUserIdDto,
+        @Body() dto: UserChangesBody,
         @CurrentUser() { id, isAdmin },
     ): Promise<User> {
-        if (!userId)
+        if (userId === '{userId}')
             userId = id
         const user: User = await this.usersService.getUserById(userId)
         if (!user) {
             throw new NotFoundException({ message: 'User does not exists' })
         }
-        if (id !== userId && isAdmin) {
+        if (id !== userId && !isAdmin) {
             throw new ForbiddenException({ message: 'You have no access' })
         }
-        const updatedUser: User = await this.usersService.updateUser({ userId, ...body })
+        const updatedUser: User = await this.usersService.updateUser({ ...dto, userId: user.id })
         return updatedUser
     }
 
     @Delete('/:userId')
     @isAdmin()
-    @UseGuards(JwtAuthGuard, AdminGuard)
+    @UseGuards(AdminGuard)
     async deleteUser(
-        @Param('userId') userId: string,
+        @Param() { userId }: UserIdDto,
     ): Promise<User> {
         const user: User = await this.usersService.deleteUser(userId)
         return user

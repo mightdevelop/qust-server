@@ -1,6 +1,6 @@
 <h2>Qust - messenger<h2>
 
-<br><hr><br>
+<h4>docker compose up --build to start<h4>
 
 <h3>Stack:<h3>
 <h5>NestJS - Node.js framework<h5>

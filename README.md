@@ -1,12 +1,14 @@
 <h2>Qust - messenger<h2>
 
-<h4>docker compose up --build to start<h4>
+<h4>'docker compose up --build' to start<h4>
+<h4>
 
 <h3>Stack:<h3>
 <h5>NestJS - Node.js framework<h5>
 <h5>Typescript<h5>
 <h5>PostgreSQL - основная база данных<h5>
 <h5>Redis - для хранения refresh токенов<h5>
+<h5>Swagger - документация<h5>
 
 
 <p>Qust - мессенджер, повторяющий многие функции популярного приложения Discord:<p>

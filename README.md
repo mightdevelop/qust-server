@@ -32,3 +32,6 @@ There are 3 ways to chat with friends in the Qust application:
 3. Create a Qust server, invite friends, and send a message into a text channel
 
 Note: "Qust server" is *group* in the Qust API
+
+## License
+MIT License
